@@ -138,6 +138,7 @@ GEM
       i18n (>= 1.8.11, < 2)
     fasterer (0.11.0)
       ruby_parser (>= 3.19.1)
+    foreman (0.88.1)
     globalid (1.2.1)
       activesupport (>= 6.1)
     has_scope (0.8.2)
@@ -196,6 +197,8 @@ GEM
       net-protocol
     nio4r (2.6.0)
     nokogiri (1.15.5-arm64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.15.5-x86_64-darwin)
       racc (~> 1.4)
     nokogiri (1.15.5-x86_64-linux)
       racc (~> 1.4)
@@ -385,6 +388,7 @@ GEM
 PLATFORMS
   arm64-darwin-21
   arm64-darwin-22
+  x86_64-darwin-21
   x86_64-linux
 
 DEPENDENCIES
@@ -401,6 +405,7 @@ DEPENDENCIES
   factory_bot_rails (< 6.4)
   faker
   fasterer
+  foreman (~> 0.88.1)
   has_scope
   jbuilder
   jsonapi-rspec

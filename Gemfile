@@ -106,3 +106,5 @@ group :test do
   gem 'simplecov', require: false
   gem 'webdrivers'
 end
+
+gem "foreman", "~> 0.88.1"
