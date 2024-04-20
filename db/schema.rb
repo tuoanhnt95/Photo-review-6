@@ -10,9 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_04_17_152356) do
+ActiveRecord::Schema[7.0].define(version: 2024_04_20_162133) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "albums", force: :cascade do |t|
+    t.string "name"
+    t.date "expiry_date"
+    t.integer "last_upload_batch", default: 0
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_albums_on_user_id"
+  end
 
   create_table "allowlisted_jwts", force: :cascade do |t|
     t.string "jti", null: false
@@ -23,6 +33,45 @@ ActiveRecord::Schema[7.0].define(version: 2022_04_17_152356) do
     t.datetime "updated_at", null: false
     t.index ["jti"], name: "index_allowlisted_jwts_on_jti", unique: true
     t.index ["user_id"], name: "index_allowlisted_jwts_on_user_id"
+  end
+
+  create_table "photo_user_reviews", force: :cascade do |t|
+    t.bigint "photos_id", null: false
+    t.bigint "user_id", null: false
+    t.bigint "review_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["photos_id"], name: "index_photo_user_reviews_on_photos_id"
+    t.index ["review_id"], name: "index_photo_user_reviews_on_review_id"
+    t.index ["user_id"], name: "index_photo_user_reviews_on_user_id"
+  end
+
+  create_table "photos", force: :cascade do |t|
+    t.string "name"
+    t.string "image"
+    t.decimal "angle"
+    t.bigint "album_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["album_id"], name: "index_photos_on_album_id"
+  end
+
+  create_table "reviews", force: :cascade do |t|
+    t.string "name"
+    t.integer "value"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "uploads", force: :cascade do |t|
+    t.string "name"
+    t.string "file_type"
+    t.integer "progress"
+    t.integer "batch"
+    t.bigint "albums_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["albums_id"], name: "index_uploads_on_albums_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -41,5 +90,11 @@ ActiveRecord::Schema[7.0].define(version: 2022_04_17_152356) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "albums", "users"
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
+  add_foreign_key "photo_user_reviews", "photos", column: "photos_id"
+  add_foreign_key "photo_user_reviews", "reviews"
+  add_foreign_key "photo_user_reviews", "users"
+  add_foreign_key "photos", "albums"
+  add_foreign_key "uploads", "albums", column: "albums_id"
 end

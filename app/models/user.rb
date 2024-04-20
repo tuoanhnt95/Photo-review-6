@@ -28,4 +28,7 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :validatable, :trackable,
          :jwt_authenticatable, jwt_revocation_strategy: self
+
+  has_many :albums, dependent: :destroy
+  has_many :photo_user_reviews, dependent: :destroy
 end
