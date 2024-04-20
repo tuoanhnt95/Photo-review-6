@@ -26,5 +26,5 @@
       "@/*": ["app/javascript/*"]
     }
   },
-  "include": ["app/javascript/**/*"]
+  "include": ["app/javascript/**/*", "app/assets/config", "app/assets/config"]
 }

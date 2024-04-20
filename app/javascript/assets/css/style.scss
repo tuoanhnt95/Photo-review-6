@@ -1,8 +1,12 @@
 @import './css_reset';
+@import './panel.scss';
 @import './variables';
 @import './general';
 @import './main_menu.scss';
 @import './form.scss';
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 
 body {
   font-size: 16px;
@@ -15,4 +19,8 @@ body {
   width: 100%;
   margin-right: auto;
   margin-left: auto;
+}
+
+.text-center {
+  text-align: center;
 }
