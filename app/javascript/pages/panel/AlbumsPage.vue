@@ -13,20 +13,20 @@
             </div>
             <div v-for="album in albums" :key="album.id">
               <div class="relative w-36 h-46 cursor-pointer">
-                <RouterLink :to="{ name: 'Album', params: { id: album.id } }">
-                  <div class="photo-container flex relative h-36 rounded">
-                    <AdvancedImage
-                      v-if="album.cover.length > 0"
-                      :cldImg="getCloudinaryImage(album.cover)"
-                      place-holder="predominant-color"
-                      class="object-cover"
-                    />
-                  </div>
-                  <div class="pl-1 text-md truncate font-medium text-slate-500 dark:text-white">
-                    {{ album.name }}
-                  </div>
-                  <div class="pl-1 text-xs text-slate-400">Expire: {{ album.expiry_date }}</div>
-                </RouterLink>
+                <!-- <RouterLink :to="{ name: 'Album', params: { id: album.id } }"> -->
+                <div class="photo-container flex relative h-36 rounded">
+                  <AdvancedImage
+                    v-if="album.cover.length > 0"
+                    :cldImg="getCloudinaryImage(album.cover)"
+                    place-holder="predominant-color"
+                    class="object-cover"
+                  />
+                </div>
+                <div class="pl-1 text-md truncate font-medium text-slate-500 dark:text-white">
+                  {{ album.name }}
+                </div>
+                <div class="pl-1 text-xs text-slate-400">Expire: {{ album.expiry_date }}</div>
+                <!-- </RouterLink> -->
                 <font-awesome-icon
                   icon="fa-solid fa-x"
                   class="absolute top-1 right-1 z-50 text-slate-400"
@@ -52,12 +52,13 @@
 
 <script setup lang="ts">
 import { computed, onBeforeMount, ref } from 'vue';
-import { RouterLink } from 'vue-router';
+// import { RouterLink } from 'vue-router';
 import axios from 'axios';
 import { Cloudinary } from '@cloudinary/url-gen';
 import { AdvancedImage } from '@cloudinary/vue';
-
+import type { AxiosResponse } from 'axios';
 import AlbumCreate from '../../components/panel/AlbumCreate.vue';
+import { getAlbums } from '@/apis/panel.api';
 
 interface Album {
   id: number;
@@ -69,15 +70,15 @@ interface Album {
 
 const albumsData = ref<Album[]>([]);
 onBeforeMount(async () => {
-  await axios
-    .get('http://localhost:3000/albums')
-    .then((response) => {
+  getAlbums()
+    .then((response: AxiosResponse) => {
       albumsData.value = response.data.reverse();
     })
     .catch((error) => {
       console.log(error);
     });
 });
+
 const albums = computed(() => {
   return albumsData.value;
 });
