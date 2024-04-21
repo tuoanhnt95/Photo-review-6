@@ -1,11 +1,12 @@
-const Index = () => import('@/pages/panel/IndexPage.vue');
+// const Index = () => import('@/pages/panel/IndexPage.vue');
+const Albums = () => import('@/pages/panel/AlbumsPage.vue');
 
 const routes = [
   {
     path: '/',
-    name: 'index',
+    name: 'albums',
     components: {
-      default: Index,
+      default: Albums,
     },
   },
 ];
