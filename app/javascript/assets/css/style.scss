@@ -1,12 +1,9 @@
 @import './css_reset';
-@import './panel.scss';
 @import './variables';
 @import './general';
 @import './main_menu.scss';
 @import './form.scss';
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+@import './tailwind_general.scss';
 
 body {
   font-size: 16px;

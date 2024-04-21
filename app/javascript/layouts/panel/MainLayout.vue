@@ -1,16 +1,12 @@
 <template>
   <BaseLayout>
     <div class="wrapper">
-      <div class="section">
-        <div class="top_navbar">
-          <MainMenu />
-        </div>
-        <div class="container">
-          <router-view />
-        </div>
+      <!-- <div class="section"> -->
+      <div class="navbar">
+        <MainMenu />
       </div>
-      <div class="sidebar">
-        <MainSidebar />
+      <div class="container">
+        <router-view />
       </div>
     </div>
   </BaseLayout>
@@ -19,5 +15,6 @@
 <script setup lang="ts">
 import BaseLayout from '../BaseLayout.vue';
 import MainMenu from './MainMenu.vue';
-import MainSidebar from './MainSidebar.vue';
 </script>
+
+// if mobile: only container, nav bar at the bottom // if desktop: top nav bar, container
