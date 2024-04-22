@@ -1,7 +1,7 @@
 module Panel
   class AlbumsController < ApplicationController
     before_action :authenticate_user!
-    before_action :set_album, only: %i[show edit update destroy]
+    before_action :set_album, only: %i[show update destroy]
 
     # GET /albums or /albums.json
     def index
@@ -19,15 +19,17 @@ module Panel
     end
 
     # GET /albums/1 or /albums/1.json
-    def show; end
-
-    # GET /albums/new
-    def new
-      @album = Album.new
+    def show
+      render json: @album
     end
 
+    # GET /albums/new
+    # def new
+    #   @album = Album.new
+    # end
+
     # GET /albums/1/edit
-    def edit; end
+    # def edit; end
 
     # POST /albums or /albums.json
     def create
@@ -35,25 +37,31 @@ module Panel
       @album.user = current_user
 
       if @album.save
-        redirect_to albums_path, notice: "Album was successfully created."
+        render json: @album, status: :created
       else
-        render :new, status: :unprocessable_entity
+        render json: @album.errors, status: :unprocessable_entity
       end
     end
 
     # PATCH/PUT /albums/1 or /albums/1.json
     def update
       if @album.update(album_params)
-        redirect_to album_url(@album), notice: "Album was successfully updated."
+        render json: @album
+        # redirect_to album_url(@album), notice: "Album was successfully updated."
       else
-        render :edit, status: :unprocessable_entity
+        render json: @album.errors, status: :unprocessable_entity
+        # render :edit, status: :unprocessable_entity
       end
     end
 
     # DELETE /albums/1 or /albums/1.json
     def destroy
-      @album.destroy
-      redirect_to albums_url
+      # @album.destroy
+      if @album.destroy
+        render json: { message: 'Album was successfully destroyed.' }
+      else
+        render json: @album.errors, status: :unprocessable_entity
+      end
     end
 
     private
