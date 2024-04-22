@@ -28,11 +28,11 @@ Review.create([
 Rails.logger.debug 'Creating user data...'
 User.create([
               {
-                email: 'myspamvn@yahoo.com',
+                email: 'test1@gmail.com',
                 password: '123123'
               },
               {
-                email: 'photographer@hotmail.com',
+                email: 'test2@gmail.com',
                 password: '123123'
               }
             ])
