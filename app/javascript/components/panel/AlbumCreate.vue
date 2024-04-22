@@ -2,8 +2,8 @@
   <div class="relative px-6 pt-16 pb-8 bg-white dark:bg-slate-800 border rounded">
     <div class="flex place-content-between w-full mb-6">
       <input
-        type="text"
         v-model="albumName"
+        type="text"
         placeholder="Album name"
         class="w-full px-2 py-1 text-xl text-black rounded"
       />
@@ -11,23 +11,23 @@
 
     <div class="flex place-content-between mb-4">
       <label for="expiry-date" class="self-center text-lg">Expiry date</label>
-      <input type="date" v-model="albumExpiryDate" class="pl-1 rounded text-lg text-black" />
+      <input v-model="albumExpiryDate" type="date" class="pl-1 rounded text-lg text-black" />
     </div>
 
     <div class="flex place-content-between w-full mb-4">
       <label for="invitee" class="self-center text-lg">Invitee</label>
       <input
+        v-model="invitees"
         type="text"
         placeholder=" reviewer@gmail.com,..."
-        v-model="invitees"
         class="w-3/4 pl-1 rounded text-lg text-black"
       />
     </div>
 
     <div class="w-full">
       <button
-        @click="createAlbum"
         class="w-full mt-4 py-3 bg-violet-600 text-slate-200 rounded text-xl font-bold cursor-pointer"
+        @click="createAlbum"
       >
         Save
       </button>
@@ -42,42 +42,43 @@
 </template>
 
 <script setup lang="ts">
-import { ref, type PropType } from 'vue';
-import axios from 'axios';
-interface Album {
-  id: number;
-  name: string;
-  expiry_date: Date;
-  cover: string;
-  last_upload_batch: number;
-}
+// import { ref, type PropType } from 'vue';
+import { ref } from 'vue';
+import type { AxiosResponse } from 'axios';
+import { createAlbumApi } from '@/apis/panel.api';
+
+// interface Album {
+//   id: number;
+//   name: string;
+//   expiry_date: Date;
+//   cover: string;
+//   last_upload_batch: number;
+// }
 
 // TODO: add upload batch to all Album object.
 // need upload batch to manage upload files
 
-const props = defineProps({
-  albums: {
-    type: Array as PropType<Album[]>,
-    required: true,
-  },
-});
+// const props = defineProps({
+//   albums: {
+//     type: Array as PropType<Album[]>,
+//     required: true,
+//   },
+// });
 
-const $emit = defineEmits(['closeCreateAlbum', 'addedNewAlbum']);
+const $emit = defineEmits(['close-create-album', 'added-new-album']);
 
 const albumName = ref('');
-const albumExpiryDate = ref('');
+const albumExpiryDate = ref(new Date());
 const invitees = ref([]);
-
+// invitees: invitees.value,
 const createAlbum = async () => {
-  await axios
-    .post('http://localhost:3000/albums', {
-      name: albumName.value,
-      expiry_date: albumExpiryDate.value,
-      invitees: invitees.value,
-    })
-    .then((response) => {
+  createAlbumApi({
+    name: albumName.value,
+    expiry_date: albumExpiryDate.value,
+  })
+    .then((response: AxiosResponse) => {
       closeCreateAlbum();
-      $emit('addedNewAlbum', response.data);
+      $emit('added-new-album', response.data);
     })
     .catch((error) => {
       console.log(error);
@@ -86,9 +87,9 @@ const createAlbum = async () => {
 
 const closeCreateAlbum = () => {
   albumName.value = '';
-  albumExpiryDate.value = '';
+  albumExpiryDate.value = new Date();
   invitees.value = [];
-  $emit('closeCreateAlbum');
+  $emit('close-create-album');
 };
 </script>
 

@@ -6,7 +6,9 @@
         <div class="flex w-100">
           <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 mx-auto mb-6 z-0">
             <div class="w-36 h-44" @click="isCreatingAlbum = true">
-              <div class="flex w-100 h-36 rounded border border-slate-600 cursor-pointer">
+              <div
+                class="flex w-100 h-36 rounded border border-solid border-slate-600 cursor-pointer"
+              >
                 <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600" />
               </div>
               <div class="pt-1 text-xs text-slate-400">New album</div>
@@ -14,15 +16,15 @@
             <div v-for="album in albums" :key="album.id">
               <div class="relative w-36 h-46 cursor-pointer">
                 <!-- <RouterLink :to="{ name: 'Album', params: { id: album.id } }"> -->
-                <div class="photo-container flex relative h-36 rounded">
+                <div class="photo-container flex relative h-36">
                   <AdvancedImage
                     v-if="album.cover.length > 0"
-                    :cldImg="getCloudinaryImage(album.cover)"
+                    :cld-img="getCloudinaryImage(album.cover)"
                     place-holder="predominant-color"
-                    class="object-cover"
+                    class="object-cover rounded"
                   />
                 </div>
-                <div class="pl-1 text-md truncate font-medium text-slate-500 dark:text-white">
+                <div class="pl-1 text-md truncate font-medium text-slate-500 text-white">
                   {{ album.name }}
                 </div>
                 <div class="pl-1 text-xs text-slate-400">Expire: {{ album.expiry_date }}</div>
@@ -42,8 +44,8 @@
         v-if="isCreatingAlbum"
         :albums="albums"
         class="absolute top-[-200px] left-0 w-full z-10"
-        @closeCreateAlbum="isCreatingAlbum = false"
-        @addedNewAlbum="(newAlbum) => addAlbum(newAlbum)"
+        @close-create-album="isCreatingAlbum = false"
+        @added-new-album="(newAlbum) => addAlbum(newAlbum)"
       >
       </AlbumCreate>
     </div>
@@ -53,12 +55,11 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, ref } from 'vue';
 // import { RouterLink } from 'vue-router';
-import axios from 'axios';
 import { Cloudinary } from '@cloudinary/url-gen';
 import { AdvancedImage } from '@cloudinary/vue';
 import type { AxiosResponse } from 'axios';
 import AlbumCreate from '../../components/panel/AlbumCreate.vue';
-import { getAlbums } from '@/apis/panel.api';
+import { getAlbumsApi, deleteAlbumApi } from '@/apis/panel.api';
 
 interface Album {
   id: number;
@@ -70,7 +71,7 @@ interface Album {
 
 const albumsData = ref<Album[]>([]);
 onBeforeMount(async () => {
-  getAlbums()
+  getAlbumsApi()
     .then((response: AxiosResponse) => {
       albumsData.value = response.data.reverse();
     })
@@ -98,8 +99,7 @@ const deleteAlbum = async (albumName: string, albumId: number) => {
   if (confirm(`Delete album "${albumName}"?`) === false) {
     return;
   }
-  await axios
-    .delete('http://localhost:3000/albums/' + albumId)
+  deleteAlbumApi(albumId)
     .then(() => {
       removeAlbum(albumId);
     })

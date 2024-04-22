@@ -5,7 +5,7 @@
       <div class="navbar">
         <MainMenu />
       </div>
-      <div class="container">
+      <div class="container-panel">
         <router-view />
       </div>
     </div>
