@@ -96,10 +96,10 @@ ActiveRecord::Schema[7.0].define(version: 2024_04_20_172156) do
     t.string "file_type"
     t.integer "progress"
     t.integer "batch"
-    t.bigint "albums_id", null: false
+    t.bigint "album_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["albums_id"], name: "index_uploads_on_albums_id"
+    t.index ["album_id"], name: "index_uploads_on_album_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -126,5 +126,5 @@ ActiveRecord::Schema[7.0].define(version: 2024_04_20_172156) do
   add_foreign_key "photo_user_reviews", "reviews"
   add_foreign_key "photo_user_reviews", "users"
   add_foreign_key "photos", "albums"
-  add_foreign_key "uploads", "albums", column: "albums_id"
+  add_foreign_key "uploads", "albums"
 end

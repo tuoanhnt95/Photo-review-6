@@ -5,7 +5,7 @@ class CreateUploads < ActiveRecord::Migration[7.0]
       t.string :file_type
       t.integer :progress
       t.integer :batch
-      t.references :albums, null: false, foreign_key: true
+      t.references :album, null: false, foreign_key: true
 
       t.timestamps
     end

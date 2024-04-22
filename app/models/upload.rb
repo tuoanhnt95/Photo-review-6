@@ -7,14 +7,14 @@
 #  file_type  :string
 #  progress   :integer
 #  batch      :integer
-#  albums_id  :bigint           not null
+#  album_id   :bigint           not null
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
 #
 # Indexes
 #
-#  index_uploads_on_albums_id  (albums_id)
+#  index_uploads_on_album_id  (album_id)
 #
 class Upload < ApplicationRecord
-  belongs_to :albums
+  belongs_to :album
 end
