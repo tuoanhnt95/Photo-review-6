@@ -1,5 +1,6 @@
 @import './css_reset';
 @import './tailwind_general.scss';
+@import './base.css';
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
 
 * {
@@ -9,10 +10,6 @@
   padding: 0;
   box-sizing: border-box;
   font-family: 'Open Sans', sans-serif;
-}
-
-body {
-  // background: #f5f6fa;
 }
 
 .wrapper {
