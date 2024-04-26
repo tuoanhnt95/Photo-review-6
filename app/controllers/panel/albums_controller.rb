@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Panel
   class AlbumsController < ApplicationController
     before_action :authenticate_user!
@@ -9,9 +11,7 @@ module Panel
       results = []
 
       @albums.each do |album|
-        album_cover = ''
-        album_cover = album.photos.first.image unless album.photos.first.nil?
-        result = album_result(album, album_cover)
+        result = album_result(album)
         results.push(result)
       end
 
@@ -20,16 +20,8 @@ module Panel
 
     # GET /albums/1 or /albums/1.json
     def show
-      render json: @album
+      render json: album_result(@album)
     end
-
-    # GET /albums/new
-    # def new
-    #   @album = Album.new
-    # end
-
-    # GET /albums/1/edit
-    # def edit; end
 
     # POST /albums or /albums.json
     def create
@@ -67,7 +59,9 @@ module Panel
     private
 
     # Use callbacks to share common setup or constraints between actions.
-    def album_result(album, album_cover)
+    def album_result(album)
+      album_cover = ''
+      album_cover = album.photos.first.image unless album.photos.first.nil?
       album_result = {}.merge(album.attributes)
       album_result[:cover] = album_cover
       album_result

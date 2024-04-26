@@ -14,7 +14,11 @@ Rails.application.routes.draw do
 
   get '/panel', to: 'application#panel', as: :panel
   namespace :panel do
-    resources :albums
+    resources :albums do
+      resources :photos, only: %i[index create]
+    end
+    resources :photos, only: %i[show update destroy]
+    delete '/delete_photos', to: 'photos#destroy_multiple', as: 'delete_photos'
   end
   get '/(*path)', to: 'application#website', as: :website
 
