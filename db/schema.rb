@@ -64,12 +64,12 @@ ActiveRecord::Schema[7.0].define(version: 2024_04_20_172156) do
   end
 
   create_table "photo_user_reviews", force: :cascade do |t|
-    t.bigint "photos_id", null: false
+    t.bigint "photo_id", null: false
     t.bigint "user_id", null: false
     t.bigint "review_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["photos_id"], name: "index_photo_user_reviews_on_photos_id"
+    t.index ["photo_id"], name: "index_photo_user_reviews_on_photo_id"
     t.index ["review_id"], name: "index_photo_user_reviews_on_review_id"
     t.index ["user_id"], name: "index_photo_user_reviews_on_user_id"
   end
@@ -122,7 +122,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_04_20_172156) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "albums", "users"
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
-  add_foreign_key "photo_user_reviews", "photos", column: "photos_id"
+  add_foreign_key "photo_user_reviews", "photos"
   add_foreign_key "photo_user_reviews", "reviews"
   add_foreign_key "photo_user_reviews", "users"
   add_foreign_key "photos", "albums"
