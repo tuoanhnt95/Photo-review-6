@@ -1,14 +1,6 @@
 import type { AxiosResponse } from 'axios';
 import { http } from '@/services/http.service';
 
-// interface Album {
-//   id: number;
-//   name: string;
-//   expiry_date: Date;
-//   cover: string;
-//   last_upload_batch: number;
-// }
-
 // Album
 interface album {
   name: string;
@@ -45,8 +37,19 @@ export const getPhotosApi = (albumId: number): Promise<AxiosResponse> => {
   return http.get(`${albumId}/photos`);
 };
 
-export const createPhotoApi = (albumId: number, photo: photo): Promise<AxiosResponse> => {
-  return http.post(`${albumId}/photos`, { photo });
+export const createPhotoApi = (
+  albumId: number,
+  upload_option: number,
+  files: File[],
+): Promise<AxiosResponse> => {
+  return http.post(
+    `${albumId}/photos`,
+    { upload_option, files },
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+  });
 };
 
 export const showPhotoApi = (albumId: number, id: number): Promise<AxiosResponse> => {
@@ -67,4 +70,16 @@ export const deletePhotoApi = (albumId: number, id: number): Promise<AxiosRespon
 
 export const deletePhotosApi = (photoIds: number[]): Promise<AxiosResponse> => {
   return http.delete(`delete_photos`, { data: { photo_ids: photoIds } });
+};
+
+// Upload Progress
+export const getUploadProgressApi = (
+  albumId: number,
+  queryString: string,
+): Promise<AxiosResponse> => {
+  return http.get(`${albumId}/upload_progress${queryString}`, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 };

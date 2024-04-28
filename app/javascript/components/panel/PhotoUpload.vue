@@ -40,9 +40,9 @@
 
       <div>
         <button
-          @click="uploadPhoto"
           class="w-full mt-4 py-3 text-slate-200 bg-violet-600 rounded text-xl font-bold"
           :class="[canUpload ? 'cursor-pointer' : 'opacity-30 cursor-not-allowed']"
+          @click="uploadPhoto"
         >
           Upload
         </button>
@@ -90,7 +90,9 @@
 
 <script setup lang="ts">
 import { ref, type PropType, watch, computed } from 'vue';
-import axios from 'axios';
+// import axios from 'axios';
+import type { AxiosResponse } from 'axios';
+import { createPhotoApi, getUploadProgressApi } from '@/apis/panel.api';
 
 interface Album {
   id: number;
@@ -202,22 +204,10 @@ const uploadPhoto = async () => {
     return;
   }
 
-  // upload photo
-  const filesData = new FormData();
-  filesData.append('album_id', props.album.id.toString());
-  filesData.append('upload_option', photoUploadOption.value.toString());
-  for (let i = 0; i < inputFiles.value.length; i++) {
-    filesData.append('files[]', inputFiles.value[i]);
-  }
-  getProgressUntilComplete();
+  // getProgressUntilComplete();
 
-  await axios
-    .post(`http://localhost:3000/albums/${props.album.id}/photos`, filesData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
-    .then((response) => {
+  createPhotoApi(props.album.id, photoUploadOption.value, inputFiles.value)
+    .then((response: AxiosResponse) => {
       $emit('close-upload-photo');
       $emit('uploaded-new-photo', response.data);
     })
@@ -280,13 +270,8 @@ async function getProgress() {
 
   const queryString = '?file_names=' + endcodedFileNames + '&file_types=' + endcodedFileTypes;
 
-  axios
-    .get(`http://localhost:3000/albums/${props.album.id}/upload_progress` + queryString, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-    .then((response) => {
+  getUploadProgressApi(props.album.id, queryString)
+    .then((response: AxiosResponse) => {
       // update uploads for any file that is not completed
       response.data.forEach((element: Upload) => {
         const index = uploads.value.findIndex((upload: Upload) => upload.name === element.name);
