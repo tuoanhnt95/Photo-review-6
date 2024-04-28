@@ -107,6 +107,10 @@ group :test do
   gem 'webdrivers'
 end
 
-gem "foreman", "~> 0.88.1"
-
-gem "cloudinary", "~> 2.0"
+gem 'cloudinary', '~> 2.0'
+gem 'foreman', '~> 0.88.1'
+# Use mini_magick to reformat .ARW file
+gem 'mini_magick'
+# Use vips to reformat RAW images
+# https://www.rubydoc.info/gems/ruby-vips
+gem 'ruby-vips'

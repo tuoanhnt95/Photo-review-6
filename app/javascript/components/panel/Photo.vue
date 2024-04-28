@@ -22,15 +22,15 @@
               :class="{ 'btn-selected': reviewResult(i) === opt.value }"
             >
               <font-awesome-icon
-                :icon="`fa-solid fa-${opt.icon}`"
                 v-model="photo.review_results"
+                :icon="`fa-solid fa-${opt.icon}`"
                 @click="reviewPhoto(i, opt.value)"
               />
             </div>
           </div>
           <AdvancedImage
             v-if="display"
-            :cldImg="getCloudinaryImage(display.image, display.angle)"
+            :cld-img="getCloudinaryImage(display.image, display.angle)"
             place-holder="predominant-color"
             class="object-contain w-full h-full"
           />
@@ -80,7 +80,6 @@ import { AdvancedImage } from '@cloudinary/vue';
 const emit = defineEmits(['reviewed-photo', 'close-review-photo', 'navigate-photo']);
 
 interface Photo {
-  [x: string]: unknown;
   id: number;
   name: string;
   image: string;
@@ -137,7 +136,7 @@ const cld = new Cloudinary({
     cloudName: 'djnvimner',
   },
 });
-const getCloudinaryImage = (publicId: String, angle: number) => {
+const getCloudinaryImage = (publicId: string, angle: number) => {
   return cld.image(`photo_review/${publicId}`).rotate(byAngle(angle));
 };
 

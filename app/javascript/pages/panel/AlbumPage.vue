@@ -168,7 +168,7 @@
       @close-upload-photo="isUploadingPhoto = false"
     />
 
-    <!-- <Photo
+    <Photo
       v-if="isShowingPhoto && photoShowing"
       :photo="photoShowing"
       :photos="photos"
@@ -176,14 +176,13 @@
       @reviewed-photo="(photo: Photo) => updatePhoto(photo)"
       @navigate-photo="(photoId: Number) => showPhoto(photoId)"
       @close-review-photo="closeReviewPhoto"
-    /> -->
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onBeforeMount, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import axios from 'axios';
 import { Cloudinary } from '@cloudinary/url-gen';
 import { AdvancedImage } from '@cloudinary/vue';
 import { byAngle } from '@cloudinary/url-gen/actions/rotate';
@@ -331,20 +330,6 @@ async function deletePhotos() {
     .catch((error) => {
       console.log(error);
     });
-
-  // await axios
-  //   .delete('http://localhost:3000/delete_photos', {
-  //     data: {
-  //       photo_ids: selectedPhotoIds.value,
-  //     }
-  //   }).then(() => {
-  //     selectedPhotoIds.value.forEach((photoId) => {
-  //       removePhoto(photoId);
-  //     });
-  //   })
-  //   .catch((error) => {
-  //     console.log(error);
-  //   });
 }
 
 function removePhoto(photoId: number) {
