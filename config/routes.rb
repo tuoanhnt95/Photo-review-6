@@ -17,7 +17,10 @@ Rails.application.routes.draw do
     resources :albums do
       resources :photos, only: %i[index create]
     end
-    resources :photos, only: %i[show update destroy]
+    resources :photos, only: %i[show update destroy] do
+      get '/photo_user_reviews', to: 'photo_user_reviews#index'
+      put '/photo_user_reviews', to: 'photo_user_reviews#update'
+    end
     delete '/delete_photos', to: 'photos#destroy_multiple', as: 'delete_photos'
   end
   get '/(*path)', to: 'application#website', as: :website

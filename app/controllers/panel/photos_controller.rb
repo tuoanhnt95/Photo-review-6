@@ -8,8 +8,6 @@ module Panel
     include FileInput
     before_action :set_photo, only: %i[show update destroy]
     before_action :set_album, only: %i[index create create_new_upload]
-    # skip_before_action :verify_authenticity_token
-    # skip_before_action :authenticate_user!
 
     # GET /albums/:album_id/photos
     def index
@@ -100,7 +98,7 @@ module Panel
     end
 
     def get_review_result(photo)
-      user = User.first
+      user = current_user
       reviews = photo.photo_user_reviews
       review_by_user = reviews.find { |review| review.user_id == user.id }
       # Only show result after current user has reviewed
@@ -112,9 +110,9 @@ module Panel
     def get_result_all(reviews)
       values = reviews.map { |review| Review.find(review.review_id).value }
       if values.all?(1) # all yes
-        1
+        3
       elsif values.all?(&:zero?) # all no
-        0
+        1
       else
         2
       end
