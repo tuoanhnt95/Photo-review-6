@@ -1,4 +1,5 @@
 import type { AxiosResponse } from 'axios';
+import axios from 'axios';
 import { http } from '@/services/http.service';
 
 // Album
@@ -82,4 +83,24 @@ export const getUploadProgressApi = (
       'Content-Type': 'application/json',
     },
   });
+};
+
+// Review
+export const updateReviewApi = (
+  photo_id: number,
+  review_id: number | null,
+  angle: number,
+): Promise<AxiosResponse> => {
+  return axios.put(`http://localhost:3000/panel/photos/${photo_id}/photo_user_reviews`, {
+    review_id,
+    angle,
+  });
+  // return http.put(`photos/${photo_id}/photo_user_reviews`, {
+  //   //   'photo_user_review': { review_value, angle },
+  //   // });
+  //   review_value,
+  //   angle,
+  //   controller: 'photo_user_reviews',
+  //   action: 'update',
+  // });
 };

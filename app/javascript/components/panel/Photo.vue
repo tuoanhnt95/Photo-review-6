@@ -72,10 +72,11 @@
 
 <script setup lang="ts">
 import { ref, computed, type PropType, watch } from 'vue';
-import axios from 'axios';
 import { Cloudinary } from '@cloudinary/url-gen';
 import { byAngle } from '@cloudinary/url-gen/actions/rotate';
 import { AdvancedImage } from '@cloudinary/vue';
+import type { AxiosResponse } from 'axios';
+import { updateReviewApi } from '@/apis/panel.api';
 
 const emit = defineEmits(['reviewed-photo', 'close-review-photo', 'navigate-photo']);
 
@@ -117,14 +118,12 @@ const displayPhotos = computed(() => {
 });
 
 const nextPhoto = computed(() => {
-  // get the next photo in the album
   // if this is the last photo, then nothing
   return currentIndex.value === photos.value.length - 1
     ? null
     : photos.value[currentIndex.value + 1];
 });
 const previousPhoto = computed(() => {
-  // get the previous photo in the album
   // if this is the first photo, then nothing
   return currentIndex.value === 0 ? null : photos.value[currentIndex.value - 1];
 });
@@ -143,11 +142,11 @@ const getCloudinaryImage = (publicId: string, angle: number) => {
 // Review
 function reviewResult(index: number) {
   const reviewedPhoto = displayPhotos.value?.[index];
-  return reviewedPhoto ? reviewedPhoto.review_results : -1;
+  return reviewedPhoto ? reviewedPhoto.review_results : null;
 }
 
 function reviewPhoto(index: number, value: number) {
-  if (value !== -1) {
+  if (value) {
     const reviewedPhoto = displayPhotos.value?.[index];
     if (reviewedPhoto) {
       reviewedPhoto.review_results = value;
@@ -166,15 +165,8 @@ function saveReview(index = 0) {
   const displayedPhoto = displayPhotos.value?.[index];
   if (!displayedPhoto) return;
 
-  if (
-    displayedPhoto?.review_results !== -1 ||
-    photoOriginalAngles.value[index] !== displayedPhoto.angle
-  ) {
-    axios
-      .put(`http://localhost:3000/photos/${photo.value.id}/photo_user_reviews`, {
-        review_value: photo.value.review_results,
-        angle: photo.value.angle,
-      })
+  if (displayedPhoto?.review_results || photoOriginalAngles.value[index] !== displayedPhoto.angle) {
+    updateReviewApi(displayedPhoto.id, displayedPhoto.review_results, displayedPhoto.angle)
       .then(() => {
         rotateCounters.value[index] = 0;
         return;
@@ -278,9 +270,9 @@ watch(
 
 // display v-for
 const reviewDisplayOptions = [
-  { value: 0, icon: 'xmark' },
+  { value: 1, icon: 'xmark' },
   { value: 2, icon: 'question' },
-  { value: 1, icon: 'check' },
+  { value: 3, icon: 'check' },
 ];
 </script>
 
