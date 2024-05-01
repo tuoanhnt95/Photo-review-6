@@ -8,7 +8,7 @@ Rails.application.routes.draw do
     # - config/initializers/devise.rb#JWT Devise
     # - spec/support/authentication_helper.rb
     post '/users/login' => 'sessions#create', as: :user_session
-    delete '/users/logout' => 'sessions#destroy', as: :destroy_user_session
+    delete 'panel/users/logout' => 'sessions#destroy', as: :destroy_user_session
     post '/users/signup' => 'registrations#create', as: :user_registration
   end
 
