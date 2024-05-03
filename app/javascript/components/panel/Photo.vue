@@ -75,7 +75,6 @@ import { ref, computed, type PropType, watch } from 'vue';
 import { Cloudinary } from '@cloudinary/url-gen';
 import { byAngle } from '@cloudinary/url-gen/actions/rotate';
 import { AdvancedImage } from '@cloudinary/vue';
-import type { AxiosResponse } from 'axios';
 import { updateReviewApi } from '@/apis/panel.api';
 
 const emit = defineEmits(['reviewed-photo', 'close-review-photo', 'navigate-photo']);
@@ -166,7 +165,12 @@ function saveReview(index = 0) {
   if (!displayedPhoto) return;
 
   if (displayedPhoto?.review_results || photoOriginalAngles.value[index] !== displayedPhoto.angle) {
-    updateReviewApi(displayedPhoto.id, displayedPhoto.review_results, displayedPhoto.angle)
+    updateReviewApi(
+      displayedPhoto.album_id,
+      displayedPhoto.id,
+      displayedPhoto.review_results,
+      displayedPhoto.angle,
+    )
       .then(() => {
         rotateCounters.value[index] = 0;
         return;
