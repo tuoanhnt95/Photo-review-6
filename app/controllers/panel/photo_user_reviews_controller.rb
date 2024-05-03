@@ -37,14 +37,18 @@ class Panel::PhotoUserReviewsController < ApplicationController
     photo_user_review = find_review_by_photo_and_user
 
     # create a new review if it doesn't exist
-    if photo_user_review.nil? && !params[:review_id].nil?
-      create_result = create
-      if create_result[1] == 1
-        render json: create_result[0], status: :created
+    if photo_user_review.nil?
+      if !params[:review_id].nil?
+        create_result = create
+        if create_result[1] == 1
+          render json: create_result[0], status: :created
+        else
+          render json: create_result[0].errors, status: :unprocessable_entity
+        end
+        return
       else
-        render json: create_result[0].errors, status: :unprocessable_entity
+        return
       end
-      return
     end
 
     # check if review has changed before update
