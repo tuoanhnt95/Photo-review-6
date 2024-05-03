@@ -205,7 +205,7 @@ const uploadPhoto = async () => {
   }
 
   // getProgressUntilComplete();
-
+  console.log('uploading photo', props.album.id);
   createPhotoApi(props.album.id, photoUploadOption.value, inputFiles.value)
     .then((response: AxiosResponse) => {
       $emit('close-upload-photo');

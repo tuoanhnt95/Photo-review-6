@@ -2,12 +2,15 @@
 
 require './lib/modules/file_input'
 
-# Photos controller
 module Panel
   class PhotosController < ApplicationController
     include FileInput
+    before_action :set_album, only: %i[check_owner index create create_new_upload]
+    # Guest can view photos, photo, and upload photos
+    before_action :check_authorized_user, only: %i[index show create update]
     before_action :set_photo, only: %i[show update destroy]
-    before_action :set_album, only: %i[index create create_new_upload]
+    # Only the owner can delete photos
+    before_action :check_owner, only: %i[destroy destroy_multiple]
 
     # GET /albums/:album_id/photos
     def index
@@ -22,7 +25,7 @@ module Panel
       render json: result
     end
 
-    # GET /photos/:id
+    # GET /albums/:album_id/photos/:id
     def show
       render json: @photo
     end
@@ -57,8 +60,13 @@ module Panel
       end
     end
 
-    # PATCH/PUT /photos/:id
+    # PATCH/PUT /albums/:album_id/photos/:id
     def update
+      # guest can only update the angle
+      [:name, :image, :album_id].each do |key|
+        return panel_album_photo_path if !check_if_change(key)
+      end
+
       if @photo.update(photo_params)
         render json: @photo
       else
@@ -66,7 +74,7 @@ module Panel
       end
     end
 
-    # DELETE /photos/:id
+    # DELETE /albums/:album_id/photos/:id
     def destroy
       public_id = @photo.image
       @photo.destroy
@@ -118,7 +126,27 @@ module Panel
       end
     end
 
-    # Use callbacks to share common setup or constraints between actions.
+    def check_if_change(key)
+      # if there is no change or no param :key, then return false
+      if ((photo_params[key] && @photo.key == photo_params[key]) || !photo_params[key])
+        return false
+      else
+        return true
+      end
+    end
+
+    def check_authorized_user
+      album_user = AlbumUser.find_by(album_id: params[:album_id], user_id: current_user.id)
+
+      redirect_to panel_path if album_user.nil? && return
+    end
+
+    def check_owner
+      return unless @album.user != current_user
+
+      render(json: { error: 'Unauthorized' }, status: :unauthorized) && return
+    end
+
     def set_album
       @album = Album.find(params[:album_id])
     end
