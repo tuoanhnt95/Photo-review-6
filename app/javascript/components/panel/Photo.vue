@@ -126,6 +126,8 @@ const previousPhoto = computed(() => {
   // if this is the first photo, then nothing
   return currentIndex.value === 0 ? null : photos.value[currentIndex.value - 1];
 });
+
+const photoOriginal = props.photo;
 const photo = ref(props.photo);
 const photos = ref(props.photos);
 
@@ -162,9 +164,11 @@ function displayedPhoto(index: number) {
 
 function saveReview(index = 0) {
   const displayedPhoto = displayPhotos.value?.[index];
+
   if (!displayedPhoto) return;
 
-  if (displayedPhoto?.review_results || photoOriginalAngles.value[index] !== displayedPhoto.angle) {
+  if (displayedPhoto?.review_results || photoOriginal.angle !== displayedPhoto.angle) {
+    console.log('save review');
     updateReviewApi(
       displayedPhoto.album_id,
       displayedPhoto.id,
@@ -187,8 +191,6 @@ function navigatePhoto(value: number) {
 
   saveReview();
 
-  // if first photo and navigate left, end
-  // if last photo and navigate right, end
   if (
     (currentIndex.value === 0 && value === -1) ||
     (currentIndex.value === photos.value.length - 1 && value === 1)
@@ -244,13 +246,13 @@ function canNavigate(value: number) {
 
 // rotate photo
 const rotateCounters = ref([0, 0]);
-const photoOriginalAngles = computed(() => {
-  if (!displayPhotos.value) return [];
-  // get the id of the photos in the displayPhotos
-  const ids = displayPhotos.value.map((pho) => pho?.id);
-  return props.photos.filter((pho) => ids.includes(pho.id)).map((pho) => pho?.angle || 0);
-  // return displayPhotos.value?.map(pho => pho?.angle || 0);
-});
+// const photoOriginalAngles = computed(() => {
+//   if (!displayPhotos.value) return [];
+//   // get the id of the photos in the displayPhotos
+//   const ids = displayPhotos.value.map((pho) => pho?.id);
+//   return props.photos.filter((pho) => ids.includes(pho.id)).map((pho) => pho?.angle || 0);
+//   // return displayPhotos.value?.map(pho => pho?.angle || 0);
+// });
 
 function rotatePhoto(index = 0) {
   const displayPhoto = displayedPhoto(index);
@@ -258,10 +260,10 @@ function rotatePhoto(index = 0) {
 
   if (rotateCounters.value[index] === 3) {
     rotateCounters.value[index] = 0;
-    displayPhoto.angle = photoOriginalAngles.value[index];
+    displayPhoto.angle = photoOriginal.angle;
   } else {
     rotateCounters.value[index]++;
-    displayPhoto.angle = photoOriginalAngles.value[index] - rotateCounters.value[index] * 90;
+    displayPhoto.angle = photoOriginal.angle - rotateCounters.value[index] * 90;
   }
 }
 
