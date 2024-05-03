@@ -31,4 +31,5 @@ class User < ApplicationRecord
 
   has_many :albums, dependent: :destroy
   has_many :photo_user_reviews, dependent: :destroy
+  has_many :album_users, dependent: :destroy
 end
