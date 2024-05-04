@@ -25,7 +25,7 @@
         </div>
       </div>
       <!-- Filter -->
-      <div class="w-100 h-8 ml-3 mt-3">
+      <div class="w-100 h-8 ml-3 mt-3 mb-1">
         <div v-if="selectedPhotoIds.length === 0" class="flex justify-between items-center h-full">
           <div class="flex items-center">
             <font-awesome-icon icon="fa-solid fa-calendar-days" class="mr-2 self-center" />
@@ -37,8 +37,20 @@
             </div>
           </div>
           <div
-            class="flex w-42 bg-slate-200 border divide-x divide-slate-400 text-slate-600 rounded-sm"
+            class="flex w-42 border border-solid border-slate-600 divide-x divide-solid divide-slate-600 text-slate-600 rounded-sm"
           >
+            <div class="btn-filter w-12 px-2 py-0.5">
+              <font-awesome-icon
+                v-if="!isShowingResult"
+                icon="fa-solid fa-eye"
+                @click="isShowingResult = !isShowingResult"
+              />
+              <font-awesome-icon
+                v-else
+                icon="fa-solid fa-eye-slash"
+                @click="isShowingResult = !isShowingResult"
+              />
+            </div>
             <div v-for="opt in filterReview" :key="opt.icon">
               <div
                 class="btn-filter w-14 px-2 py-0.5"
@@ -73,7 +85,7 @@
 
       <!-- Photos -->
       <!-- Icon view -->
-      <div v-if="selectedAlbumViewIndex !== 1" class="grid grid-cols-5 gap-0.5 w-full">
+      <div v-if="selectedAlbumViewIndex !== 1" class="grid grid-cols-4 gap-0.5 w-full">
         <div class="photo-container flex" @click.prevent="isUploadingPhoto = true">
           <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600" />
         </div>
@@ -95,6 +107,30 @@
             :class="{ 'icon-circle-check-selected': selectedPhotoIds.includes(photo.id) }"
             @click.prevent="toggleSelectPhoto(photo.id)"
           />
+          <div
+            v-if="isShowingResult"
+            class="container-photo-reviews-all divide-x divide-solid divide-gray-700"
+          >
+            <div v-for="review in filterReview.slice(0, 3)" :key="review.icon">
+              <div class="container-photo-review bg-black bg-opacity-50">
+                <font-awesome-icon
+                  :icon="`fa-solid fa-${review.icon}`"
+                  :class="{
+                    'opacity-0': numberOfReviewsWithResult(photo.id, review.value) === 0,
+                    'text-violet-600': photo.review_results === review.value,
+                  }"
+                />
+                <div
+                  :class="{
+                    'opacity-0': numberOfReviewsWithResult(photo.id, review.value) === 0,
+                    'text-violet-600': photo.review_results === review.value,
+                  }"
+                >
+                  {{ numberOfReviewsWithResult(photo.id, review.value) }}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <!-- Photos list view -->
@@ -388,6 +424,9 @@ const filterModes = [
   { value: 1, name: 'blur' },
   { value: 2, name: 'hide' },
 ];
+
+const isShowingResult = ref(false);
+
 const filterReview = ref([
   { selected: false, value: 3, icon: 'check' },
   { selected: false, value: 2, icon: 'question' },
@@ -428,23 +467,27 @@ function numberOfPhotosWithReview(val: number | null) {
     if (photoReviews.length === 0) {
       results.push({ photo_id: photoId, review_result: null });
     } else {
-      const review_result = getOverallResult(photoId);
+      const review_result = getOverallReview(photoId);
       results.push({ photo_id: photoId, review_result: review_result });
     }
   });
 
   return results.filter((x) => x.review_result === val).length;
 }
+
+function numberOfReviewsWithResult(photoId: number, val: number | null) {
+  const reviews = getPhotoReviews(photoId);
+  return reviews.filter((x) => x.review_id === val).length;
+}
+
 function getPhotoReviews(photoId: number) {
   return photosReviewsData.value.filter((x) => x.photo_id === photoId);
 }
-function getOverallResult(photoId: number) {
+
+function getOverallReview(photoId: number) {
   const reviews = getPhotoReviews(photoId);
   const reviewIds = reviews.map((review) => review.review_id);
-  const user = localStorage.user;
-  const userId = user ? JSON.parse(user).data.id : null;
-  const userIdInt = userId ? parseInt(userId) : 0;
-  const userReview = reviews.find((review) => review.user_id === userIdInt);
+  const userReview = reviews.find((review) => review.user_id === currentUserId.value);
   // if user has not made a review, return null
   if (!userReview || userReview.review_id === null) {
     return null;
@@ -456,6 +499,12 @@ function getOverallResult(photoId: number) {
     return 2;
   }
 }
+
+const currentUserId = computed(() => {
+  const user = localStorage.user;
+  const userId = user ? JSON.parse(user).data.id : null;
+  return userId ? parseInt(userId) : 0;
+});
 
 // photo review
 const isShowingPhoto = ref(false);
@@ -481,7 +530,7 @@ function getPhotoClass(photo: Photo) {
   if (selectedFilterIds.value.length > 0) {
     // if photo has no review, and if filter has null,
     // or if photo overall review matches selected filter, show photo
-    let overallReview = getOverallResult(photo.id);
+    let overallReview = getOverallReview(photo.id);
     if (!overallReview) {
       const filterNull = filterReview.value.find((x) => x.value === null);
       if (filterNull && !filterNull.selected) {
@@ -538,6 +587,23 @@ function getPhotoClass(photo: Photo) {
   color: var(--color-primary);
   background-color: white;
   border-radius: 50%;
+}
+
+.container-photo-reviews-all {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.container-photo-review {
+  display: flex;
+  gap: 0.25rem;
+  justify-content: center;
+  align-items: center;
 }
 
 .container-context-menu {
