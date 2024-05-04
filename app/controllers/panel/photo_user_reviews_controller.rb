@@ -1,21 +1,18 @@
 class Panel::PhotoUserReviewsController < ApplicationController
-  before_action :set_photo_user_review, only: %i[show destroy]
-  before_action :set_photo, only: %i[index show create update show_by_photo_and_user]
+  before_action :set_photo, only: %i[create update]
+  before_action :check_authorized_user, only: %i[index]
   wrap_parameters false
 
-  # GET photos/:photo_id/photo_user_reviews
+  # GET /albums/:album_id/photo_user_reviews
   def index
-    @photo_user_reviews = PhotoUserReview.all
+    # reviews for all photos in album
+    photos = Photo.where(album_id: params[:album_id])
+    reviews = PhotoUserReview.where(photo_id: photos.map(&:id))
 
-    render json: @photo_user_reviews
+    render json: reviews
   end
 
-  # GET /photo_user_reviews/1
-  def show
-    render json: @photo_user_review
-  end
-
-  # POST photos/:photo_id/photo_user_reviews
+  # POST /albums/:album_id/photos/:photo_id/photo_user_reviews
   def create
     photo_user_review = PhotoUserReview.new
     photo_user_review.photo_id = @photo.id
@@ -29,11 +26,10 @@ class Panel::PhotoUserReviewsController < ApplicationController
     end
   end
 
-  # PATCH/PUT photos/:photo_id/photo_user_reviews
+  # PATCH/PUT /albums/:album_id/photos/:photo_id/photo_user_reviews
   def update
     # if the angle change, update the photo
     @photo.update(angle: params[:angle]) if @photo.angle != params[:angle]
-
     photo_user_review = find_review_by_photo_and_user
 
     # create a new review if it doesn't exist
@@ -61,21 +57,16 @@ class Panel::PhotoUserReviewsController < ApplicationController
     end
   end
 
-  # GET photos/:photo_id/get_review
-  def show_by_photo_and_user
-    review = find_review_by_photo_and_user
-
-    if review.nil? || review.review_id.nil?
-      return
-    end
-
-    render json: Review.find(review.review_id).value
-  end
-
   private
 
   def find_review_by_photo_and_user
     PhotoUserReview.find_by(photo_id: params[:photo_id], user_id: current_user.id)
+  end
+
+  def check_authorized_user
+    album_user = AlbumUser.find_by(album_id: params[:album_id], user_id: current_user.id)
+
+    redirect_to panel_path if album_user.nil? && return
   end
 
   def set_photo
@@ -85,10 +76,5 @@ class Panel::PhotoUserReviewsController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
   def set_photo_user_review
     @photo_user_review = PhotoUserReview.find(params[:id])
-  end
-
-  # Only allow a list of trusted parameters through.
-  def photo_user_review_params
-    params.permit(:photo_id, :photo_user_review_id, :review_id, :angle)
   end
 end

@@ -106,24 +106,9 @@ module Panel
     end
 
     def get_review_result(photo)
-      user = current_user
-      reviews = photo.photo_user_reviews
-      review_by_user = reviews.find { |review| review.user_id == user.id }
-      # Only show result after current user has reviewed
-      return nil if reviews.empty? || review_by_user.nil?
-
-      get_result_all(reviews)
-    end
-
-    def get_result_all(reviews)
-      values = reviews.map { |review| Review.find(review.review_id).value }
-      if values.all?(1) # all yes
-        3
-      elsif values.all?(&:zero?) # all no
-        1
-      else
-        2
-      end
+      review = PhotoUserReview.find_by(photo_id: photo.id, user_id: current_user.id)
+      return nil if review.nil?
+      review.review_id
     end
 
     def check_if_change(key)

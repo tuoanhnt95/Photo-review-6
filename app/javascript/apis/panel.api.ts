@@ -85,6 +85,10 @@ export const getUploadProgressApi = (
 };
 
 // Review
+export const getReviewsApi = (album_id: number): Promise<AxiosResponse> => {
+  return http.get(`${album_id}/photo_user_reviews`);
+};
+
 export const updateReviewApi = (
   album_id: number,
   photo_id: number,

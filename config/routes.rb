@@ -16,10 +16,10 @@ Rails.application.routes.draw do
   namespace :panel do
     resources :albums do
       resources :photos, only: %i[index create show update destroy] do
-        get '/photo_user_reviews', to: 'photo_user_reviews#index'
         put '/photo_user_reviews', to: 'photo_user_reviews#update'
       end
       delete '/delete_photos', to: 'photos#destroy_multiple', as: 'delete_photos'
+      get '/photo_user_reviews', to: 'photo_user_reviews#index'
     end
 
   end

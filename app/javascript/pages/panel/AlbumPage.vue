@@ -187,7 +187,13 @@ import { Cloudinary } from '@cloudinary/url-gen';
 import { AdvancedImage } from '@cloudinary/vue';
 import { byAngle } from '@cloudinary/url-gen/actions/rotate';
 import type { AxiosResponse } from 'axios';
-import { showAlbumApi, updateAlbumApi, getPhotosApi, deletePhotosApi } from '@/apis/panel.api';
+import {
+  showAlbumApi,
+  updateAlbumApi,
+  getPhotosApi,
+  deletePhotosApi,
+  getReviewsApi,
+} from '@/apis/panel.api';
 
 // components
 import Photo from '../../components/panel/Photo.vue';
@@ -209,6 +215,15 @@ interface Photo {
   angle: number;
   album_id: number;
   review_results: number | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+interface PhotoUserReview {
+  id: number;
+  photo_id: number;
+  user_id: number;
+  review_id: number;
   created_at: Date;
   updated_at: Date;
 }
@@ -374,26 +389,72 @@ const filterModes = [
   { value: 2, name: 'hide' },
 ];
 const filterReview = ref([
-  { selected: false, value: 1, icon: 'check' },
+  { selected: false, value: 3, icon: 'check' },
   { selected: false, value: 2, icon: 'question' },
-  { selected: false, value: 0, icon: 'xmark' },
+  { selected: false, value: 1, icon: 'xmark' },
   { selected: false, value: null, icon: 'exclamation' },
 ]); // Yes Maybe No
-const filterIsSelected = computed(() => {
-  return filterReview.value.some((x) => x.selected);
+const selectedFilterIds = computed(() => {
+  return filterReview.value.filter((x) => x.selected).map((x) => x.value);
 });
 
+const photosReviewsData = ref([<PhotoUserReview>{}]);
+onBeforeMount(loadReviews);
+
+async function loadReviews() {
+  getReviewsApi(albumId.value)
+    .then((response: AxiosResponse) => {
+      photosReviewsData.value = response.data;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+}
+
 function numberOfPhotosWithReview(val: number | null) {
-  if (!filterIsSelected.value) {
-    return photosData.value.length;
-  }
-  if (photosData.value.length === 0) {
+  if (!photosReviewsData.value || photosReviewsData.value.length === 0) {
     return 0;
   }
-  if (!photosData.value) {
-    return 0;
+
+  // get all reviews for this album's photos with their average results and who reviews what
+  interface ReviewResult {
+    photo_id: number;
+    review_result: number | null;
   }
-  return photosData.value.filter((x) => x.review_results === val).length;
+  const photoIds = photosData.value.map((photo) => photo.id);
+  var results: ReviewResult[] = [];
+  photoIds.forEach((photoId) => {
+    const photoReviews = getPhotoReviews(photoId);
+    if (photoReviews.length === 0) {
+      results.push({ photo_id: photoId, review_result: null });
+    } else {
+      const review_result = getOverallResult(photoId);
+      results.push({ photo_id: photoId, review_result: review_result });
+    }
+  });
+
+  return results.filter((x) => x.review_result === val).length;
+}
+function getPhotoReviews(photoId: number) {
+  return photosReviewsData.value.filter((x) => x.photo_id === photoId);
+}
+function getOverallResult(photoId: number) {
+  const reviews = getPhotoReviews(photoId);
+  const reviewIds = reviews.map((review) => review.review_id);
+  const user = localStorage.user;
+  const userId = user ? JSON.parse(user).data.id : null;
+  const userIdInt = userId ? parseInt(userId) : 0;
+  const userReview = reviews.find((review) => review.user_id === userIdInt);
+  // if user has not made a review, return null
+  if (!userReview || userReview.review_id === null) {
+    return null;
+  } else if (reviewIds.every((value) => value === 1)) {
+    return 1;
+  } else if (reviewIds.every((value) => value === 3)) {
+    return 3;
+  } else {
+    return 2;
+  }
 }
 
 // photo review
@@ -411,17 +472,26 @@ function updatePhoto(photo: Photo) {
 
 function closeReviewPhoto() {
   isShowingPhoto.value = false;
-  // photoShowing.value = {};
+  loadReviews();
 }
 
 // style
 function getPhotoClass(photo: Photo) {
   let result = '';
-  const filterOfPhoto = filterReview.value.find((x) => x.value === photo.review_results);
-  if (!filterIsSelected.value) {
-    return result;
-  } else if (!filterOfPhoto || !filterOfPhoto.selected) {
-    result += ' opacity-10 saturate-0';
+  if (selectedFilterIds.value.length > 0) {
+    // if photo has no review, and if filter has null,
+    // or if photo overall review matches selected filter, show photo
+    let overallReview = getOverallResult(photo.id);
+    if (!overallReview) {
+      const filterNull = filterReview.value.find((x) => x.value === null);
+      if (filterNull && !filterNull.selected) {
+        return 'opacity-10 saturate-0';
+      }
+    } else {
+      if (!selectedFilterIds.value.includes(overallReview)) {
+        result += ' opacity-10 saturate-0';
+      }
+    }
   }
   return result;
 }
