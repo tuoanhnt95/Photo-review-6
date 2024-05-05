@@ -107,23 +107,21 @@
             :class="{ 'icon-circle-check-selected': selectedPhotoIds.includes(photo.id) }"
             @click.prevent="toggleSelectPhoto(photo.id)"
           />
-          <div
-            v-if="isShowingResult"
-            class="container-photo-reviews-all divide-x divide-solid divide-gray-700"
-          >
+          <div v-if="isShowingResult" class="absolute top-0 right-1 text-violet-600">
+            <font-awesome-icon :icon="`fa-solid fa-${getOverallIcon(photo.id)}`" />
+          </div>
+          <div v-if="isShowingResult" class="container-photo-reviews-all">
             <div v-for="review in filterReview.slice(0, 3)" :key="review.icon">
               <div class="container-photo-review bg-black bg-opacity-50">
                 <font-awesome-icon
                   :icon="`fa-solid fa-${review.icon}`"
                   :class="{
                     'opacity-0': numberOfReviewsWithResult(photo.id, review.value) === 0,
-                    'text-violet-600': photo.review_results === review.value,
                   }"
                 />
                 <div
                   :class="{
                     'opacity-0': numberOfReviewsWithResult(photo.id, review.value) === 0,
-                    'text-violet-600': photo.review_results === review.value,
                   }"
                 >
                   {{ numberOfReviewsWithResult(photo.id, review.value) }}
@@ -500,6 +498,13 @@ function getOverallReview(photoId: number) {
   }
 }
 
+function getOverallIcon(photoId: number) {
+  const reviewInFilter =
+    filterReview.value.find((x) => x.value === getOverallReview(photoId)) || null;
+
+  return reviewInFilter ? reviewInFilter.icon : 'exclamation';
+}
+
 const currentUserId = computed(() => {
   const user = localStorage.user;
   const userId = user ? JSON.parse(user).data.id : null;
@@ -597,6 +602,10 @@ function getPhotoClass(photo: Photo) {
   z-index: 10;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  /* backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  background-blend-mode: overlay;
+  mix-blend-mode: lighten; */
 }
 
 .container-photo-review {
