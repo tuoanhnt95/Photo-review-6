@@ -69,12 +69,13 @@ const $emit = defineEmits(['close-create-album', 'added-new-album']);
 
 const albumName = ref('');
 const albumExpiryDate = ref(new Date());
-const invitees = ref([]);
+const invitees = ref('');
 // invitees: invitees.value,
 const createAlbum = async () => {
   createAlbumApi({
     name: albumName.value,
     expiry_date: albumExpiryDate.value,
+    invitees: invitees.value,
   })
     .then((response: AxiosResponse) => {
       closeCreateAlbum();
@@ -88,7 +89,7 @@ const createAlbum = async () => {
 const closeCreateAlbum = () => {
   albumName.value = '';
   albumExpiryDate.value = new Date();
-  invitees.value = [];
+  invitees.value = '';
   $emit('close-create-album');
 };
 </script>

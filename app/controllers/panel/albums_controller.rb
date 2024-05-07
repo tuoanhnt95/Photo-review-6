@@ -36,6 +36,12 @@ module Panel
 
       if album.save
         AlbumUser.create(user: current_user, album:)
+        # if invitees are current users, create an Album_User record and send an email to them
+        params[:invitees].split(',').each do |invitee|
+          UserNotifierMailer.send_album_invitation_email(album, invitee).deliver
+          user = User.find_by(email: invitee)
+          AlbumUser.create(user: user, album: album) unless user.nil?
+        end
         render json: album, status: :created
       else
         render json: album.errors, status: :unprocessable_entity

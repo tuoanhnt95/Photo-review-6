@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Album Invitation</title>
+</head>
+<body>
+  <h1>Hello, <%= @user_name %>!</h1>
+  <p>You have been invited by <%= @album_owner_email %> to review the album "<%= @album.name %>":</p>
+  <a href="<%= @album_url %>">View Album</a>
+  <%# <p>If you have any questions, feel free to reply to this email.</p> %>
+  <p>Best,</p>
+  <p>Pickture Team</p>
+</body>
+</html>

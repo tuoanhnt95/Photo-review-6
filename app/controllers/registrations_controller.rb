@@ -10,6 +10,10 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def register_success(resource)
+    p 'register_success'
+    p resource
+    p resource.email
+    UserNotifierMailer.send_signup_email(resource).deliver
     render jsonapi: resource
   end
 
