@@ -42,7 +42,6 @@
 
       <AlbumCreate
         v-if="isCreatingAlbum"
-        :albums="albums"
         class="absolute top-[-200px] left-0 w-full z-10"
         @close-create-album="isCreatingAlbum = false"
         @added-new-album="(newAlbum) => addAlbum(newAlbum)"
@@ -65,6 +64,7 @@ interface Album {
   id: number;
   name: string;
   expiry_date: Date;
+  invitees: string;
   cover: string;
   last_upload_batch: number;
 }
