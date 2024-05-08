@@ -76,6 +76,7 @@ module Panel
 
     # DELETE /albums/:album_id/photos/:id
     def destroy
+      return redirect_to panel_path if current_user != @album.user
       public_id = @photo.image
       @photo.destroy
       folder = 'photo_review/'
@@ -84,6 +85,7 @@ module Panel
 
     # DELETE /photos/delete_photos
     def destroy_multiple
+      return redirect_to panel_path if current_user != @album.user
       params[:photo_ids].each do |photo_id|
         photo = Photo.find(photo_id)
         public_id = photo.image

@@ -76,8 +76,9 @@
           <div class="flex justify-between w-20">
             <font-awesome-icon icon="fa-solid fa-share-from-square" />
             <font-awesome-icon
-              icon="fa-regular fa-trash-can"
-              class="mr-2"
+              v-if="isAlbumOwner"
+              icon="fa-solid fa-trash-can"
+              class="mr-4"
               @click.prevent="deletePhotos"
             />
           </div>
@@ -397,6 +398,10 @@ async function saveEditAlbum() {
 }
 
 const deleteAlbum = async (albumName: string, albumId: number) => {
+  if (!isAlbumOwner.value) {
+    return;
+  }
+
   if (confirm(`Delete album "${albumName}"?`) === false) {
     return;
   }
@@ -425,6 +430,9 @@ function cancelSelectPhotos() {
 }
 
 async function deletePhotos() {
+  if (!isAlbumOwner.value) {
+    return;
+  }
   let message = '';
   if (selectedPhotoIds.value.length === 1) {
     const selectedPhoto = photos.value.find((x: Photo) => x.id === selectedPhotoIds.value[0]);
