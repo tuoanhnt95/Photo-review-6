@@ -29,11 +29,6 @@
                   </div>
                   <div class="pl-1 text-xs text-slate-400">Expire: {{ album.expiry_date }}</div>
                 </RouterLink>
-                <font-awesome-icon
-                  icon="fa-solid fa-x"
-                  class="absolute top-1 right-1 z-50 text-slate-400"
-                  @click="deleteAlbum(album.name, album.id)"
-                />
               </div>
             </div>
           </div>
@@ -58,7 +53,7 @@ import { Cloudinary } from '@cloudinary/url-gen';
 import { AdvancedImage } from '@cloudinary/vue';
 import type { AxiosResponse } from 'axios';
 import AlbumCreate from '../../components/panel/AlbumCreate.vue';
-import { getAlbumsApi, deleteAlbumApi } from '@/apis/panel.api';
+import { getAlbumsApi } from '@/apis/panel.api';
 
 interface Album {
   id: number;
@@ -94,24 +89,6 @@ const getCloudinaryImage = (publicId: string) => {
 };
 
 const isCreatingAlbum = ref(false);
-
-const deleteAlbum = async (albumName: string, albumId: number) => {
-  if (confirm(`Delete album "${albumName}"?`) === false) {
-    return;
-  }
-  deleteAlbumApi(albumId)
-    .then(() => {
-      removeAlbum(albumId);
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-};
-
-const removeAlbum = (albumId: number) => {
-  const index = albumsData.value.findIndex((alb: Album) => alb.id === albumId);
-  albumsData.value.splice(index, 1);
-};
 
 const addAlbum = (album: Album) => {
   album.cover = '';

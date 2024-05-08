@@ -169,28 +169,57 @@
     <div
       v-if="contextMenuIsOpen"
       :album="album"
-      class="absolute top-16 right-0 w-40 z-10 bg-white rounded-md border border-red-100 shadow-lg border-t"
+      id="context-menu"
       @click.prevent="toggleContextMenu"
       @toogle-list-view="selectAlbumViewOption"
     >
-      <div class="container-context-menu px-2 py-2 border-b-4" @click.prevent="startEditingAlbum">
+      <div
+        v-if="isAlbumOwner"
+        class="container-context-menu container-context-border"
+        @click.prevent="startEditingAlbum"
+      >
         <div></div>
         <div>Edit</div>
         <font-awesome-icon icon="fa-solid fa-pen" class="self-center mr-2" />
       </div>
+      <div class="container-context-border">
+        <div
+          v-for="(opt, i) in albumViewOptions"
+          :key="opt.name"
+          class="container-context-menu"
+          :class="[
+            i === albumViewOptions.length - 1
+              ? 'container-context-border'
+              : 'container-context-border-sub',
+          ]"
+          @click.prevent="selectAlbumViewOption(i)"
+        >
+          <font-awesome-icon
+            :class="{ 'opacity-0': i !== selectedAlbumViewIndex }"
+            icon="fa-solid fa-check"
+          />
+          <div>{{ opt.name }}</div>
+          <font-awesome-icon :icon="opt.icon" class="mr-2" />
+        </div>
+      </div>
+      <div class="container-context-menu" :class="{ 'container-context-border': isAlbumOwner }">
+        <div></div>
+        <div>Share</div>
+        <font-awesome-icon icon="fa-solid fa-user-plus" class="self-center mr-2" />
+      </div>
+      <div v-if="isAlbumOwner" class="container-context-menu container-context-border">
+        <div></div>
+        <div>Manage Access</div>
+        <font-awesome-icon icon="fa-solid fa-user-group" class="self-center mr-2" />
+      </div>
       <div
-        v-for="(opt, i) in albumViewOptions"
-        :key="opt.name"
-        class="container-context-menu px-2 py-2"
-        :class="{ 'bg-slate-200': i === selectedAlbumViewIndex }"
-        @click.prevent="selectAlbumViewOption(i)"
+        v-if="isAlbumOwner"
+        class="container-context-menu"
+        @click.prevent="deleteAlbum(album.name, album.id)"
       >
-        <font-awesome-icon
-          :class="{ 'opacity-0': i !== selectedAlbumViewIndex }"
-          icon="fa-solid fa-check"
-        />
-        <div>{{ opt.name }}</div>
-        <font-awesome-icon :icon="opt.icon" class="mr-2" />
+        <div></div>
+        <div>Delete</div>
+        <font-awesome-icon icon="fa-solid fa-trash-can" class="self-center mr-2" />
       </div>
     </div>
 
@@ -216,7 +245,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeMount, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { Cloudinary } from '@cloudinary/url-gen';
 import { AdvancedImage } from '@cloudinary/vue';
 import { byAngle } from '@cloudinary/url-gen/actions/rotate';
@@ -224,6 +253,7 @@ import type { AxiosResponse } from 'axios';
 import {
   showAlbumApi,
   updateAlbumApi,
+  deleteAlbumApi,
   getPhotosApi,
   deletePhotosApi,
   getReviewsApi,
@@ -232,12 +262,17 @@ import {
 // components
 import Photo from '../../components/panel/Photo.vue';
 import PhotoUpload from '../../components/panel/PhotoUpload.vue';
+import { useAuthStore } from '@/stores/auth.store';
 
 const route = useRoute();
+const router = useRouter();
+const authStore = useAuthStore();
+const { user } = authStore;
 
 interface Album {
   id: number;
   name: string;
+  user_id: number;
   last_upload_batch: number;
   expiry_date: Date;
 }
@@ -262,9 +297,18 @@ interface PhotoUserReview {
   updated_at: Date;
 }
 
+const currentUserId = computed(() => {
+  if (!user || !user.data) {
+    return 0;
+  }
+  const result = String((user.data as { id: number; type: string; attributes: {} }).id);
+  return parseInt(result);
+});
+
 const album = ref<Album>({
   id: -1,
   name: '',
+  user_id: 0,
   last_upload_batch: 0,
   expiry_date: new Date(),
 });
@@ -319,6 +363,10 @@ function selectAlbumViewOption(index: number) {
 // TODO: Add option to filter by date, name, number of photos, and expiry date
 // TODO: Add option to search by name
 
+const isAlbumOwner = computed(() => {
+  return album.value.user_id === currentUserId.value;
+});
+
 function startEditingAlbum() {
   isEditing.value = true;
   albumName.value = album.value.name;
@@ -332,7 +380,11 @@ function cancelEditAlbum() {
 }
 
 async function saveEditAlbum() {
-  updateAlbumApi(albumId.value, { name: albumName.value, expiry_date: albumExpiryDate.value })
+  updateAlbumApi(albumId.value, {
+    name: albumName.value,
+    expiry_date: albumExpiryDate.value,
+    invitees: '',
+  })
     .then(() => {
       album.value.name = albumName.value;
       album.value.expiry_date = albumExpiryDate.value;
@@ -342,6 +394,19 @@ async function saveEditAlbum() {
       console.log(error);
     });
 }
+
+const deleteAlbum = async (albumName: string, albumId: number) => {
+  if (confirm(`Delete album "${albumName}"?`) === false) {
+    return;
+  }
+  deleteAlbumApi(albumId)
+    .then(() => {
+      router.push({ name: 'Albums' });
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+};
 
 // Select photos for option
 const selectedPhotoIds = ref<number[]>([]);
@@ -505,16 +570,10 @@ function getOverallIcon(photoId: number) {
   return reviewInFilter ? reviewInFilter.icon : 'exclamation';
 }
 
-const currentUserId = computed(() => {
-  const user = localStorage.user;
-  const userId = user ? JSON.parse(user).data.id : null;
-  return userId ? parseInt(userId) : 0;
-});
-
 // photo review
 const isShowingPhoto = ref(false);
 const photoShowing = ref<Photo>();
-// const photoShowing = ref<Photo | null>();
+
 function showPhoto(photoId: Number) {
   photoShowing.value = photosData.value.find((x) => x.id === photoId);
   isShowingPhoto.value = true;
@@ -615,11 +674,38 @@ function getPhotoClass(photo: Photo) {
   align-items: center;
 }
 
+/* Context menu */
+#context-menu {
+  position: absolute;
+  top: 4rem;
+  right: 0;
+  width: 12rem;
+  z-index: 10;
+  background-color: white;
+  border-radius: 0.25rem;
+  border-width: 1px;
+}
+
 .container-context-menu {
   display: grid;
   grid-template-columns: 1fr 4fr 1fr;
   align-items: center;
+  padding: 0.5rem;
+  border-style: solid;
+  border-color: var(--slate-200);
   cursor: pointer;
   color: var(--slate-800);
+}
+
+.container-context-menu:hover {
+  background-color: var(--slate-200);
+}
+
+.container-context-border {
+  border-bottom-width: 0.5rem;
+}
+
+.container-context-border-sub {
+  border-bottom-width: 0.125rem;
 }
 </style>

@@ -20,6 +20,7 @@
   --vt-c-text-dark-1: var(--vt-c-white);
   --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
 
+  --slate-200: rgb(235 238 242);
   --slate-300: rgb(209 213 219);
   --slate-600: rgb(75 85 99);
   --slate-800: rgb(30 41 59);
