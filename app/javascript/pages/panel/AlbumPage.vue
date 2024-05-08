@@ -1,5 +1,6 @@
 <template>
-  <div class="absolute top-0 left-0 w-full h-full">
+  <!-- <div class="absolute top-0 left-0 w-full h-full"> -->
+  <div class="w-full h-full">
     <div
       class="relative w-full"
       :class="{ 'opacity-10 saturate-0': isUploadingPhoto || isShowingPhoto }"
