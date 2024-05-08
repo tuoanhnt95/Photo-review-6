@@ -25,7 +25,7 @@ export const updateAlbumApi = (id: number, album: album): Promise<AxiosResponse>
 };
 
 export const deleteAlbumApi = (id: number): Promise<AxiosResponse> => {
-  return http.delete(`albums/${id}`);
+  return http.delete(`${id}`);
 };
 
 // Photo
