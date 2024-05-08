@@ -1,6 +1,6 @@
 <template>
   <ul class="navbar-nav">
-    <li class="nav-item">Home</li>
+    <li class="nav-item" @click="goToHome">Home</li>
     <li class="nav-item">Settings</li>
     <li class="nav-item" @click="logout">Logout</li>
   </ul>
@@ -12,5 +12,9 @@ const authStore = useAuthStore();
 
 const logout = () => {
   authStore.logout();
+};
+
+const goToHome = () => {
+  window.location.href = '/panel';
 };
 </script>
