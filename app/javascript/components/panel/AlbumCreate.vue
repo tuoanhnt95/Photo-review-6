@@ -19,6 +19,7 @@
       <input
         v-model="invitees"
         type="text"
+        required
         placeholder=" reviewer@gmail.com,..."
         class="w-3/4 pl-1 rounded text-lg text-black"
       />
