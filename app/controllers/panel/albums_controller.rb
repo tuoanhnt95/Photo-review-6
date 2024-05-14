@@ -27,7 +27,7 @@ module Panel
       return redirect_to panel_path if @album.nil?
 
       respond_to do |format|
-        format.html { render template: 'layouts/panel'} # or whatever to simply render html
+        format.html { render template: 'layouts/panel'}
         format.json { render json: album_result(@album) }
       end
     end
