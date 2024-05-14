@@ -59,7 +59,7 @@ interface Album {
   id: number;
   name: string;
   expiry_date: Date;
-  invitees: string;
+  invitees: string[];
   cover: string;
   last_upload_batch: number;
 }

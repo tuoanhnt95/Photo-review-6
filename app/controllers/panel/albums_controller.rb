@@ -14,8 +14,7 @@ module Panel
 
       unless albums.empty?
         albums.each do |album|
-          result = album_result(album)
-          results.push(result)
+          results.push(album.attach_cover)
         end
       end
 
@@ -28,7 +27,7 @@ module Panel
 
       respond_to do |format|
         format.html { render template: 'layouts/panel'}
-        format.json { render json: album_result(@album) }
+        format.json { render json: @album.attach_cover }
       end
     end
 
@@ -36,15 +35,11 @@ module Panel
     def create
       album = Album.new(album_params)
       album.user = current_user
+      invitees = sanitize_invitees_email unless params[:invitees].nil?
 
       if album.save
         AlbumUser.create(user: current_user, album:)
-        # if invitees are current users, create an Album_User record and send an email to them
-        params[:invitees].split(',').each do |invitee|
-          UserNotifierMailer.send_album_invitation_email(album, invitee).deliver
-          user = User.find_by(email: invitee)
-          AlbumUser.create(user: user, album: album) unless user.nil?
-        end
+        album.share(invitees, true) unless invitees.nil?
         render json: album, status: :created
       else
         render json: album.errors, status: :unprocessable_entity
@@ -56,12 +51,13 @@ module Panel
       # only the owner can update the album
       return redirect_to panel_path if @album.user != current_user
 
+      invitees = sanitize_invitees_email unless params[:invitees].nil?
+
       if @album.update(album_params)
         render json: @album
-        # redirect_to album_url(@album), notice: "Album was successfully updated."
+        @album.share(invitees, false) unless invitees.nil?
       else
         render json: @album.errors, status: :unprocessable_entity
-        # render :edit, status: :unprocessable_entity
       end
     end
 
@@ -91,12 +87,12 @@ module Panel
       render(json: { error: 'Unauthorized' }, status: :unauthorized) && return
     end
 
-    def album_result(album)
-      album_cover = ''
-      album_cover = album.photos.first.image unless album.photos.first.nil?
-      album_result = {}.merge(album.attributes)
-      album_result[:cover] = album_cover
-      album_result
+    def sanitize_invitees_email
+      result = []
+      params[:invitees].each do |invitee|
+        result.push(invitee) if invitee != '' && invitee.match(URI::MailTo::EMAIL_REGEXP)
+      end
+      result
     end
 
     def set_album
@@ -113,7 +109,8 @@ module Panel
 
     # Only allow a list of trusted parameters through.
     def album_params
-      params.require(:album).permit(:name, :expiry_date, :last_update_batch)
+      # params.require(:album).permit(:name, :expiry_date, :last_update_batch, :invitees => []) # rubocop:disable Style/HashSyntax
+      params.require(:album).permit(:name, :expiry_date, :last_update_batch, invitees: [])
     end
   end
 end

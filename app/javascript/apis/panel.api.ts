@@ -5,7 +5,7 @@ import { http } from '@/services/http.service';
 interface album {
   name: string;
   expiry_date: Date;
-  invitees: string;
+  invitees: string[];
 }
 
 export const getAlbumsApi = (): Promise<AxiosResponse> => {
