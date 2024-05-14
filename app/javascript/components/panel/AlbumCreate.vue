@@ -4,6 +4,7 @@
       <input
         v-model="albumName"
         type="text"
+        required
         placeholder="Album name"
         class="w-full px-2 py-1 text-xl text-black rounded"
       />
@@ -18,8 +19,9 @@
       <label for="invitee" class="self-center text-lg">Invitee</label>
       <input
         v-model="invitees"
-        type="text"
-        required
+        type="email"
+        multiple
+        pattern="^([\w+-.%]+@[\w-.]+\.[A-Za-z]{2,4},*[\W]*)+$"
         placeholder=" reviewer@gmail.com,..."
         class="w-3/4 pl-1 rounded text-lg text-black"
       />
@@ -70,8 +72,7 @@ const $emit = defineEmits(['close-create-album', 'added-new-album']);
 
 const albumName = ref('');
 const albumExpiryDate = ref(new Date());
-const invitees = ref('');
-// invitees: invitees.value,
+const invitees = ref([]);
 const createAlbum = async () => {
   createAlbumApi({
     name: albumName.value,
@@ -90,7 +91,7 @@ const createAlbum = async () => {
 const closeCreateAlbum = () => {
   albumName.value = '';
   albumExpiryDate.value = new Date();
-  invitees.value = '';
+  invitees.value = [];
   $emit('close-create-album');
 };
 </script>

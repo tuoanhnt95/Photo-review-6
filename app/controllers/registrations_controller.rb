@@ -10,10 +10,10 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def register_success(resource)
-    p 'register_success'
-    p resource
-    p resource.email
     UserNotifierMailer.send_signup_email(resource).deliver
+    # TODO
+    # check if the user email is shared in the invitees list of any album?
+    # registration email should have the link with the album shared with the user
     render jsonapi: resource
   end
 

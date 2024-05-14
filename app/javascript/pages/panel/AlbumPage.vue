@@ -6,23 +6,16 @@
       :class="{ 'opacity-10 saturate-0': isUploadingPhoto || isShowingPhoto }"
     >
       <div class="flex justify-between mx-8 mt-4">
-        <div v-if="!isEditing" class="label-text">
+        <div class="label-text">
           {{ album.name }}
         </div>
-        <div v-else class="label-text">
-          <input type="text" v-model="albumName" class="pl-2 rounded text-black" />
-        </div>
 
-        <div v-if="!isEditing" class="flex">
+        <div class="flex">
           <font-awesome-icon
             icon="fa-solid fa-ellipsis"
             class="m-2 text-xl text-slate-400"
             @click.prevent="toggleContextMenu"
           />
-        </div>
-        <div v-else class="flex space-x-6 self-center">
-          <font-awesome-icon icon="fa-solid fa-floppy-disk" @click.prevent="saveEditAlbum()" />
-          <font-awesome-icon icon="fa-solid fa-x" @click.prevent="cancelEditAlbum()" />
         </div>
       </div>
       <!-- Filter -->
@@ -30,11 +23,8 @@
         <div v-if="selectedPhotoIds.length === 0" class="flex justify-between items-center h-full">
           <div class="flex items-center">
             <font-awesome-icon icon="fa-solid fa-calendar-days" class="mr-2 self-center" />
-            <div v-if="!isEditing" class="text-slate-400">
+            <div class="text-slate-400">
               {{ formatDate(album.expiry_date) }}
-            </div>
-            <div v-else>
-              <input type="date" class="text-black" v-model="albumExpiryDate" />
             </div>
           </div>
           <div
@@ -209,11 +199,15 @@
         <div>Share</div>
         <font-awesome-icon icon="fa-solid fa-user-plus" class="self-center mr-2" />
       </div>
-      <div v-if="isAlbumOwner" class="container-context-menu container-context-border">
+      <!-- <div
+        v-if="isAlbumOwner"
+        class="container-context-menu container-context-border"
+        @click.prevent=""
+      >
         <div></div>
         <div>Manage Access</div>
         <font-awesome-icon icon="fa-solid fa-user-group" class="self-center mr-2" />
-      </div>
+      </div> -->
       <div
         v-if="isAlbumOwner"
         class="container-context-menu"
@@ -224,6 +218,17 @@
         <font-awesome-icon icon="fa-solid fa-trash-can" class="self-center mr-2" />
       </div>
     </div>
+
+    <AlbumEdit
+      v-if="isEditing"
+      :albumId="album.id"
+      :albumName="album.name"
+      :albumExpiryDate="album.expiry_date"
+      :albumInvitees="album.invitees"
+      class="absolute top-[-200px] left-0 w-full z-10"
+      @close-edit-album="isEditing = false"
+      @edited-album="(editedAlbum) => updateAlbum(editedAlbum)"
+    />
 
     <PhotoUpload
       v-if="isUploadingPhoto"
@@ -254,7 +259,6 @@ import { byAngle } from '@cloudinary/url-gen/actions/rotate';
 import type { AxiosResponse } from 'axios';
 import {
   showAlbumApi,
-  updateAlbumApi,
   deleteAlbumApi,
   getPhotosApi,
   deletePhotosApi,
@@ -262,6 +266,7 @@ import {
 } from '@/apis/panel.api';
 
 // components
+import AlbumEdit from '../../components/panel/AlbumEdit.vue';
 import Photo from '../../components/panel/Photo.vue';
 import PhotoUpload from '../../components/panel/PhotoUpload.vue';
 import { useAuthStore } from '@/stores/auth.store';
@@ -275,6 +280,7 @@ interface Album {
   id: number;
   name: string;
   user_id: number;
+  invitees: string[];
   last_upload_batch: number;
   expiry_date: Date;
 }
@@ -311,6 +317,7 @@ const album = ref<Album>({
   id: -1,
   name: '',
   user_id: 0,
+  invitees: [],
   last_upload_batch: 0,
   expiry_date: new Date(),
 });
@@ -319,6 +326,7 @@ onBeforeMount(async () => {
   showAlbumApi(Number(route.params.id))
     .then((response: AxiosResponse) => {
       album.value = response.data;
+      // album.value.expiry_date = new Date(response.data.expiry_date);
       // TODO: improve, not bug - fix album date format to be YYYY-MM-DD when reloading page
     })
     .catch((error) => {
@@ -341,9 +349,19 @@ const albumId = computed(() => {
 });
 
 const isUploadingPhoto = ref(false);
-const isEditing = ref(false);
 const albumName = ref('');
 const albumExpiryDate = ref(new Date());
+
+// Edit album
+const isEditing = ref(false);
+function startEditingAlbum() {
+  isEditing.value = true;
+}
+
+function updateAlbum(editedAlbum: Album) {
+  album.value = editedAlbum;
+  isEditing.value = false;
+}
 
 // Context menu
 const contextMenuIsOpen = ref(false);
@@ -369,33 +387,33 @@ const isAlbumOwner = computed(() => {
   return album.value.user_id === currentUserId.value;
 });
 
-function startEditingAlbum() {
-  isEditing.value = true;
-  albumName.value = album.value.name;
-  albumExpiryDate.value = album.value.expiry_date;
-}
+// function startEditingAlbum() {
+//   isEditing.value = true;
+//   albumName.value = album.value.name;
+//   albumExpiryDate.value = album.value.expiry_date;
+// }
 
-function cancelEditAlbum() {
-  albumName.value = '';
-  albumExpiryDate.value = new Date();
-  isEditing.value = false;
-}
+// function cancelEditAlbum() {
+//   albumName.value = '';
+//   albumExpiryDate.value = new Date();
+//   isEditing.value = false;
+// }
 
-async function saveEditAlbum() {
-  updateAlbumApi(albumId.value, {
-    name: albumName.value,
-    expiry_date: albumExpiryDate.value,
-    invitees: '',
-  })
-    .then(() => {
-      album.value.name = albumName.value;
-      album.value.expiry_date = albumExpiryDate.value;
-      cancelEditAlbum();
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-}
+// async function saveEditAlbum() {
+//   updateAlbumApi(albumId.value, {
+//     name: albumName.value,
+//     expiry_date: albumExpiryDate.value,
+//     invitees: [],
+//   })
+//     .then(() => {
+//       album.value.name = albumName.value;
+//       album.value.expiry_date = albumExpiryDate.value;
+//       cancelEditAlbum();
+//     })
+//     .catch((error) => {
+//       console.log(error);
+//     });
+// }
 
 const deleteAlbum = async (albumName: string, albumId: number) => {
   if (!isAlbumOwner.value) {
