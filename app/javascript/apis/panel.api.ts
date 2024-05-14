@@ -17,8 +17,7 @@ export const createAlbumApi = (album: album): Promise<AxiosResponse> => {
 };
 
 export const showAlbumApi = (id: number): Promise<AxiosResponse> => {
-  return http.get(`${id}.json`);
-  // not 'albums/${id}' because of Rails' default behavior params_wrapper.
+  return http.get(`${id}.json`); // not 'albums/${id}' because of Rails' default behavior params_wrapper.
 };
 
 export const updateAlbumApi = (id: number, album: album): Promise<AxiosResponse> => {
