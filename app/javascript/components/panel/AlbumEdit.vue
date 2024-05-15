@@ -106,7 +106,7 @@ const saveEditAlbum = async () => {
     invitees: invitees.value,
   })
     .then((response: AxiosResponse) => {
-      $emit('edited-album', response.data);
+      $emit('edited-album', response.data.album, response.data.invitees_were_removed);
     })
     .catch((error) => {
       console.log(error);

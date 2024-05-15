@@ -3,7 +3,7 @@
 module Panel
   class AlbumsController < ApplicationController
     before_action :authenticate_user!
-    before_action :set_album, only: %i[check_owner show update destroy]
+    before_action :set_album, only: %i[check_owner show update destroy list_removed_invitees list_added_invitees]
     before_action :check_authorized_user, only: %i[show]
     before_action :check_owner, only: %i[update destroy]
 
@@ -51,11 +51,23 @@ module Panel
       # only the owner can update the album
       return redirect_to panel_path if @album.user != current_user
 
-      invitees = sanitize_invitees_email unless params[:invitees].nil?
+      # if there are newly removed invitees and the user is not the owner, then return
+      removed_invitees = list_removed_invitees
+      if @album.user != current_user && !removed_invitees.empty?
+        render(json: { error: 'You cannot remove invitee.' }, status: :unauthorized) && return
+      end
+
+      # check if there are newly added invitees
+      invitees = list_added_invitees
 
       if @album.update(album_params)
-        render json: @album
-        @album.share(invitees, false) unless invitees.nil?
+        if removed_invitees.empty?
+          render json: @album
+        else
+          @album.remove_invitees(removed_invitees)
+          render json: { album: @album, invitees_were_removed: true }
+        end
+        @album.share(invitees, false) unless invitees.empty?
       else
         render json: @album.errors, status: :unprocessable_entity
       end
@@ -87,9 +99,22 @@ module Panel
       render(json: { error: 'Unauthorized' }, status: :unauthorized) && return
     end
 
-    def sanitize_invitees_email
+    def list_removed_invitees
+      return [] if @album.invitees.empty?
+
+      @album.invitees - params[:invitees]
+    end
+
+    def list_added_invitees
+      return [] if params[:invitees].empty?
+
+      added_invitees = params[:invitees] - @album.invitees
+      sanitize_invitees_email(added_invitees) unless added_invitees.empty?
+    end
+
+    def sanitize_invitees_email(emails = [])
       result = []
-      params[:invitees].each do |invitee|
+      emails.each do |invitee|
         result.push(invitee) if invitee != '' && invitee.match(URI::MailTo::EMAIL_REGEXP)
       end
       result
@@ -109,7 +134,6 @@ module Panel
 
     # Only allow a list of trusted parameters through.
     def album_params
-      # params.require(:album).permit(:name, :expiry_date, :last_update_batch, :invitees => []) # rubocop:disable Style/HashSyntax
       params.require(:album).permit(:name, :expiry_date, :last_update_batch, invitees: [])
     end
   end
