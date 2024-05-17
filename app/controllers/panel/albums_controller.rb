@@ -4,8 +4,7 @@ module Panel
   class AlbumsController < ApplicationController
     before_action :authenticate_user!
     before_action :set_album,
-                  only: %i[check_owner show update add_invitees destroy list_removed_invitees list_added_invitees
-                           handle_removed_invitees]
+                  only: %i[check_owner show update add_invitees destroy list_removed_invitees list_added_invitees]
     before_action :check_authorized_user, only: %i[show add_invitees]
     before_action :check_owner, only: %i[update destroy]
 
@@ -57,7 +56,8 @@ module Panel
       added_invitees = list_added_invitees(invitees)
 
       if @album.update(create_update_album(invitees))
-        render json: handle_removed_invitees(removed_invitees)
+        @album.remove_invitees(removed_invitees) unless removed_invitees.empty?
+        render json: @album
         @album.share(added_invitees, false) unless added_invitees.empty?
       else
         render json: @album.errors, status: :unprocessable_entity
@@ -109,13 +109,6 @@ module Panel
       return [] if sanitized_invitees.empty?
 
       sanitized_invitees - @album.invitees
-    end
-
-    def handle_removed_invitees(removed_invitees = [])
-      return { album: @album, invitees_were_removed: false } if removed_invitees.empty?
-
-      @album.remove_invitees(removed_invitees)
-      { album: @album, invitees_were_removed: true }
     end
 
     def sanitize_invitees_email(emails = [])

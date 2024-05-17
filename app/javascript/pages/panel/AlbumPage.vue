@@ -218,9 +218,7 @@
       :albumInvitees="album.invitees"
       class="absolute top-[-200px] left-0 w-full z-10"
       @close-edit-album="isEditing = false"
-      @edited-album="
-        (editedAlbum, invitees_were_removed) => updateAlbum(editedAlbum, invitees_were_removed)
-      "
+      @edited-album="(editedAlbum) => updateAlbum(editedAlbum)"
     />
 
     <PhotoUpload
@@ -349,10 +347,8 @@ function startEditingAlbum() {
   isEditing.value = true;
 }
 
-function updateAlbum(editedAlbum: Album, inviteesWereRemoved: boolean) {
-  if (inviteesWereRemoved) {
-    loadReviews();
-  }
+function updateAlbum(editedAlbum: Album) {
+  loadReviews();
   album.value = editedAlbum;
   isEditing.value = false;
 }
