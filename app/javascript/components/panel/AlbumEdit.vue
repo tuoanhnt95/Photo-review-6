@@ -85,7 +85,7 @@ const props = defineProps({
 
 const name = ref(props.albumName);
 const expiryDate = ref(props.albumExpiryDate);
-const invitees = ref(props.albumInvitees);
+const invitees = ref([...props.albumInvitees]);
 const newInvitee = ref('');
 
 const addInvitee = () => {

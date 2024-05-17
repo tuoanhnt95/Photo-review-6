@@ -3,8 +3,9 @@
 module Panel
   class AlbumsController < ApplicationController
     before_action :authenticate_user!
-    before_action :set_album, only: %i[check_owner show update destroy]
-    before_action :check_authorized_user, only: %i[show]
+    before_action :set_album,
+                  only: %i[check_owner show update add_invitees destroy list_removed_invitees list_added_invitees]
+    before_action :check_authorized_user, only: %i[show add_invitees]
     before_action :check_owner, only: %i[update destroy]
 
     # GET /albums or /albums.json
@@ -35,11 +36,11 @@ module Panel
     def create
       album = Album.new(album_params)
       album.user = current_user
-      invitees = sanitize_invitees_email unless params[:invitees].nil?
+      invitees = sanitize_invitees_email(params[:album][:invitees])
 
       if album.save
         AlbumUser.create(user: current_user, album:)
-        album.share(invitees, true) unless invitees.nil?
+        album.share(invitees, true) unless invitees.empty?
         render json: album, status: :created
       else
         render json: album.errors, status: :unprocessable_entity
@@ -48,14 +49,28 @@ module Panel
 
     # PATCH/PUT /albums/1 or /albums/1.json
     def update
-      # only the owner can update the album
-      return redirect_to panel_path if @album.user != current_user
+      removed_invitees = list_removed_invitees
 
-      invitees = sanitize_invitees_email unless params[:invitees].nil?
+      # check if there are newly added invitees
+      invitees = sanitize_invitees_email(params[:album][:invitees])
+      added_invitees = list_added_invitees(invitees)
 
-      if @album.update(album_params)
+      if @album.update(create_update_album(invitees))
+        @album.remove_invitees(removed_invitees) unless removed_invitees.empty?
         render json: @album
-        @album.share(invitees, false) unless invitees.nil?
+        @album.share(added_invitees, false) unless added_invitees.empty?
+      else
+        render json: @album.errors, status: :unprocessable_entity
+      end
+    end
+
+    def add_invitees
+      invitees = sanitize_invitees_email(params[:invitees])
+      added_invitees = list_added_invitees(invitees)
+
+      if @album.update(invitees:)
+        render json: @album
+        @album.share(added_invitees, false)
       else
         render json: @album.errors, status: :unprocessable_entity
       end
@@ -63,9 +78,6 @@ module Panel
 
     # DELETE /albums/1 or /albums/1.json
     def destroy
-      # only the owner can delete the album
-      return redirect_to panel_path if @album.user != current_user
-
       if @album.destroy
         render json: { message: 'Album was successfully destroyed.' }
       else
@@ -87,11 +99,31 @@ module Panel
       render(json: { error: 'Unauthorized' }, status: :unauthorized) && return
     end
 
-    def sanitize_invitees_email
+    def list_removed_invitees
+      return [] if @album.invitees.empty?
+
+      @album.invitees - params[:album][:invitees]
+    end
+
+    def list_added_invitees(sanitized_invitees = [])
+      return [] if sanitized_invitees.empty?
+
+      sanitized_invitees - @album.invitees
+    end
+
+    def sanitize_invitees_email(emails = [])
+      return [] if emails.empty? || emails.nil?
+
       result = []
-      params[:invitees].each do |invitee|
+      emails.each do |invitee|
         result.push(invitee) if invitee != '' && invitee.match(URI::MailTo::EMAIL_REGEXP)
       end
+      result
+    end
+
+    def create_update_album(invitees = [])
+      result = album_params.except(:invitees)
+      result[:invitees] = invitees
       result
     end
 
@@ -109,7 +141,6 @@ module Panel
 
     # Only allow a list of trusted parameters through.
     def album_params
-      # params.require(:album).permit(:name, :expiry_date, :last_update_batch, :invitees => []) # rubocop:disable Style/HashSyntax
       params.require(:album).permit(:name, :expiry_date, :last_update_batch, invitees: [])
     end
   end

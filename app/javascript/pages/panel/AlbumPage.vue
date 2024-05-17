@@ -199,15 +199,6 @@
         <div>Share</div>
         <font-awesome-icon icon="fa-solid fa-user-plus" class="self-center mr-2" />
       </div>
-      <!-- <div
-        v-if="isAlbumOwner"
-        class="container-context-menu container-context-border"
-        @click.prevent=""
-      >
-        <div></div>
-        <div>Manage Access</div>
-        <font-awesome-icon icon="fa-solid fa-user-group" class="self-center mr-2" />
-      </div> -->
       <div
         v-if="isAlbumOwner"
         class="container-context-menu"
@@ -349,8 +340,6 @@ const albumId = computed(() => {
 });
 
 const isUploadingPhoto = ref(false);
-const albumName = ref('');
-const albumExpiryDate = ref(new Date());
 
 // Edit album
 const isEditing = ref(false);
@@ -359,6 +348,7 @@ function startEditingAlbum() {
 }
 
 function updateAlbum(editedAlbum: Album) {
+  loadReviews();
   album.value = editedAlbum;
   isEditing.value = false;
 }
@@ -386,34 +376,6 @@ function selectAlbumViewOption(index: number) {
 const isAlbumOwner = computed(() => {
   return album.value.user_id === currentUserId.value;
 });
-
-// function startEditingAlbum() {
-//   isEditing.value = true;
-//   albumName.value = album.value.name;
-//   albumExpiryDate.value = album.value.expiry_date;
-// }
-
-// function cancelEditAlbum() {
-//   albumName.value = '';
-//   albumExpiryDate.value = new Date();
-//   isEditing.value = false;
-// }
-
-// async function saveEditAlbum() {
-//   updateAlbumApi(albumId.value, {
-//     name: albumName.value,
-//     expiry_date: albumExpiryDate.value,
-//     invitees: [],
-//   })
-//     .then(() => {
-//       album.value.name = albumName.value;
-//       album.value.expiry_date = albumExpiryDate.value;
-//       cancelEditAlbum();
-//     })
-//     .catch((error) => {
-//       console.log(error);
-//     });
-// }
 
 const deleteAlbum = async (albumName: string, albumId: number) => {
   if (!isAlbumOwner.value) {
