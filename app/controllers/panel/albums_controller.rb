@@ -4,9 +4,10 @@ module Panel
   class AlbumsController < ApplicationController
     before_action :authenticate_user!
     before_action :set_album,
-                  only: %i[check_owner show update add_invitees destroy list_removed_invitees list_added_invitees]
+                  only: %i[check_owner show update add_invitees destroy list_removed_invitees added_invitees]
     before_action :check_authorized_user, only: %i[show add_invitees]
     before_action :check_owner, only: %i[update destroy]
+    before_action :set_invitees, only: %i[create update add_invitees create_update_album added_invitees]
 
     # GET /albums or /albums.json
     def index
@@ -36,11 +37,11 @@ module Panel
     def create
       album = Album.new(album_params)
       album.user = current_user
-      invitees = sanitize_invitees_email(params[:album][:invitees])
+      album.invitees = @invitees
 
       if album.save
         AlbumUser.create(user: current_user, album:)
-        album.share(invitees, true) unless invitees.empty?
+        album.share(@invitees, true) unless @invitees.empty?
         render json: album, status: :created
       else
         render json: album.errors, status: :unprocessable_entity
@@ -51,11 +52,7 @@ module Panel
     def update
       removed_invitees = list_removed_invitees
 
-      # check if there are newly added invitees
-      invitees = sanitize_invitees_email(params[:album][:invitees])
-      added_invitees = list_added_invitees(invitees)
-
-      if @album.update(create_update_album(invitees))
+      if @album.update(create_update_album)
         @album.remove_invitees(removed_invitees) unless removed_invitees.empty?
         render json: @album
         @album.share(added_invitees, false) unless added_invitees.empty?
@@ -65,10 +62,7 @@ module Panel
     end
 
     def add_invitees
-      invitees = sanitize_invitees_email(params[:album][:invitees])
-      added_invitees = list_added_invitees(invitees)
-
-      if @album.update(invitees:)
+      if @album.update(invitees: @invitees)
         render json: @album
         @album.share(added_invitees, false)
       else
@@ -105,10 +99,10 @@ module Panel
       @album.invitees - params[:album][:invitees]
     end
 
-    def list_added_invitees(sanitized_invitees = [])
-      return [] if sanitized_invitees.empty?
+    def added_invitees
+      return [] if @invitees.empty?
 
-      sanitized_invitees - @album.invitees
+      @invitees - @album.invitees
     end
 
     def sanitize_invitees_email(emails = [])
@@ -121,10 +115,14 @@ module Panel
       result
     end
 
-    def create_update_album(invitees = [])
+    def create_update_album
       result = album_params.except(:invitees)
-      result[:invitees] = invitees
+      result[:invitees] = @invitees
       result
+    end
+
+    def set_invitees
+      @invitees = sanitize_invitees_email(params[:album][:invitees])
     end
 
     def set_album
