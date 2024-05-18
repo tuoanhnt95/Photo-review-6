@@ -30,18 +30,6 @@
           <div
             class="flex w-42 border border-solid border-slate-600 divide-x divide-solid divide-slate-600 text-slate-600 rounded-sm"
           >
-            <div class="btn-filter w-12 px-2 py-0.5">
-              <font-awesome-icon
-                v-if="!isShowingResult"
-                icon="fa-solid fa-eye"
-                @click="isShowingResult = !isShowingResult"
-              />
-              <font-awesome-icon
-                v-else
-                icon="fa-solid fa-eye-slash"
-                @click="isShowingResult = !isShowingResult"
-              />
-            </div>
             <div v-for="opt in filterReview" :key="opt.icon">
               <div
                 class="btn-filter w-14 px-2 py-0.5"
@@ -193,6 +181,14 @@
           <div>{{ opt.name }}</div>
           <font-awesome-icon :icon="opt.icon" class="mr-2" />
         </div>
+      </div>
+      <div
+        class="container-context-menu container-context-border"
+        @click="isShowingResult = !isShowingResult"
+      >
+        <font-awesome-icon :class="{ 'opacity-0': !isShowingResult }" icon="fa-solid fa-check" />
+        <div>Show votes</div>
+        <font-awesome-icon icon="fa-solid fa-eye" class="self-center mr-2" />
       </div>
       <div
         class="container-context-menu"
