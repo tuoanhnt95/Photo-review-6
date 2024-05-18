@@ -18,15 +18,18 @@
     <div class="flex place-content-between mb-4">
       <label for="invitee" class="text-lg">Invitee</label>
       <div class="tag-input ml-2.5">
-        <!-- pattern="^([\w+-.%]+@[\w-.]+\.[A-Za-z]{2,4},*[\W]*)+$" -->
         <input
           v-model="newInvitee"
           type="email"
           class="w-full py-1 px-2 text-lg text-black rounded"
           @keydown.enter="addInvitee"
           @keydown.prevent.tab="addInvitee"
+          @keydown.space="addInvitee"
+          @keyup.,="addInvitee"
+          @keyup.;="addInvitee"
           @keydown.delete="newInvitee.length || removeInvitee(0)"
         />
+        <p v-if="!emailIsValid">Invalid email format</p>
         <div class="tags">
           <div
             v-for="(invitee, i) in invitees"
@@ -106,8 +109,17 @@ const editableInvitees = computed(() => {
   return myInvitees.value;
 });
 
+const emailIsValid = computed(() => {
+  const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+  return (
+    emailRegex.test(newInvitee.value) ||
+    (newInvitee.value === '' && invitees.value.every((invitee) => emailRegex.test(invitee)))
+  );
+});
+
 function addInvitee() {
   if (newInvitee.value !== '') {
+    newInvitee.value = newInvitee.value.replace(/[,.;\s]+$/, '');
     myInvitees.value.unshift(newInvitee.value);
     invitees.value.unshift(newInvitee.value);
     newInvitee.value = '';
