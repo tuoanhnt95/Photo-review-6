@@ -43,6 +43,7 @@
   --section-gap: 160px;
   --color-primary: var(--violet-600);
   --color-primary-dark: var(--violet-800);
+  --color-secondary: var(--slate-600);
 }
 
 /* measurement variables */

@@ -24,6 +24,10 @@ export const updateAlbumApi = (id: number, album: album): Promise<AxiosResponse>
   return http.put(`${id}`, { album });
 };
 
+export const addInviteesApi = (id: number, invitees: object): Promise<AxiosResponse> => {
+  return http.put(`${id}/add_invitees`, invitees);
+};
+
 export const deleteAlbumApi = (id: number): Promise<AxiosResponse> => {
   return http.delete(`${id}`);
 };

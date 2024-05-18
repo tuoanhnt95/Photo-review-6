@@ -168,7 +168,10 @@
       <div
         v-if="isAlbumOwner"
         class="container-context-menu container-context-border"
-        @click.prevent="startEditingAlbum"
+        @click.prevent="
+          isEditing = true;
+          isSharing = false;
+        "
       >
         <div></div>
         <div>Edit</div>
@@ -194,7 +197,14 @@
           <font-awesome-icon :icon="opt.icon" class="mr-2" />
         </div>
       </div>
-      <div class="container-context-menu" :class="{ 'container-context-border': isAlbumOwner }">
+      <div
+        class="container-context-menu"
+        :class="{ 'container-context-border': isAlbumOwner }"
+        @click.prevent="
+          isSharing = true;
+          isEditing = false;
+        "
+      >
         <div></div>
         <div>Share</div>
         <font-awesome-icon icon="fa-solid fa-user-plus" class="self-center mr-2" />
@@ -218,7 +228,16 @@
       :albumInvitees="album.invitees"
       class="absolute top-[-200px] left-0 w-full z-10"
       @close-edit-album="isEditing = false"
-      @edited-album="(editedAlbum) => updateAlbum(editedAlbum)"
+      @edited-album="(editedAlbum: Album) => updateAlbum(editedAlbum)"
+    />
+
+    <AlbumShare
+      v-if="isSharing"
+      :albumId="album.id"
+      :albumInvitees="album.invitees"
+      class="absolute top-0 left-0 w-full h-full z-10"
+      @close-share-album="isSharing = false"
+      @edited-album="(editedAlbum: Album) => updateAlbum(editedAlbum)"
     />
 
     <PhotoUpload
@@ -258,6 +277,7 @@ import {
 
 // components
 import AlbumEdit from '../../components/panel/AlbumEdit.vue';
+import AlbumShare from '../../components/panel/AlbumShare.vue';
 import Photo from '../../components/panel/Photo.vue';
 import PhotoUpload from '../../components/panel/PhotoUpload.vue';
 import { useAuthStore } from '@/stores/auth.store';
@@ -341,16 +361,15 @@ const albumId = computed(() => {
 
 const isUploadingPhoto = ref(false);
 
-// Edit album
+// Edit album, share album
 const isEditing = ref(false);
-function startEditingAlbum() {
-  isEditing.value = true;
-}
+const isSharing = ref(false);
 
 function updateAlbum(editedAlbum: Album) {
   loadReviews();
   album.value = editedAlbum;
   isEditing.value = false;
+  isSharing.value = false;
 }
 
 // Context menu
