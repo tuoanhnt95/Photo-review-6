@@ -13,7 +13,12 @@
           @keydown.delete="newInvitee.email.length || removeInvitee(0)"
         />
         <div class="tags">
-          <div v-for="(invitee, i) in inviteesObject" :key="i" class="tag">
+          <div
+            v-for="(invitee, i) in inviteesObject"
+            :key="i"
+            class="tag"
+            :class="{ 'tag-existing': invitee.existing }"
+          >
             {{ invitee.email }}
             <font-awesome-icon
               v-if="!invitee.existing"
@@ -129,5 +134,9 @@ const closeEditAlbum = () => {
   color: white;
   white-space: nowrap;
   transition: 0.1s ease background;
+}
+
+.tag-existing {
+  background: var(--color-secondary);
 }
 </style>
