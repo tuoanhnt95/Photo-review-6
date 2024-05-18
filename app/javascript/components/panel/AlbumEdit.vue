@@ -107,7 +107,7 @@ const props = defineProps({
   },
   albumExpiryDate: {
     type: String,
-    default: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().slice(0, 10), // seven days from today
+    default: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split('T')[0], // seven days from today
   },
   albumInvitees: {
     type: Array<string>,
