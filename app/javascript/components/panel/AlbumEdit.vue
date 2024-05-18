@@ -1,13 +1,18 @@
 <template>
   <div class="relative px-6 pt-16 pb-8 bg-white dark:bg-slate-800 border rounded">
-    <div v-if="props.action !== 'share'" class="flex place-content-between w-full mb-6">
-      <input
-        v-model="name"
-        type="text"
-        required
-        placeholder="Album name"
-        class="w-full px-2 py-1 text-xl text-black rounded"
-      />
+    <div v-if="props.action !== 'share'" class="w-full">
+      <div class="flex place-content-between">
+        <input
+          v-model="name"
+          type="text"
+          required
+          placeholder="Album name"
+          class="w-full px-2 py-1 text-xl text-black rounded"
+        />
+      </div>
+      <div class="h-8">
+        <p v-if="!nameExists">Required</p>
+      </div>
     </div>
 
     <div v-if="props.action !== 'share'" class="flex place-content-between mb-4">
@@ -29,7 +34,9 @@
           @keyup.;="addInvitee"
           @keydown.delete="newInvitee.length || removeInvitee(0)"
         />
-        <p v-if="!emailIsValid">Invalid email format</p>
+        <div class="h-8">
+          <p v-if="!emailIsValid">Invalid email format</p>
+        </div>
         <div class="tags">
           <div
             v-for="(invitee, i) in invitees"
@@ -51,7 +58,9 @@
 
     <div class="w-full">
       <button
-        class="w-full mt-4 py-3 bg-violet-600 text-slate-200 rounded text-xl font-bold cursor-pointer"
+        class="w-full mt-4 py-3 bg-violet-600 text-slate-200 rounded text-xl font-bold"
+        :disabled="!nameExists"
+        :class="{ 'opacity-50 cursor-not-allowed': !nameExists }"
         @click="saveAlbum"
       >
         {{ props.action === 'create' ? 'Create' : 'Save' }}
@@ -97,6 +106,8 @@ const props = defineProps({
 });
 
 const name = ref(props.albumName);
+const nameExists = computed(() => name.value && name.value.length > 0);
+
 const expiryDate = ref(props.albumExpiryDate);
 
 const myInvitees = ref<Array<string>>([]);
@@ -156,6 +167,9 @@ function saveAlbum() {
 }
 
 async function saveCreateAlbum() {
+  if (!nameExists.value) {
+    return;
+  }
   createAlbumApi({
     name: name.value,
     expiry_date: expiryDate.value,
@@ -170,6 +184,9 @@ async function saveCreateAlbum() {
 }
 
 async function saveUpdateAlbum() {
+  if (!nameExists.value) {
+    return;
+  }
   updateAlbumApi(props.albumId, {
     name: name.value,
     expiry_date: expiryDate.value,
