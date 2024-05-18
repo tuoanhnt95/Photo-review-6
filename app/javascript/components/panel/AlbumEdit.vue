@@ -17,7 +17,17 @@
 
     <div v-if="props.action !== 'share'" class="flex place-content-between mb-4">
       <label for="expiry-date" class="self-center text-lg">Expiry date</label>
-      <input v-model="expiryDate" type="date" class="pl-1 rounded text-lg text-black" />
+      <div>
+        <input
+          v-model="expiryDate"
+          type="date"
+          :min="today"
+          class="pl-1 rounded text-lg text-black"
+        />
+        <div class="h-8">
+          <p v-if="!expiryDate">Invalid date</p>
+        </div>
+      </div>
     </div>
 
     <div class="flex place-content-between mb-4">
@@ -59,8 +69,8 @@
     <div class="w-full">
       <button
         class="w-full mt-4 py-3 bg-violet-600 text-slate-200 rounded text-xl font-bold"
-        :disabled="!nameExists"
-        :class="{ 'opacity-50 cursor-not-allowed': !nameExists }"
+        :disabled="!canSubmit"
+        :class="{ 'opacity-50 cursor-not-allowed': !canSubmit }"
         @click="saveAlbum"
       >
         {{ props.action === 'create' ? 'Create' : 'Save' }}
@@ -96,8 +106,8 @@ const props = defineProps({
     default: '',
   },
   albumExpiryDate: {
-    type: Date,
-    default: new Date(),
+    type: String,
+    default: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().slice(0, 10), // seven days from today
   },
   albumInvitees: {
     type: Array<string>,
@@ -108,6 +118,7 @@ const props = defineProps({
 const name = ref(props.albumName);
 const nameExists = computed(() => name.value && name.value.length > 0);
 
+const today = new Date().toISOString().slice(0, 10);
 const expiryDate = ref(props.albumExpiryDate);
 
 const myInvitees = ref<Array<string>>([]);
@@ -150,6 +161,10 @@ const removeInvitee = (index: number) => {
   }
 };
 
+const canSubmit = computed(() => {
+  return nameExists.value && expiryDate.value;
+});
+
 function saveAlbum() {
   switch (props.action) {
     case 'create':
@@ -170,9 +185,10 @@ async function saveCreateAlbum() {
   if (!nameExists.value) {
     return;
   }
+
   createAlbumApi({
     name: name.value,
-    expiry_date: expiryDate.value,
+    expiry_date: toDate(expiryDate.value),
     invitees: invitees.value,
   })
     .then((response: AxiosResponse) => {
@@ -189,7 +205,7 @@ async function saveUpdateAlbum() {
   }
   updateAlbumApi(props.albumId, {
     name: name.value,
-    expiry_date: expiryDate.value,
+    expiry_date: toDate(expiryDate.value),
     invitees: invitees.value,
   })
     .then((response: AxiosResponse) => {
@@ -214,6 +230,11 @@ async function saveShareAlbum() {
 
 function closeEditAlbum() {
   $emit('close-edit-album');
+}
+
+function toDate(dateStr: string) {
+  const parts = dateStr.split('-');
+  return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]) + 1);
 }
 </script>
 
