@@ -39,7 +39,7 @@ module Panel
       album.user = current_user
       album.invitees = @invitees
 
-      if album.save
+      if !album.name.empty? && album.save
         AlbumUser.create(user: current_user, album:)
         album.share(@invitees, true) unless @invitees.empty?
         render json: album, status: :created
@@ -52,7 +52,7 @@ module Panel
     def update
       removed_invitees = list_removed_invitees
 
-      if @album.update(create_update_album)
+      if !@album.name.empty? && @album.update(create_update_album)
         @album.remove_invitees(removed_invitees) unless removed_invitees.empty?
         render json: @album
         @album.share(added_invitees, false) unless added_invitees.empty?
