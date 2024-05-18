@@ -18,7 +18,12 @@
     <div v-if="props.action !== 'share'" class="flex place-content-between mb-4">
       <label for="expiry-date" class="self-center text-lg">Expiry date</label>
       <div>
-        <input v-model="expiryDate" type="date" class="pl-1 rounded text-lg text-black" />
+        <input
+          v-model="expiryDate"
+          type="date"
+          :min="today"
+          class="pl-1 rounded text-lg text-black"
+        />
         <div class="h-8">
           <p v-if="!expiryDate">Invalid date</p>
         </div>
@@ -113,6 +118,7 @@ const props = defineProps({
 const name = ref(props.albumName);
 const nameExists = computed(() => name.value && name.value.length > 0);
 
+const today = new Date().toISOString().slice(0, 10);
 const expiryDate = ref(props.albumExpiryDate);
 
 const myInvitees = ref<Array<string>>([]);
