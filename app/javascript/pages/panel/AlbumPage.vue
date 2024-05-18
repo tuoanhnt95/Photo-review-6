@@ -219,7 +219,7 @@
       :action="action"
       :albumId="album.id"
       :albumName="album.name"
-      :albumExpiryDate="album.expiry_date"
+      :albumExpiryDate="album.expiry_date.toISOString().split('T')[0]"
       :albumInvitees="album.invitees"
       class="absolute top-[-200px] left-0 w-full z-10"
       @close-edit-album="action = ''"
@@ -322,8 +322,6 @@ onBeforeMount(async () => {
   showAlbumApi(Number(route.params.id))
     .then((response: AxiosResponse) => {
       album.value = response.data;
-      // album.value.expiry_date = new Date(response.data.expiry_date);
-      // TODO: improve, not bug - fix album date format to be YYYY-MM-DD when reloading page
     })
     .catch((error) => {
       console.log(error);
@@ -540,9 +538,11 @@ function getPhotoReviews(photoId: number) {
 function getOverallReview(photoId: number) {
   const reviews = getPhotoReviews(photoId);
   const reviewIds = reviews.map((review) => review.review_id);
-  const userReview = reviews.find((review) => review.user_id === currentUserId.value);
-  // if user has not made a review, return null
-  if (!userReview || userReview.review_id === null) {
+  // const userReview = reviews.find((review) => review.user_id === currentUserId.value);
+  // // if user has not made a review, return null
+  // if (!userReview || userReview.review_id === null) {
+  //   return null;
+  if (reviewIds.length === 0) {
     return null;
   } else if (reviewIds.every((value) => value === 1)) {
     return 1;
