@@ -1,11 +1,11 @@
 <template>
   <div class="flex w-100 justify-center">
     <div>
-      <div :class="{ 'opacity-25': isCreatingAlbum }">
+      <div :class="{ 'opacity-25': action.length > 0 }">
         <div class="label-text mt-4">Albums</div>
         <div class="flex w-100">
           <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 mx-auto mb-6 z-0">
-            <div class="w-36 h-44" @click="isCreatingAlbum = true">
+            <div class="w-36 h-44" @click="action = 'create'">
               <div
                 class="flex w-100 h-36 rounded border border-solid border-slate-600 cursor-pointer"
               >
@@ -35,13 +35,13 @@
         </div>
       </div>
 
-      <AlbumCreate
-        v-if="isCreatingAlbum"
+      <AlbumEdit
+        v-if="action.length > 0"
+        :action="action"
         class="absolute top-[-200px] left-0 w-full z-10"
-        @close-create-album="isCreatingAlbum = false"
-        @added-new-album="(newAlbum) => addAlbum(newAlbum)"
-      >
-      </AlbumCreate>
+        @close-edit-album="action = ''"
+        @added-new-album="(editedAlbum: Album) => addAlbum(editedAlbum)"
+      />
     </div>
   </div>
 </template>
@@ -52,7 +52,7 @@ import { RouterLink } from 'vue-router';
 import { Cloudinary } from '@cloudinary/url-gen';
 import { AdvancedImage } from '@cloudinary/vue';
 import type { AxiosResponse } from 'axios';
-import AlbumCreate from '../../components/panel/AlbumCreate.vue';
+import AlbumEdit from '../../components/panel/AlbumEdit.vue';
 import { getAlbumsApi } from '@/apis/panel.api';
 
 interface Album {
@@ -88,9 +88,10 @@ const getCloudinaryImage = (publicId: string) => {
   return cld.image(`photo_review/${publicId}`);
 };
 
-const isCreatingAlbum = ref(false);
+const action = ref('');
 
 const addAlbum = (album: Album) => {
+  action.value = '';
   album.cover = '';
   albumsData.value.unshift(album);
 };
