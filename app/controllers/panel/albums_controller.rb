@@ -65,7 +65,7 @@ module Panel
     end
 
     def add_invitees
-      invitees = sanitize_invitees_email(params[:invitees])
+      invitees = sanitize_invitees_email(params[:album][:invitees])
       added_invitees = list_added_invitees(invitees)
 
       if @album.update(invitees:)
@@ -128,7 +128,11 @@ module Panel
     end
 
     def set_album
-      @album = Album.find(params[:id])
+      @album = if params[:id].present?
+                 Album.find(params[:id])
+               else
+                 Album.find(params[:album_id])
+               end
     end
 
     def set_albums

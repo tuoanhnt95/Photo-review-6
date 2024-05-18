@@ -63,8 +63,8 @@ module Panel
     # PATCH/PUT /albums/:album_id/photos/:id
     def update
       # guest can only update the angle
-      [:name, :image, :album_id].each do |key|
-        return panel_album_photo_path if !check_if_change(key)
+      %i[name image album_id].each do |key|
+        return panel_album_photo_path unless check_if_change(key)
       end
 
       if @photo.update(photo_params)
@@ -77,6 +77,7 @@ module Panel
     # DELETE /albums/:album_id/photos/:id
     def destroy
       return redirect_to panel_path if current_user != @album.user
+
       public_id = @photo.image
       @photo.destroy
       folder = 'photo_review/'
@@ -86,6 +87,7 @@ module Panel
     # DELETE /photos/delete_photos
     def destroy_multiple
       return redirect_to panel_path if current_user != @album.user
+
       params[:photo_ids].each do |photo_id|
         photo = Photo.find(photo_id)
         public_id = photo.image
@@ -110,15 +112,16 @@ module Panel
     def get_review_result(photo)
       review = PhotoUserReview.find_by(photo_id: photo.id, user_id: current_user.id)
       return nil if review.nil?
+
       review.review_id
     end
 
     def check_if_change(key)
       # if there is no change or no param :key, then return false
-      if ((photo_params[key] && @photo.key == photo_params[key]) || !photo_params[key])
-        return false
+      if (photo_params[key] && @photo.key == photo_params[key]) || !photo_params[key]
+        false
       else
-        return true
+        true
       end
     end
 

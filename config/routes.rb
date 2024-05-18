@@ -18,6 +18,7 @@ Rails.application.routes.draw do
       resources :photos, only: %i[index create show update destroy] do
         put '/photo_user_reviews', to: 'photo_user_reviews#update'
       end
+      put '/add_invitees', to: 'albums#add_invitees'
       delete '/delete_photos', to: 'photos#destroy_multiple', as: 'delete_photos'
       get '/photo_user_reviews', to: 'photo_user_reviews#index'
     end
