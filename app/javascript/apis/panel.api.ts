@@ -9,27 +9,27 @@ interface album {
 }
 
 export const getAlbumsApi = (): Promise<AxiosResponse> => {
-  return http.get('albums');
+  return http.get('/panel/albums');
 };
 
 export const createAlbumApi = (album: album): Promise<AxiosResponse> => {
-  return http.post('albums', { album });
+  return http.post('/panel/albums', { album });
 };
 
 export const showAlbumApi = (id: number): Promise<AxiosResponse> => {
-  return http.get(`${id}.json`); // not 'albums/${id}' because of Rails' default behavior params_wrapper.
+  return http.get(`/panel/albums/${id}.json`);
 };
 
 export const updateAlbumApi = (id: number, album: album): Promise<AxiosResponse> => {
-  return http.put(`${id}`, { album });
+  return http.put(`/panel/albums/${id}`, { album });
 };
 
 export const addInviteesApi = (id: number, invitees: object): Promise<AxiosResponse> => {
-  return http.put(`${id}/add_invitees`, invitees);
+  return http.put(`/panel/albums/${id}/add_invitees`, invitees);
 };
 
 export const deleteAlbumApi = (id: number): Promise<AxiosResponse> => {
-  return http.delete(`${id}`);
+  return http.delete(`/panel/albums/${id}`);
 };
 
 // Photo
@@ -39,7 +39,7 @@ interface photo {
 }
 
 export const getPhotosApi = (albumId: number): Promise<AxiosResponse> => {
-  return http.get(`${albumId}/photos`);
+  return http.get(`/panel/albums/${albumId}/photos`);
 };
 
 export const createPhotoApi = (
@@ -48,7 +48,7 @@ export const createPhotoApi = (
   files: File[],
 ): Promise<AxiosResponse> => {
   return http.post(
-    `${albumId}/photos`,
+    `/panel/albums/${albumId}/photos`,
     { upload_option, files },
     {
       headers: {
@@ -59,7 +59,7 @@ export const createPhotoApi = (
 };
 
 export const showPhotoApi = (albumId: number, id: number): Promise<AxiosResponse> => {
-  return http.get(`${albumId}/photos/${id}`);
+  return http.get(`/panel/albums/${albumId}/photos/${id}`);
 };
 
 export const updatePhotoApi = (
@@ -67,15 +67,15 @@ export const updatePhotoApi = (
   id: number,
   photo: photo,
 ): Promise<AxiosResponse> => {
-  return http.put(`${albumId}/photos/${id}`, { photo });
+  return http.put(`/panel/albums/${albumId}/photos/${id}`, { photo });
 };
 
 export const deletePhotoApi = (albumId: number, id: number): Promise<AxiosResponse> => {
-  return http.delete(`${albumId}/photos/${id}`);
+  return http.delete(`/panel/albums/${albumId}/photos/${id}`);
 };
 
 export const deletePhotosApi = (photoIds: number[]): Promise<AxiosResponse> => {
-  return http.delete(`delete_photos`, { data: { photo_ids: photoIds } });
+  return http.delete(`/panel/albums/delete_photos`, { data: { photo_ids: photoIds } });
 };
 
 // Upload Progress
@@ -83,7 +83,7 @@ export const getUploadProgressApi = (
   albumId: number,
   queryString: string,
 ): Promise<AxiosResponse> => {
-  return http.get(`${albumId}/upload_progress${queryString}`, {
+  return http.get(`/panel/albums/${albumId}/upload_progress${queryString}`, {
     headers: {
       'Content-Type': 'application/json',
     },
@@ -92,7 +92,7 @@ export const getUploadProgressApi = (
 
 // Review
 export const getReviewsApi = (album_id: number): Promise<AxiosResponse> => {
-  return http.get(`${album_id}/photo_user_reviews`);
+  return http.get(`/panel/albums/${album_id}/photo_user_reviews`);
 };
 
 export const updateReviewApi = (
@@ -101,7 +101,7 @@ export const updateReviewApi = (
   review_id: number | null,
   angle: number,
 ): Promise<AxiosResponse> => {
-  return http.put(`${album_id}/photos/${photo_id}/photo_user_reviews`, {
+  return http.put(`/panel/albums/${album_id}/photos/${photo_id}/photo_user_reviews`, {
     review_id,
     angle,
     controller: 'photo_user_reviews',
