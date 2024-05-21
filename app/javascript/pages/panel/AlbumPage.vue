@@ -245,10 +245,9 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { Cloudinary } from '@cloudinary/url-gen';
 import { AdvancedImage } from '@cloudinary/vue';
-import { byAngle } from '@cloudinary/url-gen/actions/rotate';
 import type { AxiosResponse } from 'axios';
+import { getCloudinaryImage } from '@/services/cloudinary.service';
 import {
   showAlbumApi,
   deleteAlbumApi,
@@ -301,7 +300,7 @@ const currentUserId = computed(() => {
   if (!user || !user.data) {
     return 0;
   }
-  const result = String((user.data as { id: number; type: string; attributes: {} }).id);
+  const result = String((user!.data as { id: number; type: string; attributes: {} }).id);
   return parseInt(result);
 });
 
@@ -323,15 +322,6 @@ onBeforeMount(async () => {
       console.log(error);
     });
 });
-
-const cld = new Cloudinary({
-  cloud: {
-    cloudName: 'djnvimner',
-  },
-});
-const getCloudinaryImage = (publicId: String, angle: number) => {
-  return cld.image(`photo_review/${publicId}`).rotate(byAngle(angle));
-};
 
 const albumId = computed(() => {
   const id = route.params.id;
