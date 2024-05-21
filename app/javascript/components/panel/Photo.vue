@@ -72,9 +72,8 @@
 
 <script setup lang="ts">
 import { ref, computed, type PropType, watch } from 'vue';
-import { Cloudinary } from '@cloudinary/url-gen';
-import { byAngle } from '@cloudinary/url-gen/actions/rotate';
 import { AdvancedImage } from '@cloudinary/vue';
+import { getCloudinaryImage } from '@/services/cloudinary.service';
 import { updateReviewApi } from '@/apis/panel.api';
 
 const emit = defineEmits(['reviewed-photo', 'close-review-photo', 'navigate-photo']);
@@ -130,15 +129,6 @@ const previousPhoto = computed(() => {
 const photoOriginal = props.photo;
 const photo = ref(props.photo);
 const photos = ref(props.photos);
-
-const cld = new Cloudinary({
-  cloud: {
-    cloudName: 'djnvimner',
-  },
-});
-const getCloudinaryImage = (publicId: string, angle: number) => {
-  return cld.image(`photo_review/${publicId}`).rotate(byAngle(angle));
-};
 
 // Review
 function reviewResult(index: number) {

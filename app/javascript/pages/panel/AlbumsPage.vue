@@ -16,10 +16,10 @@
             <div v-for="album in albums" :key="album.id">
               <div class="relative w-36 h-46 cursor-pointer">
                 <RouterLink :to="{ name: 'Album', params: { id: album.id } }">
-                  <div class="photo-container flex relative h-36">
+                  <div class="photo-container flex justify-center h-36">
                     <AdvancedImage
                       v-if="album.cover.length > 0"
-                      :cld-img="getCloudinaryImage(album.cover)"
+                      :cld-img="getCloudinaryImage(album.cover, album.angle)"
                       place-holder="predominant-color"
                       class="object-cover rounded"
                     />
@@ -49,10 +49,10 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import { Cloudinary } from '@cloudinary/url-gen';
 import { AdvancedImage } from '@cloudinary/vue';
 import type { AxiosResponse } from 'axios';
 import AlbumEdit from '../../components/panel/AlbumEdit.vue';
+import { getCloudinaryImage } from '@/services/cloudinary.service';
 import { getAlbumsApi } from '@/apis/panel.api';
 
 interface Album {
@@ -61,6 +61,7 @@ interface Album {
   expiry_date: Date;
   invitees: string[];
   cover: string;
+  angle: number;
   last_upload_batch: number;
 }
 
@@ -78,15 +79,6 @@ onBeforeMount(async () => {
 const albums = computed(() => {
   return albumsData.value;
 });
-
-const cld = new Cloudinary({
-  cloud: {
-    cloudName: 'djnvimner',
-  },
-});
-const getCloudinaryImage = (publicId: string) => {
-  return cld.image(`photo_review/${publicId}`);
-};
 
 const action = ref('');
 

@@ -24,12 +24,13 @@ class Album < ApplicationRecord
   def cover
     return '' if photos.empty?
 
-    photos.first&.image
+    [photos.first&.image, photos.first&.angle]
   end
 
   def attach_cover
     album_result = {}.merge(attributes)
-    album_result[:cover] = cover
+    album_result[:cover] = cover[0]
+    album_result[:angle] = cover[1]
     album_result
   end
 
