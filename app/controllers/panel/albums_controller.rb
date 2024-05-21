@@ -19,7 +19,7 @@ module Panel
           results.push(album.attach_cover)
         end
       end
-
+      results.sort_by! { |album| album['id'] }.reverse!
       render json: results
     end
 
