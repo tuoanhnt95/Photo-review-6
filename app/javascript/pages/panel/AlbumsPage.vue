@@ -69,7 +69,7 @@ const albumsData = ref<Album[]>([]);
 onBeforeMount(async () => {
   getAlbumsApi()
     .then((response: AxiosResponse) => {
-      albumsData.value = response.data.reverse();
+      albumsData.value = response.data;
     })
     .catch((error) => {
       console.log(error);

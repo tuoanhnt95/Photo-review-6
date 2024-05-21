@@ -22,6 +22,7 @@ module Panel
         photo_object[:review_results] = get_review_result(photo)
         result.push(photo_object)
       end
+      result.sort_by! { |photo| photo['id'] }.reverse!
       render json: result
     end
 
