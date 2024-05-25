@@ -57,7 +57,7 @@
           <font-awesome-icon icon="fa-solid fa-grip-lines" />
         </div>
         <div v-if="isExpanded" class="border w-full max-h-40 overflow-auto">
-          <div v-for="upload in uploads" :key="upload.name" class="px-2">
+          <div v-for="upload in inProgressUploads" :key="upload.name" class="px-2">
             <div class="flex justify-between mb-1">
               <div>{{ upload.name }}</div>
               <div>
@@ -90,14 +90,12 @@
 
 <script setup lang="ts">
 import { ref, type PropType, watch, computed } from 'vue';
-// import axios from 'axios';
 import type { AxiosResponse } from 'axios';
 import { createPhotoApi, getUploadProgressApi } from '@/apis/panel.api';
 
 interface Album {
   id: number;
   name: string;
-  last_upload_batch: number;
   expiry_date: Date;
 }
 
@@ -204,12 +202,79 @@ const uploadPhoto = async () => {
     return;
   }
 
-  // getProgressUntilComplete();
-  console.log('uploading photo', props.album.id);
-  createPhotoApi(props.album.id, photoUploadOption.value, inputFiles.value)
+  inputFiles.value.forEach((file: File) => {
+    getProgressUntilComplete(file);
+    createPhotoApi(props.album.id, photoUploadOption.value, file)
+      .then((response: AxiosResponse) => {
+        $emit('uploaded-new-photo', response.data);
+      })
+      .catch((error) => {
+        if (error.response.data.error === 'Invalid file type.') {
+          hasInvalidFile.value = true;
+        }
+        console.log(error.response.data);
+      });
+  });
+};
+
+// upload progress
+interface Photo {
+  id: number;
+  name: string;
+  image: string;
+  angle: number;
+  album_id: number;
+  review_results: number | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+interface Upload {
+  name: string;
+  type: string;
+  progress: number;
+  uploaded_photo?: Photo;
+}
+
+const uploads = ref([] as Upload[]);
+watch(inputFiles, () => {
+  uploads.value = [...inputFiles.value].map((file: File) => ({
+    name: file.name,
+    type: file.type,
+    progress: 0,
+  }));
+});
+
+const inProgressUploads = computed(() => {
+  return uploads.value.filter((upload: Upload) => upload.progress < 100);
+});
+
+const uploadIsComplete = computed(() => {
+  return uploads.value.every((upload: Upload) => upload.progress === 100);
+});
+
+watch(uploadIsComplete, (isComplete) => {
+  if (isComplete) {
+    $emit('close-upload-photo');
+  }
+});
+
+function getProgressUntilComplete(file: File) {
+  const upload = uploads.value.find((upload: Upload) => upload.name === file.name);
+  const getProgressRepeatedly = setInterval(() => {
+    if ((upload && upload.progress === 100) || hasInvalidFile.value) {
+      clearInterval(getProgressRepeatedly);
+      return;
+    }
+    getProgress(file);
+  }, 1000);
+}
+
+async function getProgress(file: File) {
+  getUploadProgressApi(props.album.id, file.name, file.type)
     .then((response: AxiosResponse) => {
-      $emit('close-upload-photo');
-      $emit('uploaded-new-photo', response.data);
+      const upload = uploads.value.find((upload: Upload) => upload.name === response.data.name);
+      upload!.progress = response.data.progress;
     })
     .catch((error) => {
       if (error.response.data.error === 'Invalid file type.') {
@@ -217,7 +282,7 @@ const uploadPhoto = async () => {
       }
       console.log(error.response.data);
     });
-};
+}
 
 const isExpanded = ref(true);
 function toggleUploads() {
@@ -232,57 +297,4 @@ const closeUploadPhoto = () => {
   cancelUpload();
   $emit('close-upload-photo');
 };
-
-// upload progress
-interface Upload {
-  name: string;
-  type: string;
-  progress: number;
-}
-
-const uploads = ref([] as Upload[]);
-watch(inputFiles, () => {
-  uploads.value = [...inputFiles.value].map((file: File) => ({
-    name: file.name,
-    type: file.type,
-    progress: 0,
-  }));
-});
-
-function getProgressUntilComplete() {
-  const getProgressRepeatedly = setInterval(() => {
-    if (uploads.value.every((upload) => upload.progress === 100) || hasInvalidFile.value) {
-      clearInterval(getProgressRepeatedly);
-      return;
-    }
-    getProgress();
-  }, 1000);
-}
-
-async function getProgress() {
-  // get all files that are not completed
-  const uploadsInProgress = uploads.value.filter((upload: Upload) => upload.progress < 100);
-  const filesInProgressName = uploadsInProgress.map((upload: Upload) => upload.name);
-  const endcodedFileNames = encodeURIComponent(JSON.stringify(filesInProgressName));
-
-  const filesInProgressType = uploadsInProgress.map((upload: Upload) => upload.type);
-  const endcodedFileTypes = encodeURIComponent(JSON.stringify(filesInProgressType));
-
-  const queryString = '?file_names=' + endcodedFileNames + '&file_types=' + endcodedFileTypes;
-
-  getUploadProgressApi(props.album.id, queryString)
-    .then((response: AxiosResponse) => {
-      // update uploads for any file that is not completed
-      response.data.forEach((element: Upload) => {
-        const index = uploads.value.findIndex((upload: Upload) => upload.name === element.name);
-        uploads.value[index].progress = element.progress;
-      });
-    })
-    .catch((error) => {
-      if (error.response.data.error === 'Invalid file type.') {
-        hasInvalidFile.value = true;
-      }
-      console.log(error.response.data);
-    });
-}
 </script>

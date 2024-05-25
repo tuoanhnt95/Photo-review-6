@@ -12,11 +12,10 @@ class ImageProcessor < ApplicationService
   end
 
   def call
-    file_name_without_extension = @file.original_filename.split('.')[0]
     cloudinary_image = process_image
     url = cloudinary_image['secure_url']
     public_id = cloudinary_public_id(url)
-    { img_name: file_name_without_extension, img_url: public_id }
+    { img_name: get_file_name_without_extension(@file.original_filename), img_url: public_id }
   end
 
   private
@@ -86,24 +85,28 @@ class ImageProcessor < ApplicationService
   def image_name(file_name)
     return file_name if image_is_jpg(file_name)
 
-    # if image has multiple '.' in the name, split by the last '.'
-    return "#{file_name.split('.')[0..-2].join('.')}.jpg" if file_name.split('.').length > 2
-
-    "#{file_name.split('.')[0]}.jpg"
+    "#{get_file_name_without_extension(file_name)}.jpg"
   end
 
-  def image_extension(file_name)
-    file_name.split('.')[-1].downcase
+  def get_file_extension(file_name)
+    file_name.split('.').last.downcase
+  end
+
+  def get_file_name_without_extension(file_name)
+    # if image has multiple '.' in the name, split by the last '.' and join the rest
+    return file_name.split('.')[0..-2].join('.').to_s if file_name.split('.').length > 2
+
+    (file_name.split('.')[0]).to_s
   end
 
   def image_is_jpg(file_name)
-    image_extension(file_name) == 'jpg' || image_extension(file_name) == 'jpeg'
+    get_file_extension(file_name) == 'jpg' || get_file_extension(file_name) == 'jpeg'
   end
 
   def image_uses_magicload(file_name)
     magickload_formats = %w[arw cr2 crw dng heic nef nrw orf pef raf srw]
     # magickload_formats = %w[arw cr2 crw dng nef nrw orf pef raf srw rw2 x3f gpr]
-    image_extension(file_name).in? magickload_formats
+    get_file_extension(file_name).in? magickload_formats
   end
 
   def get_image_resized(option)

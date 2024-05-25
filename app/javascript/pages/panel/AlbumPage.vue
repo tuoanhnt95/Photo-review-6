@@ -135,7 +135,7 @@
                 />
               </td>
               <td @click.prevent="showPhoto(photo.id)">
-                <div>{{ photo.name }}</div>
+                <div class="text-wrap border border-solid border-red-500">{{ photo.name }}</div>
                 <!-- TODO: Show original size -->
                 <div class="text-xs text-slate-400"></div>
               </td>
@@ -215,7 +215,7 @@
       :action="action"
       :albumId="album.id"
       :albumName="album.name"
-      :albumExpiryDate="album.expiry_date.toISOString().split('T')[0]"
+      :albumExpiryDate="album.expiry_date.toString()"
       :albumInvitees="album.invitees"
       class="absolute top-[-200px] left-0 w-full z-10"
       @close-edit-album="action = ''"
@@ -425,11 +425,8 @@ function removePhoto(photoId: number) {
   photosData.value.splice(index, 1);
 }
 
-function addPhoto(photos: [Photo]) {
-  photos.forEach((photo) => {
-    // photosData.value.unshift(photo);
-    photosData.value.push(photo);
-  });
+function addPhoto(photo: Photo) {
+  photosData.value.unshift(photo);
 }
 
 function formatDate(date: Date) {

@@ -14,7 +14,7 @@ module Panel
 
     # GET /albums/:album_id/photos
     def index
-      @photos = Photo.where(album_id: params[:album_id])
+      @photos = @album.photos
       # return photo objects with review results
       result = []
       @photos.each do |photo|
@@ -33,31 +33,22 @@ module Panel
 
     # POST /albums/:album_id/photos
     def create
-      @album.increment(:last_upload_batch)
-      results = []
-
-      photo_params[:files].each do |file|
-        # whitelist file types
-        unless check_file_type_whitelist!(file.original_filename, file.content_type)
-          return render(json: { error: 'Invalid file type.' }, status: :unprocessable_entity)
-        end
-
-        upload = create_new_upload(file)
-
-        processed_image = ImageProcessor.call(file, photo_params[:upload_option], upload.id)
-        photo = Photo.make_new_photo(processed_image, photo_params[:album_id])
-        if photo.save
-          results.push(photo)
-          upload.update(progress: 100)
-        else
-          render json: photo.errors, status: :unprocessable_entity
-        end
+      file = photo_params[:file]
+      # whitelist file types
+      unless check_file_type_whitelist!(file.original_filename, file.content_type)
+        return render(json: { error: 'Invalid file type.' }, status: :unprocessable_entity)
       end
 
-      if results.empty?
-        render(json: { error: 'Error uploading images' }, status: :unprocessable_entity)
+      upload = create_new_upload(file)
+
+      processed_image = ImageProcessor.call(file, photo_params[:upload_option], upload.id)
+      photo = Photo.make_new_photo(processed_image, photo_params[:album_id])
+
+      if photo.save
+        upload.update(progress: 100)
+        render(json: photo, status: :created)
       else
-        render(json: results, status: :created)
+        render json: photo.errors, status: :unprocessable_entity
       end
     end
 
@@ -148,7 +139,7 @@ module Panel
 
     # Only allow a list of trusted parameters through.
     def photo_params
-      params.permit(:image, :angle, :album_id, :upload_option, files: [], photo_ids: [])
+      params.permit(:image, :angle, :album_id, :upload_option, :file, :last_upload_batch, photo_ids: [])
     end
   end
 end
