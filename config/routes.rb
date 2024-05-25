@@ -15,7 +15,7 @@ Rails.application.routes.draw do
   get '/panel', to: 'application#panel', as: :panel
   namespace :panel do
     resources :albums do
-      resources :photos, only: %i[index create show update destroy] do
+      resources :photos, only: %i[index create show update] do
         put '/photo_user_reviews', to: 'photo_user_reviews#update'
       end
       put '/add_invitees', to: 'albums#add_invitees'
