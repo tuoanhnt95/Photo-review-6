@@ -409,7 +409,7 @@ async function deletePhotos() {
     return;
   }
 
-  deletePhotosApi(selectedPhotoIds.value)
+  deletePhotosApi(album.value.id, selectedPhotoIds.value)
     .then(() => {
       selectedPhotoIds.value.forEach((photoId) => {
         removePhoto(photoId);
