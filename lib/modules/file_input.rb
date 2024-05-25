@@ -5,6 +5,13 @@ module FileInput
     file_name.split('.').last.downcase
   end
 
+  def get_file_name_without_extension(file_name)
+    # if image has multiple '.' in the name, split by the last '.' and join the rest
+    return file_name.split('.')[0..-2].join('.').to_s if file_name.split('.').length > 2
+
+    (file_name.split('.')[0]).to_s
+  end
+
   def file_extension_whitelist
     %w[arw bmp cr2 crw dng heic jpg jpeg nef nrw orf pef png raf srw tif tiff]
   end

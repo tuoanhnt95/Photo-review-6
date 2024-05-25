@@ -1,7 +1,6 @@
 Rails.application.routes.draw do
   mount Sidekiq::Web => '/sidekiq'
   root to: 'application#website'
-  # get '/(*path)', to: 'application#panel', constraints: ->(request) { request.format == :html }
   devise_for :users, defaults: { format: :json }, skip: :all
   devise_scope :user do
     # If you change these urls and helpers, you must change these files too:
@@ -21,6 +20,7 @@ Rails.application.routes.draw do
       put '/add_invitees', to: 'albums#add_invitees'
       delete '/delete_photos', to: 'photos#destroy_multiple', as: 'delete_photos'
       get '/photo_user_reviews', to: 'photo_user_reviews#index'
+      get '/upload_progress', to: 'uploads#show_progress'
     end
   end
   get '/(*path)', to: 'application#website', as: :website

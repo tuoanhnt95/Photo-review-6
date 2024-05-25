@@ -2,7 +2,7 @@ import type { AxiosResponse } from 'axios';
 import { http } from '@/services/http.service';
 
 // Album
-interface album {
+interface Album {
   name: string;
   expiry_date: Date;
   invitees: string[];
@@ -12,7 +12,7 @@ export const getAlbumsApi = (): Promise<AxiosResponse> => {
   return http.get('/panel/albums');
 };
 
-export const createAlbumApi = (album: album): Promise<AxiosResponse> => {
+export const createAlbumApi = (album: Album): Promise<AxiosResponse> => {
   return http.post('/panel/albums', { album });
 };
 
@@ -20,7 +20,7 @@ export const showAlbumApi = (id: number): Promise<AxiosResponse> => {
   return http.get(`/panel/albums/${id}.json`);
 };
 
-export const updateAlbumApi = (id: number, album: album): Promise<AxiosResponse> => {
+export const updateAlbumApi = (id: number, album: Album): Promise<AxiosResponse> => {
   return http.put(`/panel/albums/${id}`, { album });
 };
 
@@ -33,7 +33,7 @@ export const deleteAlbumApi = (id: number): Promise<AxiosResponse> => {
 };
 
 // Photo
-interface photo {
+interface Photo {
   name: string;
   image: string;
 }
@@ -45,11 +45,11 @@ export const getPhotosApi = (albumId: number): Promise<AxiosResponse> => {
 export const createPhotoApi = (
   albumId: number,
   upload_option: number,
-  files: File[],
+  file: File,
 ): Promise<AxiosResponse> => {
   return http.post(
     `/panel/albums/${albumId}/photos`,
-    { upload_option, files },
+    { upload_option, file },
     {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -65,7 +65,7 @@ export const showPhotoApi = (albumId: number, id: number): Promise<AxiosResponse
 export const updatePhotoApi = (
   albumId: number,
   id: number,
-  photo: photo,
+  photo: Photo,
 ): Promise<AxiosResponse> => {
   return http.put(`/panel/albums/${albumId}/photos/${id}`, { photo });
 };
@@ -81,9 +81,11 @@ export const deletePhotosApi = (photoIds: number[]): Promise<AxiosResponse> => {
 // Upload Progress
 export const getUploadProgressApi = (
   albumId: number,
-  queryString: string,
+  fileName: string,
+  fileType: string,
 ): Promise<AxiosResponse> => {
-  return http.get(`/panel/albums/${albumId}/upload_progress${queryString}`, {
+  return http.get(`/panel/albums/${albumId}/upload_progress`, {
+    params: { file_name: fileName, file_type: fileType },
     headers: {
       'Content-Type': 'application/json',
     },
