@@ -70,10 +70,6 @@ export const updatePhotoApi = (
   return http.put(`/panel/albums/${albumId}/photos/${id}`, { photo });
 };
 
-export const deletePhotoApi = (albumId: number, id: number): Promise<AxiosResponse> => {
-  return http.delete(`/panel/albums/${albumId}/photos/${id}`);
-};
-
 export const deletePhotosApi = (albumId: number, photoIds: number[]): Promise<AxiosResponse> => {
   return http.delete(`/panel/albums/${albumId}/delete_photos`, { data: { photo_ids: photoIds } });
 };
