@@ -84,11 +84,16 @@ class ImageProcessor < ApplicationService
 
   # replace extension with '.jpg
   def image_name(file_name)
+    return file_name if image_is_jpg(file_name)
+
+    # if image has multiple '.' in the name, split by the last '.'
+    return "#{file_name.split('.')[0..-2].join('.')}.jpg" if file_name.split('.').length > 2
+
     "#{file_name.split('.')[0]}.jpg"
   end
 
   def image_extension(file_name)
-    file_name.split('.')[1].downcase
+    file_name.split('.')[-1].downcase
   end
 
   def image_is_jpg(file_name)
