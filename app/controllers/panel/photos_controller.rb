@@ -66,37 +66,33 @@ module Panel
       end
     end
 
-    # DELETE /albums/:album_id/photos/:id
-    def destroy
-      return redirect_to panel_path if current_user != @album.user
-
-      public_id = @photo.image
-      @photo.destroy
+    def destroy(photo_id)
+      photo = Photo.find(photo_id)
+      public_id = photo.image
+      photo.destroy
       folder = 'photo_review/'
       Cloudinary::Uploader.destroy(folder + public_id)
     end
 
     # DELETE /photos/delete_photos
     def destroy_multiple
-      return redirect_to panel_path if current_user != @album.user
+      album = set_album
+      return redirect_to panel_path if current_user != album.user
 
       params[:photo_ids].each do |photo_id|
-        photo = Photo.find(photo_id)
-        public_id = photo.image
-        photo.destroy
-        folder = 'photo_review/'
-        Cloudinary::Uploader.destroy(folder + public_id)
+        destroy(photo_id)
       end
     end
 
     private
 
     def create_new_upload(file)
+      album = set_album
       Upload.create({
                       name: file.original_filename,
                       file_type: file.content_type,
                       progress: 15,
-                      batch: @album.last_upload_batch,
+                      batch: album.last_upload_batch,
                       album_id: photo_params[:album_id]
                     })
     end
@@ -124,6 +120,7 @@ module Panel
     end
 
     def check_owner
+      @album = set_album
       return unless @album.user != current_user
 
       render(json: { error: 'Unauthorized' }, status: :unauthorized) && return

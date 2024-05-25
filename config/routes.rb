@@ -1,3 +1,4 @@
+
 Rails.application.routes.draw do
   mount Sidekiq::Web => '/sidekiq'
   root to: 'application#website'
