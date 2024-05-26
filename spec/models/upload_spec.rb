@@ -2,14 +2,14 @@
 #
 # Table name: uploads
 #
-#  id         :bigint           not null, primary key
-#  name       :string
-#  file_type  :string
-#  progress   :integer
-#  batch      :integer
-#  album_id   :bigint           not null
-#  created_at :datetime         not null
-#  updated_at :datetime         not null
+#  id           :bigint           not null, primary key
+#  name         :string
+#  file_type    :string
+#  progress     :integer
+#  album_id     :bigint           not null
+#  created_at   :datetime         not null
+#  updated_at   :datetime         not null
+#  is_cancelled :boolean          default(FALSE), not null
 #
 # Indexes
 #

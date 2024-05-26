@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_05_11_145226) do
+ActiveRecord::Schema[7.0].define(version: 2024_05_25_145011) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -54,7 +54,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_11_145226) do
   create_table "albums", force: :cascade do |t|
     t.string "name"
     t.date "expiry_date"
-    t.integer "last_upload_batch", default: 0
     t.bigint "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -105,10 +104,10 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_11_145226) do
     t.string "name"
     t.string "file_type"
     t.integer "progress"
-    t.integer "batch"
     t.bigint "album_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "is_cancelled", default: false, null: false
     t.index ["album_id"], name: "index_uploads_on_album_id"
   end
 
