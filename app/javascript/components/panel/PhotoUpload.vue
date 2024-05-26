@@ -1,6 +1,9 @@
 <template>
   <div class="flex justify-center" style="align-items: center">
-    <div class="absolute px-6 pt-10 pb-8 bg-white dark:bg-slate-800 border rounded">
+    <div
+      class="absolute px-6 pt-10 pb-8 bg-white dark:bg-slate-800 rounded"
+      style="min-height: 432px"
+    >
       <div class="mb-2 text-lg">Upload photos</div>
 
       <!-- Upload file -->
@@ -12,18 +15,27 @@
           @change="onChangeUploadPhoto($event)"
         />
       </div>
-
       <div v-if="hasInvalidFile" class="text-xs">
-        <span class="underline text-red-500" @click="toggleInvalidList">
-          Include invalid file format!
+        <span class="text-red-500">
+          Include
+          <span class="underline cursor-pointer" @click="toggleInvalidList">invalid format!</span>
         </span>
         <div v-if="showInvalidFileList" class="mt-2">
+          <ul>
+            <li v-for="file in invalidFiles" :key="file.name">
+              {{ file.name }}
+            </li>
+          </ul>
           <span> VALID: </span>
           <div class="inline-block m-1">
             {{ validFileExtensionsString }}
           </div>
         </div>
       </div>
+
+      <span v-if="duplicateFiles.length > 0" class="text-xs text-red-500">
+        Include duplicate files!
+      </span>
 
       <div class="flex place-content-between w-full mt-2">
         <div>Upload size:</div>
@@ -49,16 +61,33 @@
       </div>
 
       <!-- Upload progress -->
-      <div v-if="canUpload" class="mt-2">
+      <div class="mt-2">
         <div
+          v-if="uploads.length > 0"
           class="flex justify-center bg-gray-200 text-slate-600 cursor-pointer"
           @click="toggleUploads"
         >
           <font-awesome-icon icon="fa-solid fa-grip-lines" />
         </div>
         <div v-if="isExpanded" class="border w-full max-h-40 overflow-auto">
-          <div v-for="upload in inWaitingUploads" :key="upload.name" class="px-2">
-            <div class="mb-1">{{ upload.name }}</div>
+          <div v-for="(upload, i) in inWaitingUploads" :key="i" class="px-2">
+            <div class="flex justify-between mb-1">
+              <span
+                :class="{
+                  'text-red-500':
+                    isDuplicateFile(upload.name) ||
+                    isInvalidFile(getFileFromInputFiles(upload.name)),
+                }"
+              >
+                {{ upload.name }}
+              </span>
+              <!-- <font-awesome-icon
+                v-if="canRemoveInputFiles"
+                icon="fa-solid fa-times"
+                class="self-center cursor-pointer"
+                @click="removeFileFromInputFiles(i)"
+              /> -->
+            </div>
             <div class="mb-4 h-1 rounded bg-gray-200">
               <div
                 class="h-1 animate-pulse rounded bg-violet-400"
@@ -94,6 +123,10 @@ interface Album {
 const props = defineProps({
   album: {
     type: Object as PropType<Album>,
+    required: true,
+  },
+  albumPhotoNames: {
+    type: Array as PropType<string[]>,
     required: true,
   },
 });
@@ -165,21 +198,72 @@ const validFileExtensionsAndMimeTypesString =
 
 const hasInvalidFile = ref(false);
 const canUpload = computed(() => {
-  return inputFiles.value.length > 0 && !hasInvalidFile.value;
+  return (
+    inputFiles.value.length > 0 &&
+    invalidFiles.value.length === 0 &&
+    duplicateFiles.value.length === 0
+  );
 });
 const showInvalidFileList = ref(false);
 function toggleInvalidList() {
   showInvalidFileList.value = !showInvalidFileList.value;
 }
 
+// const showDuplicateFileList = ref(false);
+// function toggleDuplicateList() {
+//   showDuplicateFileList.value = !showDuplicateFileList.value;
+// }
+
 const photoUploadOption = ref(1);
 const inputFiles = ref([] as File[]);
+
+function getFileExtension(fileName: string) {
+  return fileName ? fileName.split('.').pop()?.toLowerCase() ?? '' : '';
+}
+
+function getFileNameWithoutExtension(fileName: string) {
+  return fileName.split('.').slice(0, -1).join('.');
+}
+
+function getFileFromInputFiles(fileName: string) {
+  return inputFiles.value.find((file: File) => file.name === fileName);
+}
+
+function isInvalidFile(file: File | undefined) {
+  if (!file) {
+    return false;
+  }
+  const ext = '.' + getFileExtension(file.name);
+  return !validFileExtensions.includes(ext) || !mimeType.includes(file.type);
+}
+
+// list of files that are invalid in the inputFiles
+const invalidFiles = computed(() => {
+  return inputFiles.value.filter((file: File) => {
+    const ext = '.' + getFileExtension(file.name);
+    return !validFileExtensions.includes(ext) || !mimeType.includes(file.type);
+  });
+});
+
+function isDuplicateFile(fileName: string) {
+  const fileNameWithoutExtension = getFileNameWithoutExtension(fileName);
+  const isDuplicateUploadedFiles = props.albumPhotoNames.includes(fileNameWithoutExtension);
+  const isDuplicateInputFiles = inputFiles.value.some((inputFile: File) => {
+    getFileNameWithoutExtension(inputFile.name) === fileNameWithoutExtension;
+  });
+  return isDuplicateUploadedFiles || isDuplicateInputFiles;
+}
+
+// list of files that are duplicate in the inputFiles and photoData
+const duplicateFiles = computed(() => {
+  return inputFiles.value.filter((file: File) => isDuplicateFile(file.name));
+});
 
 function onChangeUploadPhoto(event: any) {
   hasInvalidFile.value = false;
 
   [...event.target.files].forEach((file: File) => {
-    const ext = '.' + file.name.match(/\.([^\.]+)$/)![1].toLowerCase();
+    const ext = '.' + getFileExtension(file.name);
     if (!validFileExtensions.includes(ext) || !mimeType.includes(file.type)) {
       hasInvalidFile.value = true;
       return;
@@ -193,6 +277,7 @@ const uploadPhoto = async () => {
   if (!canUpload.value) {
     return;
   }
+  // canRemoveInputFiles.value = false;
 
   inputFiles.value.forEach((file: File) => {
     if (inputFiles.value.length === 0) {
@@ -241,6 +326,12 @@ watch(inputFiles, () => {
   }));
 });
 
+// const canRemoveInputFiles = ref(true);
+// function removeFileFromInputFiles(i: number) {
+//   inputFiles.value.splice(i, 1);
+//   uploads.value.splice(i, 1);
+// }
+
 const inWaitingUploads = computed(() => {
   return uploads.value.filter((upload: Upload) => upload.progress < 100);
 });
@@ -250,7 +341,9 @@ const inProgressUploads = computed(() => {
 });
 
 const uploadIsComplete = computed(() => {
-  return uploads.value.every((upload: Upload) => upload.progress === 100);
+  return (
+    uploads.value.length > 0 && uploads.value.every((upload: Upload) => upload.progress === 100)
+  );
 });
 
 function getProgressUntilComplete(file: File) {

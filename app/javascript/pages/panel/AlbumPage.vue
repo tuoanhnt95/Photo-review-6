@@ -3,7 +3,7 @@
   <div class="w-full h-full">
     <div
       class="relative w-full"
-      :class="{ 'opacity-10 saturate-0': isUploadingPhoto || isShowingPhoto }"
+      :class="{ 'opacity-40 saturate-40': isUploadingPhoto || isShowingPhoto }"
     >
       <div class="flex justify-between mx-8 mt-4">
         <div class="label-text">
@@ -225,8 +225,9 @@
     <PhotoUpload
       v-if="isUploadingPhoto"
       :album="album"
+      :albumPhotoNames="photos.map((photo) => photo.name)"
       class="absolute top-0 left-0 w-full h-full z-10"
-      @uploaded-new-photo="(photos) => addPhoto(photos)"
+      @uploaded-new-photo="(photo) => addPhoto(photo)"
       @close-upload-photo="isUploadingPhoto = false"
     />
 
