@@ -272,7 +272,6 @@ interface Album {
   name: string;
   user_id: number;
   invitees: string[];
-  last_upload_batch: number;
   expiry_date: Date;
 }
 
@@ -309,7 +308,6 @@ const album = ref<Album>({
   name: '',
   user_id: 0,
   invitees: [],
-  last_upload_batch: 0,
   expiry_date: new Date(),
 });
 

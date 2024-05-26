@@ -8,11 +8,13 @@ class ImageProcessor < ApplicationService
   def initialize(file, upload_option, upload_id) # rubocop:disable Lint/MissingSuper
     @file = file
     @upload_option = upload_option
-    @upload = Upload.find(upload_id)
+    @upload_id = upload_id
   end
 
   def call
     cloudinary_image = process_image
+    return nil if cloudinary_image.nil?
+
     url = cloudinary_image['secure_url']
     public_id = cloudinary_public_id(url)
     { img_name: get_file_name_without_extension(@file.original_filename), img_url: public_id }
@@ -33,30 +35,23 @@ class ImageProcessor < ApplicationService
   end
 
   def process_magicload(file_path, resized_width, resized_height)
+    return nil if Upload.find(@upload_id).is_cancelled
+
     image = MiniMagick::Image.new(file_path).format 'jpg'
-    @upload.update(progress: 20)
-    p '---------------------------------'
-    p 'converting to jpg'
-    p @upload
-    p '---------------------------------'
-    @upload.update(progress: 30)
-    p '---------------------------------'
-    p 'reformatting to jpg'
-    p @upload
-    p '---------------------------------'
-    # image.resize('4800x3600')
+    return nil if Upload.find(@upload_id).is_cancelled
+
+    Upload.find(@upload_id).update(progress: 20)
+    return nil if Upload.find(@upload_id).is_cancelled
+
     image.resize("#{resized_width}x#{resized_height}")
-    @upload.update(progress: 60)
-    p '---------------------------------'
-    p 'resizing'
-    p @upload
-    p '---------------------------------'
+    Upload.find(@upload_id).update(progress: 40)
+    return nil if Upload.find(@upload_id).is_cancelled
+
+    Upload.find(@upload_id).update(progress: 60)
+    return nil if Upload.find(@upload_id).is_cancelled
+
     result = upload_image_to_cloudinary(image.path)
-    @upload.update(progress: 90)
-    p '---------------------------------'
-    p 'uploading to cloudinary 2'
-    p @upload
-    p '---------------------------------'
+    Upload.find(@upload_id).update(progress: 80, is_cancelled: false)
     result
   end
 

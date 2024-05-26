@@ -7,7 +7,6 @@ require './lib/modules/file_input'
 module Panel
   class UploadsController < ApplicationController
     include FileInput
-    before_action :set_album, only: %i[find_upload_by_name]
     before_action :set_upload, only: %i[show update destroy]
 
     # GET /uploads
@@ -48,27 +47,38 @@ module Panel
     end
 
     def show_progress
-      unless check_file_type_whitelist!(params[:file_name], params[:file_type])
-        return render(json: { error: 'Invalid file type.' }, status: :unprocessable_entity)
-      end
-
-      render json: find_upload_by_name
-    end
-
-    private
-
-    # For last upload batch, increment in frontend and send it to backend, not increment per upload
-    def find_upload_by_name
-      upload = Upload.find_by(
+      uploads = Upload.where(
         album_id: params[:album_id],
         name: params[:file_name]
       )
 
-      { name: params[:file_name], progress: upload ? upload.progress : 0 }
+      # TODO: move delete cancelled uploads to a background job
+      delete_cancelled_uploads(uploads) if uploads.length > 1
+      upload_in_progress = uploads.last if uploads.length.positive? && !uploads.last.is_cancelled
+
+      render json: { name: params[:file_name], progress: upload_in_progress ? upload_in_progress.progress : 0 }
     end
 
-    def set_album
-      @album = Album.find(params[:album_id])
+    def cancel
+      uploads_in_progress = Upload.select do |upload|
+        upload.album_id = params[:album_id] && upload.progress < 80 && !upload.is_cancelled
+      end
+      return render(json: { message: 'No uploads to cancel.' }) if uploads_in_progress.empty?
+
+      uploads_in_progress.each do |upload|
+        upload.is_cancelled = true
+        upload.save
+      end
+
+      render(json: { message: 'Cancelled upload.' })
+    end
+
+    private
+
+    def delete_cancelled_uploads(uploads)
+      uploads.each do |upload|
+        upload.destroy if upload.is_cancelled
+      end
     end
 
     def set_upload
@@ -77,7 +87,7 @@ module Panel
 
     # Only allow a list of trusted parameters through.
     def upload_params
-      params.require(:upload).permit(:name, :progress, :album_id, :file_name, :file_type, :batch)
+      params.require(:upload).permit(:name, :progress, :album_id, :file_name, :file_type)
     end
   end
 end

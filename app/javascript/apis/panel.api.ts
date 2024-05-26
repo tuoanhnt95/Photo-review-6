@@ -74,6 +74,10 @@ export const deletePhotosApi = (albumId: number, photoIds: number[]): Promise<Ax
   return http.delete(`/panel/albums/${albumId}/delete_photos`, { data: { photo_ids: photoIds } });
 };
 
+export const cancelUploadApi = (albumId: number): Promise<AxiosResponse> => {
+  return http.delete(`/panel/albums/${albumId}/cancel_upload`);
+};
+
 // Upload Progress
 export const getUploadProgressApi = (
   albumId: number,

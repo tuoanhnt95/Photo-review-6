@@ -20,6 +20,7 @@ Rails.application.routes.draw do
       end
       put '/add_invitees', to: 'albums#add_invitees'
       delete '/delete_photos', to: 'photos#destroy_multiple', as: 'delete_photos'
+      delete '/cancel_upload', to: 'uploads#cancel'
       get '/photo_user_reviews', to: 'photo_user_reviews#index'
       get '/upload_progress', to: 'uploads#show_progress'
     end
