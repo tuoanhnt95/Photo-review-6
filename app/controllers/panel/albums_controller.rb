@@ -51,20 +51,22 @@ module Panel
     # PATCH/PUT /albums/1 or /albums/1.json
     def update
       removed_invitees = list_removed_invitees
+      to_be_added_invitees = added_invitees
 
       if !@album.name.empty? && @album.update(create_update_album)
         @album.remove_invitees(removed_invitees) unless removed_invitees.empty?
         render json: @album
-        @album.share(added_invitees, false) unless added_invitees.empty?
+        @album.share(to_be_added_invitees, false) unless to_be_added_invitees.empty?
       else
         render json: @album.errors, status: :unprocessable_entity
       end
     end
 
     def add_invitees
+      to_be_added_invitees = added_invitees
       if @album.update(invitees: @invitees)
         render json: @album
-        @album.share(added_invitees, false)
+        @album.share(to_be_added_invitees, false)
       else
         render json: @album.errors, status: :unprocessable_entity
       end

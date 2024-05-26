@@ -14,10 +14,9 @@ class UserNotifierMailer < ApplicationMailer
   def send_album_invitation_email(album, user_email)
     @album = album
     @album_url = panel_album_url(@album)
-    # @user = user
     @user_name = user_email.split('@').first
     @album_owner_email = @album.user.email
     mail(to: user_email,
-         subject: 'You have been invited to an album.')
+         subject: 'ShootSelect: Album invitation')
   end
 end
