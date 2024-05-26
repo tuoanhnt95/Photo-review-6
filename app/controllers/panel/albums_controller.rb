@@ -143,7 +143,7 @@ module Panel
 
     # Only allow a list of trusted parameters through.
     def album_params
-      params.require(:album).permit(:name, :expiry_date, :last_update_batch, invitees: [])
+      params.require(:album).permit(:name, :expiry_date, invitees: [])
     end
   end
 end

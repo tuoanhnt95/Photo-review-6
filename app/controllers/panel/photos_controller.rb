@@ -42,7 +42,14 @@ module Panel
       upload = create_new_upload(file)
 
       processed_image = ImageProcessor.call(file, photo_params[:upload_option], upload.id)
+
+      if processed_image.nil? ||
+         (Upload.find(upload.id).is_cancelled && Upload.find(upload.id).progress < 80)
+        render json: { message: 'Cancelled upload.' } && return
+      end
+
       photo = Photo.make_new_photo(processed_image, photo_params[:album_id])
+      upload.update(progress: 90)
 
       if photo.save
         upload.update(progress: 100)
@@ -87,12 +94,10 @@ module Panel
     private
 
     def create_new_upload(file)
-      album = set_album
       Upload.create({
                       name: file.original_filename,
                       file_type: file.content_type,
-                      progress: 15,
-                      batch: album.last_upload_batch,
+                      progress: 10,
                       album_id: photo_params[:album_id]
                     })
     end
@@ -136,7 +141,7 @@ module Panel
 
     # Only allow a list of trusted parameters through.
     def photo_params
-      params.permit(:image, :angle, :album_id, :upload_option, :file, :last_upload_batch, photo_ids: [])
+      params.permit(:image, :angle, :album_id, :upload_option, :file, photo_ids: [])
     end
   end
 end

@@ -62,7 +62,6 @@ interface Album {
   invitees: string[];
   cover: string;
   angle: number;
-  last_upload_batch: number;
 }
 
 const albumsData = ref<Album[]>([]);

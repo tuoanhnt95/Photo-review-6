@@ -57,17 +57,8 @@
           <font-awesome-icon icon="fa-solid fa-grip-lines" />
         </div>
         <div v-if="isExpanded" class="border w-full max-h-40 overflow-auto">
-          <div v-for="upload in inProgressUploads" :key="upload.name" class="px-2">
-            <div class="flex justify-between mb-1">
-              <div>{{ upload.name }}</div>
-              <div>
-                <font-awesome-icon
-                  icon="fa-solid fa-x"
-                  class="text-slate-400 cursor-pointer"
-                  @click="cancelUpload()"
-                />
-              </div>
-            </div>
+          <div v-for="upload in inWaitingUploads" :key="upload.name" class="px-2">
+            <div class="mb-1">{{ upload.name }}</div>
             <div class="mb-4 h-1 rounded bg-gray-200">
               <div
                 class="h-1 animate-pulse rounded bg-violet-400"
@@ -75,6 +66,7 @@
               ></div>
             </div>
           </div>
+          <div v-if="uploadIsComplete">Upload Complete!</div>
         </div>
       </div>
 
@@ -91,7 +83,7 @@
 <script setup lang="ts">
 import { ref, type PropType, watch, computed } from 'vue';
 import type { AxiosResponse } from 'axios';
-import { createPhotoApi, getUploadProgressApi } from '@/apis/panel.api';
+import { createPhotoApi, getUploadProgressApi, cancelUploadApi } from '@/apis/panel.api';
 
 interface Album {
   id: number;
@@ -203,6 +195,9 @@ const uploadPhoto = async () => {
   }
 
   inputFiles.value.forEach((file: File) => {
+    if (inputFiles.value.length === 0) {
+      return;
+    }
     getProgressUntilComplete(file);
     createPhotoApi(props.album.id, photoUploadOption.value, file)
       .then((response: AxiosResponse) => {
@@ -233,6 +228,7 @@ interface Upload {
   name: string;
   type: string;
   progress: number;
+  is_cancelled?: boolean;
   uploaded_photo?: Photo;
 }
 
@@ -245,24 +241,26 @@ watch(inputFiles, () => {
   }));
 });
 
-const inProgressUploads = computed(() => {
+const inWaitingUploads = computed(() => {
   return uploads.value.filter((upload: Upload) => upload.progress < 100);
+});
+
+const inProgressUploads = computed(() => {
+  return uploads.value.filter((upload: Upload) => upload.progress < 100 && upload.progress > 0);
 });
 
 const uploadIsComplete = computed(() => {
   return uploads.value.every((upload: Upload) => upload.progress === 100);
 });
 
-watch(uploadIsComplete, (isComplete) => {
-  if (isComplete) {
-    $emit('close-upload-photo');
-  }
-});
-
 function getProgressUntilComplete(file: File) {
   const upload = uploads.value.find((upload: Upload) => upload.name === file.name);
   const getProgressRepeatedly = setInterval(() => {
-    if ((upload && upload.progress === 100) || hasInvalidFile.value) {
+    if (
+      (upload && upload.progress === 100) ||
+      inputFiles.value.length === 0 ||
+      hasInvalidFile.value
+    ) {
       clearInterval(getProgressRepeatedly);
       return;
     }
@@ -290,11 +288,22 @@ function toggleUploads() {
 }
 
 function cancelUpload() {
+  // make a call to backend to cancel the upload
+  // find all uploads that are in progress and cancel them
+  if (inProgressUploads.value.length > 0) {
+    cancelUploadApi(props.album.id);
+  }
   inputFiles.value = [];
 }
 
 const closeUploadPhoto = () => {
-  cancelUpload();
-  $emit('close-upload-photo');
+  if (inProgressUploads.value.length > 0) {
+    if (confirm('Are you sure you want to cancel uploading?')) {
+      cancelUpload();
+      $emit('close-upload-photo');
+    }
+  } else {
+    $emit('close-upload-photo');
+  }
 };
 </script>
