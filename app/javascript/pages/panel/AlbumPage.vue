@@ -649,7 +649,7 @@ function getPhotoClass(photo: Photo) {
 /* Context menu */
 #context-menu {
   position: absolute;
-  top: 4rem;
+  top: 7rem;
   right: 0;
   width: 12rem;
   z-index: 10;
