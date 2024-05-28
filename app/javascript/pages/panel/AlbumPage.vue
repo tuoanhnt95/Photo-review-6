@@ -31,14 +31,14 @@
             class="flex w-42 border border-solid border-slate-600 divide-x divide-solid divide-slate-600 text-slate-600 rounded-sm"
           >
             <div v-for="opt in filterReview" :key="opt.icon">
-              <div
+              <button
                 class="btn-filter w-14 px-2 py-0.5"
                 :class="{ 'btn-filter-selected': opt.selected }"
                 @click="opt.selected = !opt.selected"
               >
                 <font-awesome-icon :icon="`fa-solid fa-${opt.icon}`" />
                 <div>({{ numberOfPhotosWithReview(opt.value) }})</div>
-              </div>
+              </button>
             </div>
           </div>
         </div>
@@ -112,21 +112,25 @@
         </div>
       </div>
       <!-- Photos list view -->
-      <div v-else class="items-center">
+      <div v-else>
         <table class="w-full">
           <tbody>
-            <tr v-for="(photo, i) in photos" :key="i" class="w-full h-11 cursor-pointer border-b">
-              <td class="w-11 h-full">
-                <div class="flex justify-center align-middle w-full h-full">
+            <tr
+              v-for="(photo, i) in photos"
+              :key="i"
+              class="w-full h-11 pt-3 border-solid border-black border-b-2"
+            >
+              <td class="w-11 h-full align-middle">
+                <div class="flex justify-center w-full h-full">
                   <font-awesome-icon
                     icon="fa-solid fa-circle-check"
-                    class="icon-circle-check-viewList"
+                    class="icon-circle-check-viewList self-center"
                     :class="{ 'icon-circle-check-selected': selectedPhotoIds.includes(photo.id) }"
                     @click.prevent="toggleSelectPhoto(photo.id)"
                   />
                 </div>
               </td>
-              <td class="w-11 h-11" @click.prevent="showPhoto(photo.id)">
+              <td class="w-11 h-11 cursor-pointer" @click.prevent="showPhoto(photo.id)">
                 <AdvancedImage
                   :id="photo.image"
                   :cldImg="getCloudinaryImage(photo.image, photo.angle)"
@@ -134,11 +138,20 @@
                   :class="getPhotoClass(photo)"
                 />
               </td>
-              <td @click.prevent="showPhoto(photo.id)">
-                <div class="text-wrap border border-solid border-red-500">{{ photo.name }}</div>
-                <!-- TODO: Show original size -->
-                <div class="text-xs text-slate-400"></div>
+              <td
+                class="w-56 h-full align-middle text-wrap cursor-pointer"
+                @click.prevent="showPhoto(photo.id)"
+              >
+                <div class="ml-3 h-full">{{ photo.name }}</div>
               </td>
+              <template v-for="review in filterReview.slice(0, 3)" :key="review.icon">
+                <td v-show="isShowingResult" class="w-11 h-full align-middle pr-3">
+                  <div class="flex justify-around w-full h-full">
+                    <font-awesome-icon :icon="`fa-solid fa-${review.icon}`" class="self-center" />
+                    {{ numberOfReviewsWithResult(photo.id, review.value) }}
+                  </div>
+                </td>
+              </template>
             </tr>
           </tbody>
         </table>
@@ -590,8 +603,6 @@ function getPhotoClass(photo: Photo) {
   justify-content: space-around;
   align-items: center;
   border-radius: 0.25rem;
-  border-width: 1px;
-  cursor: pointer;
 }
 
 .btn-filter-selected {
@@ -609,6 +620,7 @@ function getPhotoClass(photo: Photo) {
 .icon-circle-check-viewList {
   z-index: 50;
   opacity: 0;
+  cursor: pointer;
 }
 
 .icon-circle-check:hover,
