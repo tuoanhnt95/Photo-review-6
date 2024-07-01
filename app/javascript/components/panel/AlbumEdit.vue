@@ -1,87 +1,89 @@
 <template>
-  <div class="relative px-6 pt-16 pb-8 bg-white dark:bg-slate-800 border rounded">
-    <div v-if="props.action !== 'share'" class="w-full">
-      <div class="flex place-content-between">
-        <input
-          v-model="name"
-          type="text"
-          required
-          placeholder="Album name"
-          class="w-full px-2 py-1 text-xl text-black rounded"
-        />
-      </div>
-      <div class="h-8">
-        <p v-if="!nameExists">Required</p>
-      </div>
-    </div>
-
-    <div v-if="props.action !== 'share'" class="flex place-content-between mb-4">
-      <label for="expiry-date" class="self-center text-lg">Expiry date</label>
-      <div>
-        <input
-          v-model="expiryDate"
-          type="date"
-          :min="today"
-          class="pl-1 rounded text-lg text-black"
-        />
+  <div class="container-modal-album bg-glass-blur">
+    <div class="modal-album bg-glass-dark rounded-xl">
+      <div v-if="props.action !== 'share'" class="w-full">
+        <div class="flex place-content-between">
+          <input
+            v-model="name"
+            type="text"
+            required
+            placeholder="Album name"
+            class="w-full px-2 py-1 text-xl text-black rounded"
+          />
+        </div>
         <div class="h-8">
-          <p v-if="!expiryDate">Invalid date</p>
+          <p v-if="!nameExists">Required</p>
         </div>
       </div>
-    </div>
 
-    <div class="flex place-content-between mb-4">
-      <label for="invitee" class="text-lg">Invitee</label>
-      <div class="tag-input ml-2.5">
-        <input
-          v-model="newInvitee"
-          type="email"
-          class="w-full py-1 px-2 text-lg text-black rounded"
-          @keydown.enter="addInvitee"
-          @keydown.prevent.tab="addInvitee"
-          @keydown.space="addInvitee"
-          @keyup.,="addInvitee"
-          @keyup.;="addInvitee"
-          @keydown.delete="newInvitee.length || removeInvitee(0)"
-        />
-        <div class="h-8">
-          <p v-if="!emailIsValid">Invalid email format</p>
-        </div>
-        <div class="tags">
-          <div
-            v-for="(invitee, i) in invitees"
-            :key="i"
-            class="tag"
-            :class="{ 'tag-existing': !editableInvitees.includes(invitee) }"
-          >
-            {{ invitee }}
-            <font-awesome-icon
-              v-if="editableInvitees.includes(invitee)"
-              icon="fa-solid fa-x"
-              class="ml-2 cursor-pointer"
-              @click="removeInvitee(i)"
-            />
+      <div v-if="props.action !== 'share'" class="flex place-content-between mb-4">
+        <label for="expiry-date" class="self-center text-lg">Expiry date</label>
+        <div>
+          <input
+            v-model="expiryDate"
+            type="date"
+            :min="today"
+            class="pl-1 rounded text-lg text-black"
+          />
+          <div class="h-8">
+            <p v-if="!expiryDate">Invalid date</p>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="w-full">
-      <button
-        class="w-full mt-4 py-3 bg-violet-600 text-slate-200 rounded text-xl font-bold"
-        :disabled="!canSubmit"
-        :class="{ 'opacity-50 cursor-not-allowed': !canSubmit }"
-        @click="saveAlbum"
-      >
-        {{ props.action === 'create' ? 'Create' : 'Save' }}
-      </button>
-    </div>
+      <div class="flex place-content-between mb-4">
+        <label for="invitee" class="text-lg">Invitee</label>
+        <div class="tag-input ml-2.5">
+          <input
+            v-model="newInvitee"
+            type="email"
+            class="w-full py-1 px-2 text-lg text-black rounded"
+            @keydown.enter="addInvitee"
+            @keydown.prevent.tab="addInvitee"
+            @keydown.space="addInvitee"
+            @keyup.,="addInvitee"
+            @keyup.;="addInvitee"
+            @keydown.delete="newInvitee.length || removeInvitee(0)"
+          />
+          <div class="h-8">
+            <p v-if="!emailIsValid">Invalid email format</p>
+          </div>
+          <div class="tags">
+            <div
+              v-for="(invitee, i) in invitees"
+              :key="i"
+              class="tag"
+              :class="{ 'tag-existing': !editableInvitees.includes(invitee) }"
+            >
+              {{ invitee }}
+              <font-awesome-icon
+                v-if="editableInvitees.includes(invitee)"
+                icon="fa-solid fa-x"
+                class="ml-2 cursor-pointer"
+                @click="removeInvitee(i)"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
 
-    <font-awesome-icon
-      icon="fa-solid fa-x"
-      class="absolute top-4 right-4 text-slate-400"
-      @click="closeEditAlbum()"
-    />
+      <div class="w-full">
+        <button
+          class="w-full mt-4 py-3 bg-violet-600 text-slate-200 rounded text-xl font-bold"
+          :disabled="!canSubmit"
+          :class="{ 'opacity-50 cursor-not-allowed': !canSubmit }"
+          @click="saveAlbum"
+        >
+          {{ props.action === 'create' ? 'Create' : 'Save' }}
+        </button>
+      </div>
+
+      <font-awesome-icon
+        icon="fa-solid fa-x"
+        class="absolute top-4 right-4 text-slate-400"
+        @click="closeEditAlbum()"
+      />
+    </div>
   </div>
 </template>
 
@@ -89,7 +91,6 @@
 import { computed, ref } from 'vue';
 import type { AxiosResponse } from 'axios';
 import { createAlbumApi, updateAlbumApi, addInviteesApi } from '@/apis/panel.api';
-
 const $emit = defineEmits(['close-edit-album', 'added-new-album', 'edited-album']);
 
 const props = defineProps({
@@ -239,6 +240,22 @@ function toDate(dateStr: string) {
 </script>
 
 <style scoped>
+.container-modal-album {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+}
+
+.modal-album {
+  position: relative;
+  margin: 0 auto;
+  top: 25%;
+  padding: 4rem 1.5rem 2rem 1.5rem;
+  width: fit-content;
+}
+
 .tag-input {
   width: 100%;
 }
