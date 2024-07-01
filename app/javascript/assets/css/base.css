@@ -20,8 +20,11 @@
   --vt-c-text-dark-1: var(--vt-c-white);
   --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
 
+  --grey-200: rgb(151 151 151);
+  --grey-500: rgba(37, 37, 37, 0.9);
   --slate-200: rgb(235 238 242);
   --slate-300: rgb(209 213 219);
+  --slate-400: rgb(148 163 184);
   --slate-600: rgb(75 85 99);
   --slate-800: rgb(30 41 59);
   --violet-600: #7c3aed;
@@ -33,12 +36,14 @@
   --color-background: var(--vt-c-white);
   --color-background-soft: var(--vt-c-white-soft);
   --color-background-mute: var(--vt-c-white-mute);
+  --color-menu: var(--grey-500);
 
   --color-border: var(--vt-c-divider-light-2);
   --color-border-hover: var(--vt-c-divider-light-1);
 
   --color-heading: var(--vt-c-text-light-1);
   --color-text: var(--vt-c-text-light-1);
+  --color-text-light-1: var(--slate-400);
 
   --section-gap: 160px;
   --color-primary: var(--violet-600);
@@ -50,11 +55,12 @@
 :root {
   --height-nav-bar: 4rem;
   --height-no-nav-bar: calc(100vh - var(--height-nav-bar));
+  --border-radius-lg: 0.75rem; /* 12px */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-background: var(--slate-800);
+    --color-background: black;
     --color-background-soft: var(--vt-c-black-soft);
     --color-background-mute: var(--vt-c-black-mute);
 
@@ -62,7 +68,7 @@
     --color-border-hover: var(--vt-c-divider-dark-1);
 
     --color-heading: var(--vt-c-text-dark-1);
-    --color-text: var(--vt-c-text-dark-2);
+    --color-text: white;
   }
 }
 
@@ -76,8 +82,8 @@
 
 body {
   width: 100vw;
-  height: 100vh;
-  min-height: 100vh;
+  /* height: 100vh; */
+  /* min-height: 100vh; */
   color: var(--color-text);
   background: var(--color-background);
   transition:
@@ -105,11 +111,10 @@ body {
 
 .label-text {
   display: block;
-  margin-bottom: 0.5rem;
-  font-size: 1.25rem; /* 20px */
-  line-height: 1.75rem; /* 28px */
-  font-weight: 600;
-  color: var(--color-primary);
+  font-size: 19pt; /* 1.9375rem */
+  font-weight: bolder;
+  /* color: var(--color-primary); */
+  color: white;
 }
 
 .photo-container {
@@ -122,4 +127,15 @@ body {
 
 .container-no-nav-bar {
   height: var(--height-no-nav-bar);
+}
+
+.bg-glass-dark {
+  background: var(--color-menu);
+  /* background: rgba(0, 0, 0, 0.8); */
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.transition-menu {
+  transition: 0.1s ease-in-out;
 }
