@@ -1,9 +1,6 @@
 <template>
   <BaseLayout>
     <div class="wrapper">
-      <div class="navbar">
-        <MainMenu />
-      </div>
       <div class="container-panel">
         <router-view />
       </div>
@@ -13,5 +10,4 @@
 
 <script setup lang="ts">
 import BaseLayout from '../BaseLayout.vue';
-import MainMenu from './MainMenu.vue';
 </script>

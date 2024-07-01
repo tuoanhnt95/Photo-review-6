@@ -37,6 +37,8 @@ import {
   faUserPlus,
   faUserGroup,
   faTrashCan,
+  faAngleDown,
+  faAngleUp,
 } from '@fortawesome/free-solid-svg-icons';
 import { faSquareMinus } from '@fortawesome/free-regular-svg-icons'
 
@@ -77,6 +79,8 @@ library.add(
   faUserPlus,
   faUserGroup,
   faTrashCan,
+  faAngleDown,
+  faAngleUp,
 );
 library.add(faSquareMinus);
 const token = AuthService.getToken();
