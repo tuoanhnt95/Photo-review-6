@@ -17,17 +17,28 @@
 
   --vt-c-text-light-1: var(--vt-c-indigo);
   --vt-c-text-light-2: rgba(60, 60, 60, 0.66);
+  --vt-c-text-light-3: rgba(60, 60, 60, 0.76);
   --vt-c-text-dark-1: var(--vt-c-white);
   --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
 
+  --white-mute: rgba(235, 235, 235, 0.28);
+  --white-soft: rgba(255, 255, 255, 0.2);
+  --black-soft: rgba(0, 0, 0, 0.4);
   --grey-200: rgb(151 151 151);
-  --grey-500: rgba(37, 37, 37, 0.9);
+  --black-piano: rgba(28, 30, 28, 0.9);
+  --black-raven: rgba(50, 50, 50, 0.9);
+  --grey-violet-300: rgba(37, 37, 37, 0.32);
+  --grey-violet-500: rgba(37, 37, 37, 0.52);
+  --grey-violet-700: rgba(37, 37, 37, 0.72);
+  --grey-violet-800: rgba(37, 37, 37, 0.82);
+  --grey-violet-900: rgba(37, 37, 37, 0.9);
   --slate-200: rgb(235 238 242);
   --slate-300: rgb(209 213 219);
   --slate-400: rgb(148 163 184);
   --slate-600: rgb(75 85 99);
   --slate-800: rgb(30 41 59);
   --black-russian: rgba(19, 19, 38, 0.5);
+  --black-russian-800: rgba(19, 19, 38, 0.8);
   --violet-600: #7c3aed;
   --violet-800: #5b21b6;
 }
@@ -37,9 +48,9 @@
   --color-background: var(--vt-c-white);
   --color-background-soft: var(--vt-c-white-soft);
   --color-background-mute: var(--vt-c-white-mute);
-  --color-menu: var(--grey-500);
+  --color-menu: var(--black-raven);
 
-  --color-border: var(--vt-c-divider-light-2);
+  --color-border: var(--white-soft);
   --color-border-hover: var(--vt-c-divider-light-1);
 
   --color-heading: var(--vt-c-text-light-1);
@@ -114,8 +125,12 @@ body {
   display: block;
   font-size: 19pt; /* 1.9375rem */
   font-weight: bolder;
-  /* color: var(--color-primary); */
-  color: white;
+}
+
+.label-text-md {
+  display: block;
+  font-size: 14pt; /* 1.9375rem */
+  font-weight: bolder;
 }
 
 .photo-container {
@@ -130,16 +145,27 @@ body {
   height: var(--height-no-nav-bar);
 }
 
-.bg-glass-dark {
+.bg-glass-grey {
   background: var(--color-menu);
-  /* background: rgba(0, 0, 0, 0.8); */
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  border-radius: 12px;
+}
+
+.bg-glass-dark {
+  background: var(--black-piano);
+  border-radius: 12px;
+}
+
+.box-shadow {
+  box-shadow: 0px 0px 32px rgba(0, 0, 0, 0.2);
+}
+
+.border-modal-input {
+  border: 1px solid var(--white-mute);
 }
 
 .bg-glass-blur {
-  background: var(--black-russian);
-  backdrop-filter: blur(8px);
+  background: var(--black-soft);
+  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(8px);
 }
 
