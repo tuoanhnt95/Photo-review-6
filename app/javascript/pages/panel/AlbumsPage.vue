@@ -1,32 +1,42 @@
 <template>
-  <div class="flex w-100 justify-center px-4">
-    <div>
-      <div :class="{ 'opacity-25': action.length > 0 }">
+  <div>
+    <div class="flex w-100 justify-center">
+      <div>
         <div class="h-11">Settings</div>
-        <div class="label-text">Albums</div>
-        <div class="container-sort">
-          <div class="container-sort-label" @click="showSort">
-            {{ selectedSort }}
-            <font-awesome-icon
-              v-if="!isShowingSort"
-              icon="fa-solid fa-angle-down"
-              class="sort-icon"
-            />
-            <font-awesome-icon v-if="isShowingSort" icon="fa-solid fa-angle-up" class="sort-icon" />
-          </div>
-          <div class="container-sort-menu">
+        <div class="flex justify-between">
+          <div class="label-text">Albums</div>
+          <div class="container-sort">
             <div
-              class="sort-menu bg-glass-dark shadow-lg divide-y divide-solid divide-neutral-700"
-              :class="{ show: isShowingSort }"
+              class="container-sort-label"
+              :class="{ 'show-sort': isShowingSort }"
+              @click="showSort"
             >
+              {{ selectedSort }}
+              <font-awesome-icon
+                v-if="!isShowingSort"
+                icon="fa-solid fa-angle-down"
+                class="sort-icon"
+              />
+              <font-awesome-icon
+                v-if="isShowingSort"
+                icon="fa-solid fa-angle-up"
+                class="sort-icon"
+              />
+            </div>
+            <div class="container-sort-menu">
               <div
-                v-for="sort in sortMethods"
-                :key="sort.value"
-                class="sort-menu-item text-xs px-4 py-2"
-                :class="{ 'sort-selected pointer-events-none': sortMethod === sort.value }"
-                @click="sortMethod = sort.value"
+                class="sort-menu bg-glass-dark shadow-lg divide-y divide-solid divide-neutral-700"
+                :class="{ show: isShowingSort }"
               >
-                {{ sort.name }}
+                <div
+                  v-for="sort in sortMethods"
+                  :key="sort.value"
+                  class="sort-menu-item text-sm px-4 py-2"
+                  :class="{ 'sort-selected pointer-events-none': sortMethod === sort.value }"
+                  @click="sortMethod = sort.value"
+                >
+                  {{ sort.name }}
+                </div>
               </div>
             </div>
           </div>
@@ -59,15 +69,13 @@
           </div>
         </div>
       </div>
-
-      <AlbumEdit
-        v-if="action.length > 0"
-        :action="action"
-        class="absolute top-[-200px] left-0 w-full z-10"
-        @close-edit-album="action = ''"
-        @added-new-album="(editedAlbum: Album) => addAlbum(editedAlbum)"
-      />
     </div>
+    <AlbumEdit
+      v-if="action.length > 0"
+      :action="action"
+      @close-edit-album="action = ''"
+      @added-new-album="(editedAlbum: Album) => addAlbum(editedAlbum)"
+    />
   </div>
 </template>
 
@@ -130,9 +138,9 @@ const addAlbum = (album: Album) => {
 
 // sort methods: 0 album added order 1 far to close, 2 close to far, 3 alphabetical ascending, 4 alphabetical descending
 const sortMethods = [
-  { value: 0, name: 'Creation date: Old to New' },
-  { value: 1, name: 'Due date: Earliest First' },
-  { value: 2, name: 'Due date: Latest First' },
+  { value: 0, name: 'Created: Earliest First' },
+  { value: 1, name: 'Due: Earliest First' },
+  { value: 2, name: 'Due: Latest First' },
   { value: 3, name: 'Album name: A to Z' },
   { value: 4, name: 'Album name: Z to A' },
 ];
@@ -161,15 +169,24 @@ const showSort = () => {
 
 .container-sort-label {
   display: flex;
+  justify-content: space-between;
   gap: 0.5rem;
   margin-left: 0.25rem;
+  padding: 0 0.25rem;
+  width: 150px;
   cursor: pointer;
   font-size: 12px;
+  border: 1px solid var(--color-background);
+  transition: border-color 0.1s ease-in-out;
 
   .sort-icon {
     align-self: center;
     font-size: 10px;
   }
+}
+
+.container-sort-label.show-sort {
+  border-color: var(--color-primary);
 }
 
 .sort-menu {
