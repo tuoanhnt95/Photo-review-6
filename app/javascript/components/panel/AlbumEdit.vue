@@ -1,74 +1,83 @@
 <template>
   <div class="container-modal-album bg-glass-blur">
     <div class="modal-album bg-glass-grey box-shadow">
-      <h3 class="label-text-md text-center mb-3">{{ title }}</h3>
-      <div v-if="props.action !== 'share'" class="w-full">
-        <div class="flex place-content-between">
-          <input
-            v-model="name"
-            type="text"
-            required
-            placeholder="Album name"
-            class="bg-glass-dark box-shadow border-modal-input"
-          />
-        </div>
-        <span v-if="!nameExists" class="pl-1 text-xs">Required</span>
-      </div>
-
-      <div v-if="props.action !== 'share'">
-        <div class="container-label-input bg-glass-dark box-shadow">
-          <label for="expiry-date" class="self-center">Due date</label>
-          <div>
+      <div class="modal-info">
+        <h3 class="label-text-md text-center mb-3">{{ title }}</h3>
+        <div v-if="props.action !== 'share'" class="w-full mb-2">
+          <div class="flex place-content-between">
             <input
-              v-model="expiryDate"
-              type="date"
-              :min="today"
-              class="bg-glass-dark flex justify-end"
+              v-model="name"
+              type="text"
+              required
+              placeholder="Album name"
+              class="bg-glass-dark box-shadow border-modal-input"
             />
           </div>
+          <div class="h-6">
+            <span v-if="!nameExists" class="text-warning-small pl-1">Required</span>
+          </div>
         </div>
-        <p v-if="!expiryDate" class="pl-1 text-xs">Invalid date</p>
+
+        <div v-if="props.action !== 'share'">
+          <div class="container-label-input bg-glass-dark box-shadow">
+            <label for="expiry-date" class="self-center">Due date</label>
+            <div>
+              <input
+                v-model="expiryDate"
+                type="date"
+                :min="today"
+                class="bg-glass-dark flex justify-end"
+              />
+            </div>
+          </div>
+          <p v-if="!expiryDate" class="text-warning-small pl-1">Invalid date</p>
+        </div>
+
+        <div class="mb-4">
+          <div class="container-label-input bg-glass-dark box-shadow">
+            <label for="invitee" class="text-lg">Share</label>
+            <div class="w-full ml-2.5">
+              <input
+                v-model="newInvitee"
+                type="email"
+                class="bg-glass-dark"
+                @keydown.enter="addInvitee"
+                @keydown.prevent.tab="addInvitee"
+                @keydown.space="addInvitee"
+                @keyup.,="addInvitee"
+                @keyup.;="addInvitee"
+                @keydown.delete="newInvitee.length || removeInvitee(0)"
+              />
+            </div>
+          </div>
+          <p v-if="!emailIsValid" class="text-warning-small pl-1">Invalid email format</p>
+          <div class="tags">
+            <div
+              v-for="(invitee, i) in invitees"
+              :key="i"
+              class="tag"
+              :class="{ 'tag-existing': !editableInvitees.includes(invitee) }"
+            >
+              {{ invitee }}
+              <div class="container-btn-x">
+                <div class="btn-x">
+                  <font-awesome-icon
+                    v-if="editableInvitees.includes(invitee)"
+                    icon="fa-solid fa-x"
+                    class="ml-2 cursor-pointer self-center text-xs"
+                    @click="removeInvitee(i)"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="mb-4">
-        <div class="container-label-input bg-glass-dark box-shadow">
-          <label for="invitee" class="text-lg">Invitee</label>
-          <div class="w-full ml-2.5">
-            <input
-              v-model="newInvitee"
-              type="email"
-              class="bg-glass-dark"
-              @keydown.enter="addInvitee"
-              @keydown.prevent.tab="addInvitee"
-              @keydown.space="addInvitee"
-              @keyup.,="addInvitee"
-              @keyup.;="addInvitee"
-              @keydown.delete="newInvitee.length || removeInvitee(0)"
-            />
-          </div>
-        </div>
-        <p v-if="!emailIsValid" class="pl-1 text-xs">Invalid email format</p>
-        <div class="tags">
-          <div
-            v-for="(invitee, i) in invitees"
-            :key="i"
-            class="tag"
-            :class="{ 'tag-existing': !editableInvitees.includes(invitee) }"
-          >
-            {{ invitee }}
-            <font-awesome-icon
-              v-if="editableInvitees.includes(invitee)"
-              icon="fa-solid fa-x"
-              class="ml-2 cursor-pointer"
-              @click="removeInvitee(i)"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div class="w-full">
+      <div class="container-btn-bottom">
+        <button class="text-xl" @click="closeEditAlbum">Cancel</button>
         <button
-          class="w-full mt-4 py-3 bg-violet-600 text-slate-200 rounded text-xl font-bold"
+          class="font-bold"
           :disabled="!canSubmit"
           :class="{ 'opacity-50 cursor-not-allowed': !canSubmit }"
           @click="saveAlbum"
@@ -76,12 +85,6 @@
           {{ props.action === 'create' ? 'Create' : 'Save' }}
         </button>
       </div>
-
-      <font-awesome-icon
-        icon="fa-solid fa-x"
-        class="absolute top-4 right-4 text-slate-400"
-        @click="closeEditAlbum()"
-      />
     </div>
   </div>
 </template>
@@ -262,18 +265,21 @@ function toDate(dateStr: string) {
 
 .modal-album {
   position: relative;
-  margin: 0 auto;
   top: 25%;
-  padding: 2rem 1.5rem;
+  margin: 0 auto;
   width: fit-content;
   border-radius: 0.75rem; /* 12px */
 }
 
-.modal-album input,
+.modal-info {
+  padding: 2rem 1.5rem;
+}
+
+.modal-info input,
 .container-label-input {
   width: 100%;
   min-width: 190px;
-  padding: 0.1rem 0.25rem;
+  padding: 0.1rem 0.5rem;
   font-size: 1rem; /* 16px */
   border-radius: 0.5rem;
 }
@@ -282,6 +288,10 @@ function toDate(dateStr: string) {
   display: flex;
   justify-content: space-between;
   margin-bottom: 0.5rem;
+}
+
+::-webkit-calendar-picker-indicator {
+  filter: invert(1);
 }
 
 .tag-input {
@@ -295,17 +305,51 @@ function toDate(dateStr: string) {
   overflow-x: auto;
 }
 .tag {
-  width: fit-content;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
   margin-top: 8px;
   padding: 0 10px 2px 8px;
-  border-radius: 4px;
-  background: var(--color-primary);
-  color: white;
-  white-space: nowrap;
+  white-space: wrap;
   transition: 0.1s ease background;
+
+  .container-btn-x {
+    width: 44px;
+    height: 44px;
+
+    .btn-x {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      align-self: center;
+    }
+  }
 }
 
 .tag-existing {
   background: var(--color-secondary);
+}
+
+.container-btn-bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  border-top: 1px solid var(--color-border);
+
+  button {
+    padding: 12px 16px;
+    font-size: 1.25rem; /* 20px */
+    line-height: 1.75rem; /* 28px */
+    color: var(--color-primary);
+  }
+
+  button:first-child {
+    border-right: 1px solid var(--color-border);
+  }
+
+  button:disabled {
+    color: var(--color-border);
+  }
 }
 </style>

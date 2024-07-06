@@ -23,7 +23,7 @@
                 class="sort-icon"
               />
             </div>
-            <div class="container-sort-menu">
+            <div v-if="isShowingSort" class="container-sort-menu">
               <div
                 class="sort-menu bg-glass-dark shadow-lg divide-y divide-solid divide-neutral-700"
                 :class="{ show: isShowingSort }"
@@ -42,16 +42,16 @@
           </div>
         </div>
         <div class="flex pb-4">
-          <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 mx-auto mb-6 z-0">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mx-auto mb-6 z-0">
             <div v-for="album in albums" :key="album.id">
-              <div class="relative w-36 h-46 cursor-pointer">
+              <div class="relative w-36 h-46 md:w-48 md:h-56 cursor-pointer">
                 <RouterLink :to="{ name: 'Album', params: { id: album.id } }">
-                  <div class="photo-container flex justify-center h-36">
+                  <div class="photo-container flex justify-center h-36 md:h-48">
                     <AdvancedImage
-                      v-if="album.cover.length > 0"
+                      v-if="album.cover && album.cover.length > 0"
                       :cld-img="getCloudinaryImage(album.cover, album.angle)"
                       place-holder="predominant-color"
-                      class="object-cover rounded"
+                      class="object-cover w-36 h-36 md:w-48 md:h-48 rounded"
                     />
                   </div>
                   <div class="pl-1 text-md truncate font-medium text-slate-500 text-white">
