@@ -1,9 +1,9 @@
 <template>
   <div class="container-modal-album bg-glass-blur">
-    <div class="modal-album bg-glass-grey box-shadow">
+    <div class="modal-album bg-glass-grey box-shadow top-[15%] md:top-1/4">
       <div class="modal-info">
         <h3 class="label-text-md text-center mb-3">{{ title }}</h3>
-        <div v-if="props.action !== 'share'" class="w-full mb-2">
+        <div v-if="props.action !== 'share'" class="container-input-warning">
           <div class="flex place-content-between">
             <input
               v-model="name"
@@ -13,7 +13,7 @@
               class="bg-glass-dark box-shadow border-modal-input"
             />
           </div>
-          <div class="h-6">
+          <div class="container-warning">
             <span v-if="!nameExists" class="text-warning-small pl-1">Required</span>
           </div>
         </div>
@@ -33,7 +33,7 @@
           <p v-if="!expiryDate" class="text-warning-small pl-1">Invalid date</p>
         </div>
 
-        <div class="mb-4">
+        <div class="">
           <div class="container-label-input bg-glass-dark box-shadow">
             <label for="invitee" class="text-lg">Share</label>
             <div class="w-full ml-2.5">
@@ -50,7 +50,9 @@
               />
             </div>
           </div>
-          <p v-if="!emailIsValid" class="text-warning-small pl-1">Invalid email format</p>
+          <div class="container-warning">
+            <p v-if="!emailIsValid" class="text-warning-small pl-1">Invalid email format</p>
+          </div>
           <div class="tags">
             <div
               v-for="(invitee, i) in invitees"
@@ -58,13 +60,15 @@
               class="tag"
               :class="{ 'tag-existing': !editableInvitees.includes(invitee) }"
             >
-              {{ invitee }}
+              <div class="container-email">
+                {{ invitee }}
+              </div>
               <div class="container-btn-x">
                 <div class="btn-x">
                   <font-awesome-icon
                     v-if="editableInvitees.includes(invitee)"
                     icon="fa-solid fa-x"
-                    class="ml-2 cursor-pointer self-center text-xs"
+                    class="cursor-pointer self-center text-xs"
                     @click="removeInvitee(i)"
                   />
                 </div>
@@ -156,6 +160,9 @@ const emailIsValid = computed(() => {
 });
 
 function addInvitee() {
+  if (!emailIsValid.value) {
+    return;
+  }
   if (newInvitee.value !== '') {
     newInvitee.value = newInvitee.value.replace(/[,.;\s]+$/, '');
     myInvitees.value.unshift(newInvitee.value);
@@ -256,7 +263,7 @@ function toDate(dateStr: string) {
 
 <style scoped>
 .container-modal-album {
-  position: absolute;
+  position: fixed;
   top: 0;
   width: 100%;
   height: 100%;
@@ -265,14 +272,16 @@ function toDate(dateStr: string) {
 
 .modal-album {
   position: relative;
-  top: 25%;
+  /* top: 15%; */
   margin: 0 auto;
-  width: fit-content;
+  width: 90%;
+  min-width: 320px;
+  max-width: 360px;
   border-radius: 0.75rem; /* 12px */
 }
 
 .modal-info {
-  padding: 2rem 1.5rem;
+  padding: 2rem 1.5rem 0 1.5rem;
 }
 
 .modal-info input,
@@ -282,6 +291,19 @@ function toDate(dateStr: string) {
   padding: 0.1rem 0.5rem;
   font-size: 1rem; /* 16px */
   border-radius: 0.5rem;
+}
+
+.container-input-warning {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+}
+
+.container-warning {
+  display: flex;
+  align-self: start;
+  height: 1.5rem;
 }
 
 .container-label-input {
@@ -294,35 +316,48 @@ function toDate(dateStr: string) {
   filter: invert(1);
 }
 
-.tag-input {
-  /* width: 100%; */
-}
 .tags {
   display: flex;
-  gap: 6px;
   flex-wrap: wrap;
+  margin-bottom: 8px;
   width: 100%;
+  max-height: 200px;
   overflow-x: auto;
+  overflow-y: scroll;
 }
 .tag {
   display: flex;
   justify-content: space-between;
   width: 100%;
-  margin-top: 8px;
-  padding: 0 10px 2px 8px;
+  padding-left: 8px;
   white-space: wrap;
   transition: 0.1s ease background;
 
+  .container-email {
+    display: flex;
+    align-items: center;
+    width: calc(100% - 44px);
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+
   .container-btn-x {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     width: 44px;
     height: 44px;
 
     .btn-x {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      align-self: center;
       width: 20px;
       height: 20px;
       border-radius: 50%;
-      background: var(--color-primary);
-      align-self: center;
+      background: var(--black-soft);
+      color: var(--color-text-light-1);
     }
   }
 }
@@ -349,7 +384,7 @@ function toDate(dateStr: string) {
   }
 
   button:disabled {
-    color: var(--color-border);
+    color: var(--color-text-light-1);
   }
 }
 </style>

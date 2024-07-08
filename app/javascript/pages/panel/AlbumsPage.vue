@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="height: 100%; overflow: hidden">
     <div class="flex w-100 justify-center">
       <div>
         <div class="h-11">Settings</div>
@@ -25,13 +25,13 @@
             </div>
             <div v-if="isShowingSort" class="container-sort-menu">
               <div
-                class="sort-menu bg-glass-dark shadow-lg divide-y divide-solid divide-neutral-700"
+                class="sort-menu bg-glass-blur shadow-lg divide-y divide-solid divide-neutral-700"
                 :class="{ show: isShowingSort }"
               >
                 <div
                   v-for="sort in sortMethods"
                   :key="sort.value"
-                  class="sort-menu-item text-sm px-4 py-2"
+                  class="sort-menu-item bg-glass-dark text-sm px-4 py-2"
                   :class="{ 'sort-selected pointer-events-none': sortMethod === sort.value }"
                   @click="sortMethod = sort.value"
                 >
@@ -63,7 +63,7 @@
             </div>
           </div>
         </div>
-        <div @click="action = 'create'">
+        <div @click="openAddAlbum()">
           <div class="btn-circle-add">
             <font-awesome-icon icon="fa-solid fa-plus" class="m-auto" />
           </div>
@@ -129,6 +129,10 @@ const albums = computed(() => {
 });
 
 const action = ref('');
+const openAddAlbum = () => {
+  action.value = 'create';
+  isShowingSort.value = false;
+};
 
 const addAlbum = (album: Album) => {
   action.value = '';
@@ -152,7 +156,6 @@ const selectedSort = computed(() => {
 });
 const showSort = () => {
   isShowingSort.value = !isShowingSort.value;
-  console.log('showSort');
 };
 </script>
 
@@ -195,7 +198,6 @@ const showSort = () => {
   inset-inline-end: -9px;
   z-index: 10;
   width: 190px;
-  border-radius: var(--border-radius-lg);
   color: var(--color-text-light-1);
   opacity: 0;
   transition: opacity 0.1s ease-in-out;
@@ -214,6 +216,16 @@ const showSort = () => {
 
 .sort-menu-item:hover {
   color: var(--color-primary);
+}
+
+.sort-menu-item:first-child {
+  border-top-left-radius: var(--border-radius-lg);
+  border-top-right-radius: var(--border-radius-lg);
+}
+
+.sort-menu-item:last-child {
+  border-bottom-left-radius: var(--border-radius-lg);
+  border-bottom-right-radius: var(--border-radius-lg);
 }
 
 .sort-selected {
