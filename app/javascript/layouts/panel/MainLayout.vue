@@ -1,10 +1,6 @@
 <template>
   <BaseLayout>
-    <div class="wrapper">
-      <div class="container-panel">
-        <router-view />
-      </div>
-    </div>
+    <router-view />
   </BaseLayout>
 </template>
 

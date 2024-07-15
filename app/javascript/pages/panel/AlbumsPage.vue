@@ -1,6 +1,38 @@
 <template>
-  <div style="height: 100%; overflow: hidden">
-    <div class="flex w-100 justify-center">
+  <div class="md:flex h-screen">
+    <div class="side-menu-container bg-glass-grey">
+      <div class="side-menu">
+        <div>
+          <div class="current-user">
+            <div class="text-lg font-bold">
+              {{ currentUserName }}
+            </div>
+            <div>
+              {{ currentUser.email }}
+            </div>
+          </div>
+          <div>
+            <div class="sidemenu-item">
+              <font-awesome-icon icon="fa-solid fa-circle-user" />
+              Profile
+            </div>
+            <div class="sidemenu-item">
+              <font-awesome-icon icon="fa-solid fa-chart-column" />
+              Monthly usage
+            </div>
+            <div class="sidemenu-item">
+              <font-awesome-icon icon="fa-solid fa-bell" />
+              Notifications
+            </div>
+          </div>
+        </div>
+        <div class="sidemenu-item logout" @click="logout">
+          <font-awesome-icon icon="fa-solid fa-arrow-right-from-bracket" />
+          Log out
+        </div>
+      </div>
+    </div>
+    <div class="albums-container">
       <div>
         <div class="h-11">Settings</div>
         <div class="flex justify-between">
@@ -41,25 +73,26 @@
             </div>
           </div>
         </div>
-        <div class="flex pb-4">
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mx-auto mb-6 z-0">
-            <div v-for="album in albums" :key="album.id">
-              <div class="relative w-36 h-46 md:w-48 md:h-56 cursor-pointer">
-                <RouterLink :to="{ name: 'Album', params: { id: album.id } }">
-                  <div class="photo-container flex justify-center h-36 md:h-48">
-                    <AdvancedImage
-                      v-if="album.cover && album.cover.length > 0"
-                      :cld-img="getCloudinaryImage(album.cover, album.angle)"
-                      place-holder="predominant-color"
-                      class="object-cover w-36 h-36 md:w-48 md:h-48 rounded"
-                    />
+        <div class="albums">
+          <div v-for="album in albums" :key="album.id">
+            <div class="relative w-36 h-46 md:w-56 md:h-60 cursor-pointer">
+              <RouterLink :to="{ name: 'Album', params: { id: album.id } }">
+                <div class="photo-container album h-36 md:h-56 mb-2">
+                  <AdvancedImage
+                    v-if="album.cover && album.cover.length > 0"
+                    :cld-img="getCloudinaryImage(album.cover, album.angle)"
+                    place-holder="predominant-color"
+                    class="object-cover w-36 h-36 md:w-56 md:h-56 rounded"
+                  />
+                  <div v-else class="placeholder-album">
+                    <font-awesome-icon icon="fa-regular fa-images" class="h-1/5" />
                   </div>
-                  <div class="pl-1 text-md truncate font-medium text-slate-500 text-white">
-                    {{ album.name }}
-                  </div>
-                  <div class="pl-1 text-xs text-slate-400">Due: {{ album.expiry_date }}</div>
-                </RouterLink>
-              </div>
+                </div>
+                <div class="title-album-name">
+                  {{ album.name }}
+                </div>
+                <div class="title-album-expiry">Due: {{ album.expiry_date }}</div>
+              </RouterLink>
             </div>
           </div>
         </div>
@@ -87,6 +120,11 @@ import type { AxiosResponse } from 'axios';
 import AlbumEdit from '../../components/panel/AlbumEdit.vue';
 import { getCloudinaryImage } from '@/services/cloudinary.service';
 import { getAlbumsApi } from '@/apis/panel.api';
+import { useAuthStore } from '@/stores/auth.store';
+const authStore = useAuthStore();
+const logout = () => {
+  authStore.logout();
+};
 
 interface Album {
   id: number;
@@ -96,6 +134,20 @@ interface Album {
   cover: string;
   angle: number;
 }
+
+const currentUser = JSON.parse(localStorage.user).data.attributes;
+const currentUserName = currentUser.email.split('@')[0];
+// {"data":
+//   {"id":"1",
+//   "type":"user",
+//   "attributes":
+//     {"email":"test1@gmail.com",
+//     "sign_in_count":422,
+//     "created_at":"2024-04-26T13:28:20.476Z"
+//     }
+//   }
+// }
+console.log(currentUser);
 
 const albumsData = ref<Album[]>([]);
 onBeforeMount(async () => {
@@ -162,6 +214,61 @@ const showSort = () => {
 <style scoped>
 @import '../../assets/css/panel.scss';
 
+.side-menu-container {
+  width: 250px;
+  height: 100%;
+
+  /* border-right: 1px solid rgba(255, 255, 255, 0.3); */
+
+  .side-menu {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    padding: 1.5rem 0;
+
+    .sidemenu-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+    }
+
+    .sidemenu-item:not(.logout):hover {
+      color: var(--violet-400);
+      background: var(--gray-raven);
+    }
+
+    .current-user {
+      padding-left: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom-width: 1px;
+      border-bottom-style: solid;
+      border-bottom-color: #404040;
+    }
+
+    .logout {
+      color: #8b5cf6;
+      font-size: 1.125rem;
+    }
+
+    .logout:hover {
+      font-weight: 600;
+    }
+  }
+}
+
+.albums-container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  justify-content: center;
+  padding-top: 2.5rem;
+  padding-left: 2rem;
+}
+
 .container-sort {
   position: relative;
   display: flex;
@@ -219,16 +326,76 @@ const showSort = () => {
 }
 
 .sort-menu-item:first-child {
-  border-top-left-radius: var(--border-radius-lg);
-  border-top-right-radius: var(--border-radius-lg);
+  border-top-left-radius: var(--rounded-xl);
+  border-top-right-radius: var(--rounded-xl);
 }
 
 .sort-menu-item:last-child {
-  border-bottom-left-radius: var(--border-radius-lg);
-  border-bottom-right-radius: var(--border-radius-lg);
+  border-bottom-left-radius: var(--rounded-xl);
+  border-bottom-right-radius: var(--rounded-xl);
 }
 
 .sort-selected {
   color: var(--color-text);
+}
+
+.albums {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  row-gap: 1rem;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 1.5rem;
+  z-index: 0;
+}
+
+.placeholder-album {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  background: var(--black-raven);
+  color: var(--dark-violet);
+  border-radius: var(--rounded);
+  cursor: pointer;
+}
+
+.photo-container.album {
+  display: flex;
+  justify-content: center;
+}
+
+.photo-container.album:hover {
+  border: 1px solid var(--gray-raven);
+}
+
+.title-album-name {
+  padding-left: 0.25rem;
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.title-album-name:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.title-album-expiry {
+  padding-left: 0.25rem;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+@media (min-width: 768px) {
+  .albums {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 3rem;
+    row-gap: 4rem;
+  }
 }
 </style>

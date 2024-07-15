@@ -24,21 +24,18 @@
   --white-mute: rgba(235, 235, 235, 0.28);
   --white-soft: rgba(255, 255, 255, 0.2);
   --black-soft: rgba(0, 0, 0, 0.4);
-  --grey-200: rgb(151 151 151);
+  --gray-200: rgb(151 151 151);
+  --dark-violet: #3b3a3d;
   --black-piano: rgba(28, 30, 28, 0.9);
-  --black-raven: rgba(50, 50, 50, 0.9);
-  --grey-violet-300: rgba(37, 37, 37, 0.32);
-  --grey-violet-500: rgba(37, 37, 37, 0.52);
-  --grey-violet-700: rgba(37, 37, 37, 0.72);
-  --grey-violet-800: rgba(37, 37, 37, 0.82);
-  --grey-violet-900: rgba(37, 37, 37, 0.9);
+  --black-raven: #151417;
+  --gray-raven: rgba(50, 50, 50, 0.9);
   --slate-200: rgb(235 238 242);
   --slate-300: rgb(209 213 219);
   --slate-400: rgb(148 163 184);
   --slate-600: rgb(75 85 99);
   --slate-800: rgb(30 41 59);
   --black-russian: rgba(19, 19, 38, 0.5);
-  --black-russian-800: rgba(19, 19, 38, 0.8);
+  --violet-400: rgb(171 127 255);
   --violet-500: rgb(139 92 246);
   --violet-600: #7c3aed;
   --violet-800: #5b21b6;
@@ -70,7 +67,8 @@
 :root {
   --height-nav-bar: 4rem;
   --height-no-nav-bar: calc(100vh - var(--height-nav-bar));
-  --border-radius-lg: 0.75rem; /* 12px */
+  --rounded: 0.25rem; /* 4px */
+  --rounded-xl: 0.75rem; /* 12px */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -97,8 +95,6 @@
 
 body {
   width: 100vw;
-  /* height: 100vh; */
-  /* min-height: 100vh; */
   color: var(--color-text);
   background: var(--color-background);
   transition:
@@ -139,8 +135,6 @@ body {
 .photo-container {
   aspect-ratio: 1 / 1;
   object-fit: cover;
-  border-width: 1px;
-  border-color: rgb(71 85 105);
   cursor: pointer;
 }
 
