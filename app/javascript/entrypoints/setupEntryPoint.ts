@@ -39,8 +39,11 @@ import {
   faTrashCan,
   faAngleDown,
   faAngleUp,
+  faArrowRightFromBracket,
+  faCircleUser,
+  faChartColumn,
 } from '@fortawesome/free-solid-svg-icons';
-import { faSquareMinus } from '@fortawesome/free-regular-svg-icons'
+import { faSquareMinus, faImages } from '@fortawesome/free-regular-svg-icons'
 
 import { globalProperties } from './globalProperties';
 import { pinia } from '@/stores';
@@ -81,8 +84,11 @@ library.add(
   faTrashCan,
   faAngleDown,
   faAngleUp,
+  faArrowRightFromBracket,
+  faCircleUser,
+  faChartColumn,
 );
-library.add(faSquareMinus);
+library.add(faSquareMinus, faImages);
 const token = AuthService.getToken();
 
 if (token) {

@@ -1,8 +1,61 @@
 <template>
-  <div style="height: 100%; overflow: hidden">
-    <div class="flex w-100 justify-center">
+  <div class="flex h-screen">
+    <div
+      ref="menuRef"
+      class="side-menu-container bg-glass-grey"
+      :class="[{ 'fixed-menu': !isLargeScreen, open: isMenuOpen && !isLargeScreen }]"
+    >
+      <div class="side-menu">
+        <div>
+          <div class="current-user">
+            <div class="text-lg font-bold">
+              {{ currentUserName }}
+            </div>
+            <div>
+              {{ currentUser.email }}
+            </div>
+          </div>
+          <div>
+            <div class="sidemenu-item">
+              <font-awesome-icon icon="fa-solid fa-circle-user" />
+              Profile
+            </div>
+            <div class="sidemenu-item">
+              <font-awesome-icon icon="fa-solid fa-chart-column" />
+              Monthly usage
+            </div>
+            <div class="sidemenu-item">
+              <font-awesome-icon icon="fa-solid fa-bell" />
+              Notifications
+            </div>
+          </div>
+        </div>
+        <div class="sidemenu-item logout" @click="logout">
+          <font-awesome-icon icon="fa-solid fa-arrow-right-from-bracket" />
+          Log out
+        </div>
+      </div>
+    </div>
+    <div class="overlay" :class="{ active: isMenuOpen && !isLargeScreen }" @click="closeMenu"></div>
+    <div class="albums-container">
       <div>
-        <div class="h-11">Settings</div>
+        <div v-if="!isLargeScreen" class="h-11">
+          <button @click="toggleMenu">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              class="btn-menu"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle cx="12" cy="12" r="11" stroke="currentColor" stroke-width="0.5" />
+              <circle cx="7" cy="12" r="1.5" fill="currentColor" />
+              <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+              <circle cx="17" cy="12" r="1.5" fill="currentColor" />
+            </svg>
+          </button>
+        </div>
         <div class="flex justify-between">
           <div class="label-text">Albums</div>
           <div class="container-sort">
@@ -41,25 +94,26 @@
             </div>
           </div>
         </div>
-        <div class="flex pb-4">
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mx-auto mb-6 z-0">
-            <div v-for="album in albums" :key="album.id">
-              <div class="relative w-36 h-46 md:w-48 md:h-56 cursor-pointer">
-                <RouterLink :to="{ name: 'Album', params: { id: album.id } }">
-                  <div class="photo-container flex justify-center h-36 md:h-48">
-                    <AdvancedImage
-                      v-if="album.cover && album.cover.length > 0"
-                      :cld-img="getCloudinaryImage(album.cover, album.angle)"
-                      place-holder="predominant-color"
-                      class="object-cover w-36 h-36 md:w-48 md:h-48 rounded"
-                    />
+        <div class="albums">
+          <div v-for="album in albums" :key="album.id">
+            <div class="relative w-36 h-46 md:w-40 md:h-48 lg:w-56 lg:h-60 cursor-pointer">
+              <RouterLink :to="{ name: 'Album', params: { id: album.id } }">
+                <div class="photo-container album h-36 md:h-40 lg:h-56 mb-2">
+                  <AdvancedImage
+                    v-if="album.cover && album.cover.length > 0"
+                    :cld-img="getCloudinaryImage(album.cover, album.angle)"
+                    place-holder="predominant-color"
+                    class="object-cover w-36 h-36 md:w-40 md:h-40 lg:w-56 lg:h-56 rounded"
+                  />
+                  <div v-else class="placeholder-album">
+                    <font-awesome-icon icon="fa-regular fa-images" class="h-1/5" />
                   </div>
-                  <div class="pl-1 text-md truncate font-medium text-slate-500 text-white">
-                    {{ album.name }}
-                  </div>
-                  <div class="pl-1 text-xs text-slate-400">Due: {{ album.expiry_date }}</div>
-                </RouterLink>
-              </div>
+                </div>
+                <div class="title-album-name">
+                  {{ album.name }}
+                </div>
+                <div class="title-album-expiry">Due: {{ album.expiry_date }}</div>
+              </RouterLink>
             </div>
           </div>
         </div>
@@ -80,13 +134,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeMount, ref } from 'vue';
+import { ref, computed, watch, onBeforeMount, onMounted, onUnmounted } from 'vue';
 import { RouterLink } from 'vue-router';
 import { AdvancedImage } from '@cloudinary/vue';
 import type { AxiosResponse } from 'axios';
 import AlbumEdit from '../../components/panel/AlbumEdit.vue';
 import { getCloudinaryImage } from '@/services/cloudinary.service';
 import { getAlbumsApi } from '@/apis/panel.api';
+import { useAuthStore } from '@/stores/auth.store';
+const authStore = useAuthStore();
+const logout = () => {
+  authStore.logout();
+};
 
 interface Album {
   id: number;
@@ -96,6 +155,9 @@ interface Album {
   cover: string;
   angle: number;
 }
+
+const currentUser = JSON.parse(localStorage.user).data.attributes;
+const currentUserName = currentUser.email.split('@')[0];
 
 const albumsData = ref<Album[]>([]);
 onBeforeMount(async () => {
@@ -157,10 +219,183 @@ const selectedSort = computed(() => {
 const showSort = () => {
   isShowingSort.value = !isShowingSort.value;
 };
+
+// side menu
+const isMenuOpen = ref(false);
+// const resizePoint = 768;
+const resizePoint = 600;
+const isLargeScreen = ref(window.innerWidth >= resizePoint);
+const menuRef = ref(null);
+
+const toggleMenu = () => {
+  if (!isLargeScreen.value) {
+    isMenuOpen.value = !isMenuOpen.value;
+  }
+};
+
+const closeMenu = () => {
+  if (!isLargeScreen.value) {
+    isMenuOpen.value = false;
+  }
+};
+
+const handleResize = () => {
+  isLargeScreen.value = window.innerWidth >= resizePoint;
+  isLargeScreen.value = window.innerWidth >= resizePoint;
+  if (isLargeScreen.value) {
+    isMenuOpen.value = true;
+  }
+};
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize);
+  handleResize();
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
+});
+
+watch(isLargeScreen, (newValue) => {
+  if (newValue) {
+    isMenuOpen.value = true;
+  } else {
+    isMenuOpen.value = false;
+  }
+});
 </script>
 
 <style scoped>
 @import '../../assets/css/panel.scss';
+
+.side-menu-container {
+  z-index: 9;
+  width: 250px;
+  height: 100%;
+  opacity: 0.8;
+  backdrop-filter: blur(12px);
+
+  .side-menu {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    padding: 1.5rem 0;
+
+    .sidemenu-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+    }
+
+    .sidemenu-item:not(.logout):hover {
+      color: var(--violet-400);
+      background: var(--gray-raven);
+    }
+
+    .current-user {
+      padding-left: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom-width: 1px;
+      border-bottom-style: solid;
+      border-bottom-color: #404040;
+    }
+
+    .logout {
+      color: #8b5cf6;
+      font-size: 1.125rem;
+    }
+
+    .logout:hover {
+      font-weight: 600;
+    }
+  }
+}
+
+.fixed-menu {
+  position: fixed;
+  top: 0;
+  left: -100%;
+  transition: left 0.32s cubic-bezier(0.4, 0, 0.6, 1);
+
+  .side-menu {
+    opacity: 0;
+    transform: translateX(-20px);
+    transition:
+      opacity 0.32s cubic-bezier(0.4, 0, 0.6, 1) 80ms,
+      transform 0.32s cubic-bezier(0.4, 0, 0.6, 1) 80ms;
+
+    .current-user div,
+    .sidemenu-item {
+      opacity: 0;
+      transform: translateX(-20px);
+      transition:
+        opacity 0.32s cubic-bezier(0.4, 0, 0.6, 1) 240ms,
+        transform 0.32s cubic-bezier(0.4, 0, 0.6, 1) 240ms;
+    }
+  }
+}
+
+.fixed-menu.open {
+  left: 0;
+
+  .side-menu {
+    opacity: 1;
+    transform: translateX(0);
+
+    .current-user div,
+    .sidemenu-item {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 8;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.3s cubic-bezier(0.4, 0, 0.6, 1),
+    visibility 0.32s cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+.overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.btn-menu {
+  box-shadow: 4px 0px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+
+.albums-container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  justify-content: center;
+  padding-top: 2.5rem;
+  overflow-y: auto;
+}
 
 .container-sort {
   position: relative;
@@ -219,16 +454,82 @@ const showSort = () => {
 }
 
 .sort-menu-item:first-child {
-  border-top-left-radius: var(--border-radius-lg);
-  border-top-right-radius: var(--border-radius-lg);
+  border-top-left-radius: var(--rounded-xl);
+  border-top-right-radius: var(--rounded-xl);
 }
 
 .sort-menu-item:last-child {
-  border-bottom-left-radius: var(--border-radius-lg);
-  border-bottom-right-radius: var(--border-radius-lg);
+  border-bottom-left-radius: var(--rounded-xl);
+  border-bottom-right-radius: var(--rounded-xl);
 }
 
 .sort-selected {
   color: var(--color-text);
+}
+
+.albums {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  row-gap: 1rem;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 1.5rem;
+  z-index: 0;
+}
+
+.placeholder-album {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  background: var(--black-raven);
+  color: var(--dark-violet);
+  border-radius: var(--rounded);
+  cursor: pointer;
+}
+
+.photo-container.album {
+  display: flex;
+  justify-content: center;
+}
+
+.photo-container.album:hover {
+  border: 1px solid var(--gray-raven);
+}
+
+.title-album-name {
+  padding-left: 0.25rem;
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.title-album-name:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.title-album-expiry {
+  padding-left: 0.25rem;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+@media (min-width: 768px) {
+  .albums {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3rem;
+    row-gap: 4rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .albums {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 </style>
