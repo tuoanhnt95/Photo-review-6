@@ -2,13 +2,13 @@
   <div class="flex h-screen">
     <div
       ref="menuRef"
-      class="side-menu-container bg-glass-grey"
+      class="side-menu-container"
       :class="[{ 'fixed-menu': !isLargeScreen, open: isMenuOpen && !isLargeScreen }]"
     >
       <div class="side-menu">
         <div>
           <div class="current-user">
-            <div class="text-lg font-bold">
+            <div class="text-xl font-bold">
               {{ currentUserName }}
             </div>
             <div>
@@ -16,17 +16,18 @@
             </div>
           </div>
           <div>
-            <div class="sidemenu-item">
-              <font-awesome-icon icon="fa-solid fa-circle-user" />
-              Profile
-            </div>
-            <div class="sidemenu-item">
-              <font-awesome-icon icon="fa-solid fa-chart-column" />
-              Monthly usage
-            </div>
-            <div class="sidemenu-item">
-              <font-awesome-icon icon="fa-solid fa-bell" />
-              Notifications
+            <div
+              v-for="item in menuItems"
+              :key="item.text"
+              class="sidemenu-item"
+              @mouseenter="item.isHovering = true"
+              @mouseleave="item.isHovering = false"
+            >
+              <div class="sidemenu-item1">
+                <font-awesome-icon :icon="item.icon" />
+                {{ item.text }}
+              </div>
+              <font-awesome-icon v-if="item.isHovering" icon="fa-solid fa-chevron-right" />
             </div>
           </div>
         </div>
@@ -263,6 +264,12 @@ watch(isLargeScreen, (newValue) => {
     isMenuOpen.value = false;
   }
 });
+
+const menuItems = ref([
+  { icon: 'fa-solid fa-circle-user', text: 'Profile', isHovering: false },
+  { icon: 'fa-solid fa-chart-column', text: 'Monthly usage', isHovering: false },
+  { icon: 'fa-solid fa-bell', text: 'Notifications', isHovering: false },
+]);
 </script>
 
 <style scoped>
@@ -271,8 +278,10 @@ watch(isLargeScreen, (newValue) => {
 .side-menu-container {
   z-index: 9;
   width: 250px;
+  min-width: 250px;
   height: 100%;
   opacity: 0.8;
+  background: rgba(22, 22, 23, 0.8);
   backdrop-filter: blur(12px);
 
   .side-menu {
@@ -286,27 +295,40 @@ watch(isLargeScreen, (newValue) => {
     .sidemenu-item {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
       padding: 0.75rem 1.5rem;
+      line-height: 1.75rem;
       cursor: pointer;
+      color: rgba(255, 255, 255, 0.8);
+      transition: color 0.32s cubic-bezier(0.4, 0, 0.6, 1);
+
+      .sidemenu-item1 {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.125rem;
+        font-weight: 700;
+      }
     }
 
     .sidemenu-item:not(.logout):hover {
-      color: var(--violet-400);
-      background: var(--gray-raven);
+      justify-content: space-between;
+      color: rgba(255, 255, 255, 1);
+      /* background: var(--gray-raven); */
     }
 
     .current-user {
       padding-left: 1.5rem;
-      padding-bottom: 0.5rem;
+      padding-bottom: 0.75rem;
       border-bottom-width: 1px;
-      border-bottom-style: solid;
-      border-bottom-color: #404040;
+      /* border-bottom-style: solid; */
+      /* border-bottom-color: #404040; */
     }
 
     .logout {
+      gap: 0.5rem;
       color: #8b5cf6;
       font-size: 1.125rem;
+      transition: font-weight 0.32s cubic-bezier(0.4, 0, 0.6, 1);
     }
 
     .logout:hover {
@@ -379,7 +401,7 @@ watch(isLargeScreen, (newValue) => {
 
 .btn-menu {
   box-shadow: 4px 0px rgba(0, 0, 0, 0.25);
-  transition: all 0.3s ease;
+  transition: all 0.32s cubic-bezier(0.4, 0, 0.6, 1);
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
 
@@ -492,10 +514,12 @@ watch(isLargeScreen, (newValue) => {
 .photo-container.album {
   display: flex;
   justify-content: center;
+  opacity: 0.8;
+  transition: opacity 0.32s cubic-bezier(0.4, 0, 0.6, 1);
 }
 
 .photo-container.album:hover {
-  border: 1px solid var(--gray-raven);
+  opacity: 1;
 }
 
 .title-album-name {

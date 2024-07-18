@@ -42,6 +42,7 @@ import {
   faArrowRightFromBracket,
   faCircleUser,
   faChartColumn,
+  faChevronRight,
 } from '@fortawesome/free-solid-svg-icons';
 import { faSquareMinus, faImages } from '@fortawesome/free-regular-svg-icons'
 
@@ -87,6 +88,7 @@ library.add(
   faArrowRightFromBracket,
   faCircleUser,
   faChartColumn,
+  faChevronRight,
 );
 library.add(faSquareMinus, faImages);
 const token = AuthService.getToken();
