@@ -44,6 +44,8 @@ import {
   faChartColumn,
   faChevronRight,
   faChevronLeft,
+  faUpRightAndDownLeftFromCenter,
+  faDownLeftAndUpRightToCenter,
 } from '@fortawesome/free-solid-svg-icons';
 import { faSquareMinus, faImages } from '@fortawesome/free-regular-svg-icons'
 
@@ -91,6 +93,8 @@ library.add(
   faChartColumn,
   faChevronRight,
   faChevronLeft,
+  faUpRightAndDownLeftFromCenter,
+  faDownLeftAndUpRightToCenter,
 );
 library.add(faSquareMinus, faImages);
 const token = AuthService.getToken();

@@ -111,7 +111,6 @@
             <AdvancedImage
               :id="photo.image"
               :cldImg="getCloudinaryImage(photo.image, photo.angle)"
-              class="object-cover"
               :class="getPhotoClass(photo)"
             />
           </div>
@@ -165,7 +164,7 @@
                 <AdvancedImage
                   :id="photo.image"
                   :cldImg="getCloudinaryImage(photo.image, photo.angle)"
-                  class="object-cover h-full"
+                  class="w-11 h-11"
                   :class="getPhotoClass(photo)"
                 />
               </td>
@@ -258,6 +257,27 @@
           />
           <div>{{ opt.name }}</div>
           <font-awesome-icon :icon="opt.icon" class="mr-2" />
+        </div>
+      </div>
+      <!-- change display fit mode -->
+      <div class="container-context-border">
+        <div
+          v-for="(mode, i) in displayFitModes"
+          :key="mode.value"
+          class="container-context-menu"
+          :class="[
+            i === displayFitModes.length - 1
+              ? 'container-context-border'
+              : 'container-context-border-sub',
+          ]"
+          @click.prevent="selectedDisplayFitMode = mode.value"
+        >
+          <font-awesome-icon
+            :class="{ 'opacity-0': selectedDisplayFitMode !== mode.value }"
+            icon="fa-solid fa-check"
+          />
+          <div>{{ mode.name }}</div>
+          <font-awesome-icon :icon="mode.icon" class="self-center mr-2" />
         </div>
       </div>
       <div
@@ -426,6 +446,13 @@ function editAlbum(editedAlbum: Album) {
   album.value = editedAlbum;
   action.value = '';
 }
+
+// Photo display size
+const displayFitModes = [
+  { value: 1, name: 'Fill photo', icon: 'fa-solid fa-up-right-and-down-left-from-center' },
+  { value: 2, name: 'Fit photo', icon: 'fa-solid fa-down-left-and-up-right-to-center' },
+];
+const selectedDisplayFitMode = ref(1); // 1: cover, 2: contain
 
 // Selecting photos
 const isSelecting = ref(false);
@@ -694,13 +721,20 @@ function closeReviewPhoto() {
 
 // style
 function getPhotoClass(photo: Photo) {
+  let result = '';
   if (!filteredPhotos.value.map((x) => x.id).includes(photo.id)) {
-    return 'opacity-10 saturate-0';
+    result += ' opacity-10 saturate-0';
   } else if (isSelecting.value && selectedPhotoIds.value.includes(photo.id)) {
-    return 'opacity-50';
-  } else {
-    return '';
+    result += ' opacity-50';
   }
+  // if mode is contain, add class
+  if (selectedDisplayFitMode.value === 2) {
+    result += ' object-contain';
+  } else {
+    result += ' object-cover';
+  }
+
+  return result;
 }
 
 // Navigate
