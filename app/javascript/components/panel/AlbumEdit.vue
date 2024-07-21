@@ -1,8 +1,8 @@
 <template>
-  <div class="container-modal-album bg-glass-blur">
-    <div class="modal-album bg-glass-grey box-shadow top-[15%] md:top-1/4">
+  <div class="container-modal-album">
+    <div class="modal-album bg-menu menu-shadow modal top-[15%] md:top-1/4">
       <div class="modal-info">
-        <h3 class="label-text-md text-center mb-3">{{ title }}</h3>
+        <h3 class="label-text md text-center mb-3">{{ title }}</h3>
         <div v-if="props.action !== 'share'" class="container-input-warning">
           <div class="flex place-content-between">
             <input
@@ -10,37 +10,40 @@
               type="text"
               required
               placeholder="Album name"
-              class="bg-glass-dark box-shadow border-modal-input"
+              class="bg-input box-shadow bordered-input"
             />
           </div>
           <div class="container-warning">
             <span v-if="!nameExists" class="text-warning-small pl-1">Required</span>
+            <span v-else-if="$props.action !== 'create'" class="text-info-small pl-1">
+              {{ props.numberOfPhotos }} {{ props.numberOfPhotos > 1 ? 'photos' : 'photo' }}
+            </span>
           </div>
         </div>
 
         <div v-if="props.action !== 'share'">
-          <div class="container-label-input bg-glass-dark box-shadow">
+          <div class="container-label-input bg-input">
             <label for="expiry-date" class="self-center">Due date</label>
             <div>
               <input
                 v-model="expiryDate"
                 type="date"
                 :min="today"
-                class="bg-glass-dark flex justify-end"
+                class="bg-input flex justify-end"
               />
             </div>
           </div>
           <p v-if="!expiryDate" class="text-warning-small pl-1">Invalid date</p>
         </div>
 
-        <div class="">
-          <div class="container-label-input bg-glass-dark box-shadow">
+        <div>
+          <div class="container-label-input bg-input">
             <label for="invitee" class="text-lg">Share</label>
             <div class="w-full ml-2.5">
               <input
                 v-model="newInvitee"
                 type="email"
-                class="bg-glass-dark"
+                class="bg-input"
                 @keydown.enter="addInvitee"
                 @keydown.prevent.tab="addInvitee"
                 @keydown.space="addInvitee"
@@ -54,19 +57,13 @@
             <p v-if="!emailIsValid" class="text-warning-small pl-1">Invalid email format</p>
           </div>
           <div class="tags">
-            <div
-              v-for="(invitee, i) in invitees"
-              :key="i"
-              class="tag"
-              :class="{ 'tag-existing': !editableInvitees.includes(invitee) }"
-            >
+            <div v-for="(invitee, i) in invitees" :key="i" class="tag">
               <div class="container-email">
                 {{ invitee }}
               </div>
-              <div class="container-btn-x">
+              <div v-if="editableInvitees.includes(invitee)" class="container-btn-x">
                 <div class="btn-x">
                   <font-awesome-icon
-                    v-if="editableInvitees.includes(invitee)"
                     icon="fa-solid fa-x"
                     class="cursor-pointer self-center text-xs"
                     @click="removeInvitee(i)"
@@ -90,6 +87,7 @@
         </button>
       </div>
     </div>
+    <div class="overlay dark active" @click="closeEditAlbum"></div>
   </div>
 </template>
 
@@ -111,6 +109,10 @@ const props = defineProps({
   albumName: {
     type: String,
     default: '',
+  },
+  numberOfPhotos: {
+    type: Number,
+    default: 0,
   },
   albumExpiryDate: {
     type: String,
@@ -272,12 +274,10 @@ function toDate(dateStr: string) {
 
 .modal-album {
   position: relative;
-  /* top: 15%; */
   margin: 0 auto;
   width: 90%;
   min-width: 320px;
   max-width: 360px;
-  border-radius: 0.75rem; /* 12px */
 }
 
 .modal-info {
@@ -290,7 +290,6 @@ function toDate(dateStr: string) {
   min-width: 190px;
   padding: 0.1rem 0.5rem;
   font-size: 1rem; /* 16px */
-  border-radius: 0.5rem;
 }
 
 .container-input-warning {
@@ -318,6 +317,7 @@ function toDate(dateStr: string) {
 
 .tags {
   display: flex;
+  gap: 4px;
   flex-wrap: wrap;
   margin-bottom: 8px;
   width: 100%;
@@ -331,7 +331,7 @@ function toDate(dateStr: string) {
   width: 100%;
   padding-left: 8px;
   white-space: wrap;
-  transition: 0.1s ease background;
+  transition: background 0.1s ease;
 
   .container-email {
     display: flex;
@@ -357,13 +357,14 @@ function toDate(dateStr: string) {
       height: 20px;
       border-radius: 50%;
       background: var(--black-soft);
-      color: var(--color-text-light-1);
+      /* color: var(--color-text-light-1); */
+      color: white;
     }
   }
 }
 
-.tag-existing {
-  background: var(--color-secondary);
+.tag:hover {
+  background: var(--black-soft);
 }
 
 .container-btn-bottom {

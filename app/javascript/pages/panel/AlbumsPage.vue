@@ -37,28 +37,17 @@
         </div>
       </div>
     </div>
-    <div class="overlay" :class="{ active: isMenuOpen && !isLargeScreen }" @click="closeMenu"></div>
+    <div
+      class="overlay dark"
+      :class="{ active: isMenuOpen && !isLargeScreen }"
+      @click="closeMenu"
+    ></div>
     <div class="albums-container">
       <div>
-        <div v-if="!isLargeScreen" class="h-11">
-          <button @click="toggleMenu">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              class="btn-menu"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle cx="12" cy="12" r="11" stroke="currentColor" stroke-width="0.5" />
-              <circle cx="7" cy="12" r="1.5" fill="currentColor" />
-              <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-              <circle cx="17" cy="12" r="1.5" fill="currentColor" />
-            </svg>
-          </button>
-        </div>
+        <ButtonMenu v-if="!isLargeScreen" @toggle-menu="toggleMenu" />
+        <div class="label-text">Albums</div>
         <div class="flex justify-between">
-          <div class="label-text">Albums</div>
+          <div class="text-album-count">{{ albums.length }} Albums</div>
           <div class="container-sort">
             <div
               class="container-sort-label"
@@ -77,16 +66,13 @@
                 class="sort-icon"
               />
             </div>
-            <div v-if="isShowingSort" class="container-sort-menu">
-              <div
-                class="sort-menu bg-glass-blur shadow-lg divide-y divide-solid divide-neutral-700"
-                :class="{ show: isShowingSort }"
-              >
+            <div v-if="isShowingSort" class="relative z-10">
+              <div class="sort-menu" :class="{ show: isShowingSort }">
                 <div
                   v-for="sort in sortMethods"
                   :key="sort.value"
-                  class="sort-menu-item bg-glass-dark text-sm px-4 py-2"
-                  :class="{ 'sort-selected pointer-events-none': sortMethod === sort.value }"
+                  class="sort-menu-item bg-menu text-sm px-4 py-2"
+                  :class="{ selected: sortMethod === sort.value }"
                   @click="sortMethod = sort.value"
                 >
                   {{ sort.name }}
@@ -96,26 +82,24 @@
           </div>
         </div>
         <div class="albums">
-          <div v-for="album in albums" :key="album.id">
-            <div class="relative w-36 h-46 md:w-40 md:h-48 lg:w-56 lg:h-60 cursor-pointer">
-              <RouterLink :to="{ name: 'Album', params: { id: album.id } }">
-                <div class="photo-container album h-36 md:h-40 lg:h-56 mb-2">
-                  <AdvancedImage
-                    v-if="album.cover && album.cover.length > 0"
-                    :cld-img="getCloudinaryImage(album.cover, album.angle)"
-                    place-holder="predominant-color"
-                    class="object-cover w-36 h-36 md:w-40 md:h-40 lg:w-56 lg:h-56 rounded"
-                  />
-                  <div v-else class="placeholder-album">
-                    <font-awesome-icon icon="fa-regular fa-images" class="h-1/5" />
-                  </div>
+          <div v-for="album in albums" :key="album.id" class="container-album">
+            <RouterLink :to="{ name: 'Album', params: { id: album.id } }">
+              <div class="photo-container album">
+                <AdvancedImage
+                  v-if="album.cover && album.cover.length > 0"
+                  :cld-img="getCloudinaryImage(album.cover, album.angle)"
+                  place-holder="predominant-color"
+                  class="album-cover"
+                />
+                <div v-else class="placeholder-album">
+                  <font-awesome-icon icon="fa-regular fa-images" class="h-1/5" />
                 </div>
-                <div class="title-album-name">
-                  {{ album.name }}
-                </div>
-                <div class="title-album-expiry">Due: {{ album.expiry_date }}</div>
-              </RouterLink>
-            </div>
+              </div>
+              <div class="title-album-name">
+                {{ album.name }}
+              </div>
+              <div class="title-album-expiry">Due: {{ album.expiry_date }}</div>
+            </RouterLink>
           </div>
         </div>
         <div @click="openAddAlbum()">
@@ -140,6 +124,7 @@ import { RouterLink } from 'vue-router';
 import { AdvancedImage } from '@cloudinary/vue';
 import type { AxiosResponse } from 'axios';
 import AlbumEdit from '../../components/panel/AlbumEdit.vue';
+import ButtonMenu from '../../components/panel/ButtonMenu.vue';
 import { getCloudinaryImage } from '@/services/cloudinary.service';
 import { getAlbumsApi } from '@/apis/panel.api';
 import { useAuthStore } from '@/stores/auth.store';
@@ -223,13 +208,15 @@ const showSort = () => {
 
 // side menu
 const isMenuOpen = ref(false);
-// const resizePoint = 768;
-const resizePoint = 600;
+const resizePoint = 670;
 const isLargeScreen = ref(window.innerWidth >= resizePoint);
 const menuRef = ref(null);
 
 const toggleMenu = () => {
   if (!isLargeScreen.value) {
+    if (isShowingSort.value) {
+      isShowingSort.value = false;
+    }
     isMenuOpen.value = !isMenuOpen.value;
   }
 };
@@ -275,6 +262,7 @@ const menuItems = ref([
 <style scoped>
 @import '../../assets/css/panel.scss';
 
+/* side menu */
 .side-menu-container {
   z-index: 9;
   width: 250px;
@@ -376,49 +364,23 @@ const menuItems = ref([
   }
 }
 
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 8;
-  background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(12px);
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity 0.3s cubic-bezier(0.4, 0, 0.6, 1),
-    visibility 0.32s cubic-bezier(0.4, 0, 0.6, 1);
-}
-
-.overlay.active {
-  opacity: 1;
-  visibility: visible;
-}
-
-.btn-menu {
-  box-shadow: 4px 0px rgba(0, 0, 0, 0.25);
-  transition: all 0.32s cubic-bezier(0.4, 0, 0.6, 1);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-
-  &:hover {
-    transform: scale(1.1);
-  }
-}
-
 .albums-container {
   display: flex;
   height: 100%;
   width: 100%;
   justify-content: center;
-  padding-top: 2.5rem;
+  padding: 2.5rem;
   overflow-y: auto;
 }
 
+.text-album-count {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: var(--color-text-light-1);
+}
+
+/* sorting */
 .container-sort {
   position: relative;
   display: flex;
@@ -453,21 +415,18 @@ const menuItems = ref([
   position: absolute;
   top: 16px;
   inset-inline-end: -9px;
-  z-index: 10;
   width: 190px;
   color: var(--color-text-light-1);
   opacity: 0;
-  transition: opacity 0.1s ease-in-out;
+  transition: opacity 0.32s cubic-bezier(0.4, 0, 0.6, 1);
 }
 
-.container-sort-menu {
-  position: relative;
-}
 .sort-menu.show {
   opacity: 1;
 }
 
 .sort-menu-item {
+  z-index: 9;
   cursor: pointer;
 }
 
@@ -475,20 +434,11 @@ const menuItems = ref([
   color: var(--color-primary);
 }
 
-.sort-menu-item:first-child {
-  border-top-left-radius: var(--rounded-xl);
-  border-top-right-radius: var(--rounded-xl);
-}
-
-.sort-menu-item:last-child {
-  border-bottom-left-radius: var(--rounded-xl);
-  border-bottom-right-radius: var(--rounded-xl);
-}
-
-.sort-selected {
+.sort-menu-item.selected {
   color: var(--color-text);
 }
 
+/* albums */
 .albums {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -496,7 +446,7 @@ const menuItems = ref([
   row-gap: 1rem;
   margin-left: auto;
   margin-right: auto;
-  margin-bottom: 1.5rem;
+  padding-bottom: 5.5rem;
   z-index: 0;
 }
 
@@ -511,11 +461,24 @@ const menuItems = ref([
   cursor: pointer;
 }
 
+.container-album {
+  position: relative;
+  cursor: pointer;
+}
+
 .photo-container.album {
   display: flex;
   justify-content: center;
+  margin-bottom: 0.5rem;
   opacity: 0.8;
   transition: opacity 0.32s cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+.album-cover {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--rounded);
 }
 
 .photo-container.album:hover {
@@ -543,17 +506,17 @@ const menuItems = ref([
   color: #94a3b8;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 400px) {
   .albums {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 3rem;
-    row-gap: 4rem;
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+    /* gap: 3rem; */
+    /* row-gap: 4rem; */
   }
 }
 
-@media (min-width: 1280px) {
+/* @media (min-width: 1330px) {
   .albums {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
-}
+} */
 </style>
