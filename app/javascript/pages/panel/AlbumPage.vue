@@ -111,7 +111,6 @@
             <AdvancedImage
               :id="photo.image"
               :cldImg="getCloudinaryImage(photo.image, photo.angle)"
-              class="object-cover"
               :class="getPhotoClass(photo)"
             />
           </div>
@@ -143,21 +142,23 @@
         </div>
       </div>
       <!-- Photos list view -->
-      <div v-else>
-        <table class="w-full">
+      <div v-else class="flex justify-center">
+        <table class="bg-menu">
           <tbody>
             <tr
               v-for="(photo, i) in photos"
               :key="i"
               class="w-full h-11 pt-3 border-solid border-black border-b-2"
             >
-              <td class="w-11 h-full align-middle">
+              <td
+                class="w-11 h-full align-middle cursor-pointer"
+                @click.prevent="clickPhoto(photo.id)"
+              >
                 <div class="flex justify-center w-full h-full">
                   <font-awesome-icon
+                    v-if="selectedPhotoIds.includes(photo.id)"
                     icon="fa-solid fa-circle-check"
-                    class="icon-circle-check-viewList self-center"
-                    :class="{ 'icon-circle-check-selected': selectedPhotoIds.includes(photo.id) }"
-                    @click.prevent="toggleSelectPhoto(photo.id)"
+                    class="self-center icon-circle-check"
                   />
                 </div>
               </td>
@@ -165,7 +166,7 @@
                 <AdvancedImage
                   :id="photo.image"
                   :cldImg="getCloudinaryImage(photo.image, photo.angle)"
-                  class="object-cover h-full"
+                  class="w-11 h-11"
                   :class="getPhotoClass(photo)"
                 />
               </td>
@@ -175,14 +176,25 @@
               >
                 <div class="ml-3 h-full">{{ photo.name }}</div>
               </td>
-              <template v-for="review in filterReview.slice(0, 3)" :key="review.icon">
-                <td v-show="isShowingResult" class="w-11 h-full align-middle pr-3">
-                  <div class="flex justify-around w-full h-full">
+              <td class="w-8 h-full align-middle pr-6">
+                <div
+                  v-show="isShowingResult"
+                  class="flex justify-center gap-2 w-full h-full text-xl font-bold"
+                >
+                  <font-awesome-icon
+                    :icon="`fa-solid fa-${getOverallIcon(photo.id)}`"
+                    class="self-center"
+                  />
+                </div>
+              </td>
+              <slot v-for="review in filterReview.slice(0, 3)" :key="review.icon">
+                <td class="td-reviews">
+                  <div v-show="isShowingResult" class="td-review">
                     <font-awesome-icon :icon="`fa-solid fa-${review.icon}`" class="self-center" />
                     {{ numberOfReviewsWithResult(photo.id, review.value) }}
                   </div>
                 </td>
-              </template>
+              </slot>
             </tr>
           </tbody>
         </table>
@@ -258,6 +270,27 @@
           />
           <div>{{ opt.name }}</div>
           <font-awesome-icon :icon="opt.icon" class="mr-2" />
+        </div>
+      </div>
+      <!-- change display fit mode -->
+      <div class="container-context-border">
+        <div
+          v-for="(mode, i) in displayFitModes"
+          :key="mode.value"
+          class="container-context-menu"
+          :class="[
+            i === displayFitModes.length - 1
+              ? 'container-context-border'
+              : 'container-context-border-sub',
+          ]"
+          @click.prevent="selectedDisplayFitMode = mode.value"
+        >
+          <font-awesome-icon
+            :class="{ 'opacity-0': selectedDisplayFitMode !== mode.value }"
+            icon="fa-solid fa-check"
+          />
+          <div>{{ mode.name }}</div>
+          <font-awesome-icon :icon="mode.icon" class="self-center mr-2" />
         </div>
       </div>
       <div
@@ -426,6 +459,13 @@ function editAlbum(editedAlbum: Album) {
   album.value = editedAlbum;
   action.value = '';
 }
+
+// Photo display size
+const displayFitModes = [
+  { value: 1, name: 'Fill photo', icon: 'fa-solid fa-up-right-and-down-left-from-center' },
+  { value: 2, name: 'Fit photo', icon: 'fa-solid fa-down-left-and-up-right-to-center' },
+];
+const selectedDisplayFitMode = ref(1); // 1: cover, 2: contain
 
 // Selecting photos
 const isSelecting = ref(false);
@@ -694,13 +734,20 @@ function closeReviewPhoto() {
 
 // style
 function getPhotoClass(photo: Photo) {
+  let result = '';
   if (!filteredPhotos.value.map((x) => x.id).includes(photo.id)) {
-    return 'opacity-10 saturate-0';
+    result += ' opacity-10 saturate-0';
   } else if (isSelecting.value && selectedPhotoIds.value.includes(photo.id)) {
-    return 'opacity-50';
-  } else {
-    return '';
+    result += ' opacity-50';
   }
+  // if mode is contain, add class
+  if (selectedDisplayFitMode.value === 2) {
+    result += ' object-contain';
+  } else {
+    result += ' object-cover';
+  }
+
+  return result;
 }
 
 // Navigate
@@ -841,6 +888,27 @@ function goBackToAlbums() {
   color: lighten(var(--color-primary), 50%);
 }
 
+table {
+  width: 100vw;
+  border-collapse: collapse;
+}
+
+.td-reviews {
+  width: 2rem;
+  height: 100%;
+  vertical-align: middle;
+  padding-right: 0.75rem;
+}
+
+.td-review {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  height: 100%;
+  font-size: 10pt;
+  color: var(--color-text-light-2);
+}
+
 /* Context menu */
 #context-menu {
   position: absolute;
@@ -881,6 +949,13 @@ function goBackToAlbums() {
 
 .container-context-border {
   border-bottom-width: 0.125rem;
+}
+
+@media (min-width: 670px) {
+  table {
+    width: 80vw;
+    /* max-width: 60rem; */
+  }
 }
 
 @media (min-width: 780px) {
