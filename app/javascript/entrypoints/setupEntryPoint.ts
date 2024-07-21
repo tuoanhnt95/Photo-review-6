@@ -29,7 +29,7 @@ import {
   faTableColumns,
   faCircleCheck,
   faShareFromSquare,
-  faEllipsis,
+  // faEllipsis,
   faBorderAll,
   faList,
   faEye,
@@ -42,6 +42,8 @@ import {
   faArrowRightFromBracket,
   faCircleUser,
   faChartColumn,
+  faChevronRight,
+  faChevronLeft,
 } from '@fortawesome/free-solid-svg-icons';
 import { faSquareMinus, faImages } from '@fortawesome/free-regular-svg-icons'
 
@@ -74,7 +76,7 @@ library.add(
   faTableColumns,
   faCircleCheck,
   faShareFromSquare,
-  faEllipsis,
+  // faEllipsis,
   faBorderAll,
   faList,
   faEye,
@@ -87,6 +89,8 @@ library.add(
   faArrowRightFromBracket,
   faCircleUser,
   faChartColumn,
+  faChevronRight,
+  faChevronLeft,
 );
 library.add(faSquareMinus, faImages);
 const token = AuthService.getToken();

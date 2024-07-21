@@ -1,9 +1,6 @@
 <template>
-  <div class="flex justify-center" style="align-items: center">
-    <div
-      class="absolute px-6 pt-10 pb-8 bg-white dark:bg-slate-800 rounded"
-      style="min-height: 432px"
-    >
+  <div class="container-page-upload">
+    <div class="menu-upload">
       <div class="mb-2 text-lg">Upload photos</div>
 
       <!-- Upload file -->
@@ -102,10 +99,11 @@
       <!-- Close Upload menu -->
       <font-awesome-icon
         icon="fa-solid fa-x"
-        class="absolute top-4 right-4 text-slate-400"
+        class="absolute top-4 right-4 text-slate-400 cursor-pointer"
         @click="closeUploadPhoto()"
       />
     </div>
+    <div class="overlay dark active" @click="closeUploadPhoto()"></div>
   </div>
 </template>
 
@@ -400,3 +398,22 @@ const closeUploadPhoto = () => {
   }
 };
 </script>
+
+<style scoped>
+@import '../../assets/css/panel.scss';
+
+.container-page-upload {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.menu-upload {
+  position: relative;
+  z-index: 9;
+  padding: 2.5rem 1.5rem 2rem 1.5rem;
+  background-color: var(--black-raven); /* bg-white */
+  border-radius: 0.25rem;
+  min-height: 432px;
+}
+</style>
