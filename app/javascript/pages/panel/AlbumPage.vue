@@ -75,17 +75,11 @@
             </slot>
             <strong v-else>{{ formatDate(album.expiry_date) }}</strong>
           </div>
-          <div
-            class="flex w-42 border border-solid border-slate-600 divide-x divide-solid divide-slate-600 text-slate-600 rounded-sm"
-          >
+          <div class="container-buttons-filter">
             <div v-for="opt in filterReview" :key="opt.icon">
-              <button
-                class="btn-filter"
-                :class="{ 'btn-filter-selected': opt.selected }"
-                @click="opt.selected = !opt.selected"
-              >
+              <button :class="{ selected: opt.selected }" @click="opt.selected = !opt.selected">
                 <font-awesome-icon :icon="`fa-solid fa-${opt.icon}`" />
-                <div>({{ numberOfPhotosWithReview(opt.value) }})</div>
+                <div style="font-size: 11pt">({{ numberOfPhotosWithReview(opt.value) }})</div>
               </button>
             </div>
           </div>
@@ -777,20 +771,6 @@ function goBackToAlbums() {
 <style scoped>
 @import '../../assets/css/panel.scss';
 
-.btn-filter {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  width: 3.25rem;
-  padding: 0.5rem 0.125rem;
-  border-radius: 0.25rem;
-}
-
-.btn-filter-selected {
-  background-color: white;
-  color: var(--color-primary);
-}
-
 .btn-select {
   padding: 0.25rem 0.5rem;
   border: 0.5px solid var(--color-text-light-1);
@@ -873,7 +853,41 @@ function goBackToAlbums() {
 
 .container-filter {
   height: 2rem;
-  margin: 0.75rem 0 0.25rem 0.75rem;
+  margin: 0.75rem 0.75rem 0.25rem 0.75rem;
+}
+
+.container-buttons-filter {
+  display: flex;
+  background: var(--color-menu);
+  color: var(--color-text-light-1);
+  border-radius: 0.25rem;
+
+  button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    padding: 0.125rem 2.5rem;
+    width: 3.25rem;
+    border-radius: 0;
+    border-right: 1px solid var(--black-raven);
+  }
+
+  div:first-child button {
+    border-top-left-radius: 0.25rem;
+    border-bottom-left-radius: 0.25rem;
+  }
+
+  div:last-child button {
+    border-top-right-radius: 0.25rem;
+    border-bottom-right-radius: 0.25rem;
+    border-right: none;
+  }
+
+  button.selected {
+    background-color: var(--color-primary);
+    color: white;
+  }
 }
 
 .container-photo-reviews-all {
