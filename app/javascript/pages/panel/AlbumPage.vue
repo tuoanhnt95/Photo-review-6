@@ -10,7 +10,7 @@
         <!-- empty placeholder to keep grid layout -->
         <p v-if="isLargeScreen"></p>
 
-        <div class="flex gap-2 justify-end w-24">
+        <div class="container-select-toggle-menu w-24">
           <button type="button" class="btn-select btn-menu" @click="toggleSelecting">Select</button>
           <ButtonMenu @toggle-menu="toggleContextMenu" />
         </div>
@@ -21,13 +21,13 @@
             {{ selectedPhotoIds.length > 0 ? 'Deselect All' : 'Select All' }}
           </button>
         </div>
-        <div v-if="isLargeScreen" class="flex justify-center items-center">
+        <div v-if="isLargeScreen" class="flex-center-center">
           <p class="w-8 font-bold">
             {{ selectedPhotoIds.length }}
           </p>
           of {{ filteredPhotos.length }} photos selected
         </div>
-        <div class="flex gap-2 justify-end w-36">
+        <div class="container-select-toggle-menu w-36">
           <!-- TODO: send photo to someone by notification or email, with a message -->
           <button
             v-if="isLargeScreen"
@@ -61,7 +61,7 @@
         </div>
       </div>
       <!-- Filter -->
-      <div class="w-100 h-8 ml-3 mt-3 mb-1">
+      <div class="container-filter">
         <div class="flex justify-between items-center h-full">
           <div class="flex gap-1 items-center text-xs text-slate-400">
             <font-awesome-icon icon="fa-solid fa-calendar-days" />
@@ -80,7 +80,7 @@
           >
             <div v-for="opt in filterReview" :key="opt.icon">
               <button
-                class="btn-filter w-14 px-2 py-0.5"
+                class="btn-filter"
                 :class="{ 'btn-filter-selected': opt.selected }"
                 @click="opt.selected = !opt.selected"
               >
@@ -144,12 +144,32 @@
       <!-- Photos list view -->
       <div v-else class="flex justify-center">
         <table class="bg-menu">
+          <thead>
+            <tr>
+              <th></th>
+              <th></th>
+              <th class="text-left">Name</th>
+              <th>
+                <div class="flex gap-2 w-32 justify-start">
+                  Average result
+                  <div class="flex items-center">
+                    <font-awesome-icon
+                      :icon="`fa-solid fa-eye${isShowingResult ? '' : '-slash'}`"
+                      class="cursor-pointer"
+                      @click="isShowingResult = !isShowingResult"
+                    />
+                  </div>
+                </div>
+              </th>
+              <slot v-for="review in filterReview.slice(0, 3)" :key="review.icon">
+                <th>
+                  <font-awesome-icon :icon="`fa-solid fa-${review.icon}`" class="self-center" />
+                </th>
+              </slot>
+            </tr>
+          </thead>
           <tbody>
-            <tr
-              v-for="(photo, i) in photos"
-              :key="i"
-              class="w-full h-11 pt-3 border-solid border-black border-b-2"
-            >
+            <tr v-for="(photo, i) in photos" :key="i" class="w-full h-11 pt-3">
               <td
                 class="w-11 h-full align-middle cursor-pointer"
                 @click.prevent="clickPhoto(photo.id)"
@@ -190,7 +210,6 @@
               <slot v-for="review in filterReview.slice(0, 3)" :key="review.icon">
                 <td class="td-reviews">
                   <div v-show="isShowingResult" class="td-review">
-                    <font-awesome-icon :icon="`fa-solid fa-${review.icon}`" class="self-center" />
                     {{ numberOfReviewsWithResult(photo.id, review.value) }}
                   </div>
                 </td>
@@ -203,7 +222,7 @@
 
     <!-- Bottom bar if small screen -->
     <slot v-if="!isLargeScreen">
-      <div class="fixed left-0 bottom-0 flex justify-between w-full p-4 bg-menu">
+      <div class="container-bottom bg-menu">
         <button
           type="button"
           class="btn-select btn-menu"
@@ -212,9 +231,7 @@
         >
           <font-awesome-icon icon="fa-solid fa-share-from-square" />
         </button>
-        <p v-if="!isSelecting" class="flex justify-center items-center">
-          {{ filteredPhotos.length }} photos
-        </p>
+        <p v-if="!isSelecting" class="flex-center-center">{{ filteredPhotos.length }} photos</p>
         <div v-else class="flex justify-center">
           <div class="w-37 self-center flex">
             <div class="flex justify-center align-center w-8 font-bold">
@@ -764,6 +781,8 @@ function goBackToAlbums() {
   display: flex;
   justify-content: space-around;
   align-items: center;
+  width: 3.25rem;
+  padding: 0.5rem 0.125rem;
   border-radius: 0.25rem;
 }
 
@@ -840,6 +859,23 @@ function goBackToAlbums() {
   cursor: pointer;
 }
 
+.container-select-toggle-menu {
+  display: flex;
+  gap: 0.5rem; /* gap-2 */
+  justify-content: flex-end;
+}
+
+.flex-center-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container-filter {
+  height: 2rem;
+  margin: 0.75rem 0 0.25rem 0.75rem;
+}
+
 .container-photo-reviews-all {
   position: absolute;
   bottom: 0;
@@ -866,7 +902,7 @@ function goBackToAlbums() {
   justify-content: center;
   align-items: center;
   z-index: 9;
-  font-size: 10pt;
+  font-size: 11pt;
   color: var(--color-text-light-2);
 
   svg {
@@ -893,6 +929,26 @@ table {
   border-collapse: collapse;
 }
 
+thead tr {
+  height: 2.5rem;
+  align-self: center;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-menu-light);
+  color: var(--color-text-light-1);
+
+  th {
+    vertical-align: middle;
+    padding: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-align: start;
+  }
+}
+
+tbody tr:nth-child(odd) {
+  background-color: var(--color-menu);
+}
+
 .td-reviews {
   width: 2rem;
   height: 100%;
@@ -905,7 +961,7 @@ table {
   justify-content: space-around;
   width: 100%;
   height: 100%;
-  font-size: 10pt;
+  font-size: 11pt;
   color: var(--color-text-light-2);
 }
 
@@ -924,6 +980,16 @@ table {
   box-shadow:
     0 10px 15px -3px rgb(0 0 0 / 0.1),
     0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.container-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1rem;
 }
 
 #context-menu.show {
@@ -953,7 +1019,7 @@ table {
 
 @media (min-width: 670px) {
   table {
-    width: 80vw;
+    width: 60vw;
     /* max-width: 60rem; */
   }
 }
