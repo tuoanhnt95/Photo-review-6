@@ -269,7 +269,8 @@ const menuItems = ref([
   min-width: 250px;
   height: 100%;
   opacity: 0.8;
-  background: rgba(22, 22, 23, 0.8);
+  background: var(--color-fill-tertiary);
+  /* background: rgba(22, 22, 23, 0.8); */
   backdrop-filter: blur(12px);
 
   .side-menu {
@@ -398,7 +399,7 @@ const menuItems = ref([
   width: 150px;
   cursor: pointer;
   font-size: 12px;
-  border: 1px solid var(--color-background);
+  border: 1px solid var(--color-fill);
   transition: border-color 0.1s ease-in-out;
 
   .sort-icon {
