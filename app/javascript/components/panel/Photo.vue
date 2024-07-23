@@ -1,70 +1,78 @@
 <template>
-  <div>
-    <div class="relative container-no-nav-bar">
-      <!-- Photo -->
-      <div class="container-full-flex items-start">
+  <div class="container-photo-page">
+    <!-- Top bar -->
+    <div class="top-bar">
+      <!-- Back to Album -->
+      <div class="ml-5 btn-small" @click="backToAlbum">
+        <font-awesome-icon icon="fa-solid fa-chevron-left" class="btn-small-icon" />
+      </div>
+      <!-- Vertical side-by-side -->
+      <div class="mr-5 btn-small" @click="splitScreen(1)">
+        <font-awesome-icon icon="fa-solid fa-table-columns" class="btn-small-icon" />
+      </div>
+    </div>
+
+    <!-- Photo -->
+    <div class="container-photos">
+      <div
+        v-for="(display, i) in displayPhotos"
+        :key="display?.id"
+        class="container-photo"
+        :class="{
+          'w-1/2 justify-end': splitScreenOption > 0 && i === 0,
+          'w-1/2 justify-start': splitScreenOption > 0 && i === 1,
+          'w-full justify-center': !splitScreenOption,
+        }"
+      >
+        <!-- Rotate photo -->
         <div
-          v-for="(display, i) in displayPhotos"
-          :key="display?.id"
-          class="relative object-contain w-fit h-full"
-          :class="[splitScreenOption > 0 ? 'w-1/2' : 'w-full']"
+          class="btn-rotate btn-small"
+          :class="{
+            'right-5': !splitScreenOption || (splitScreenOption > 0 && i === 1),
+            'left-5': splitScreenOption > 0 && i === 0,
+          }"
+          @click="rotatePhoto(i)"
         >
-          <!-- Rotate photo -->
-          <div class="absolute right-10 z-10 btn-small" @click="rotatePhoto(i)">
-            <font-awesome-icon icon="fa-solid fa-rotate-left" class="btn-small-icon" />
+          <font-awesome-icon icon="fa-solid fa-rotate-left" class="btn-small-icon" />
+        </div>
+        <AdvancedImage
+          v-if="display"
+          :cld-img="getCloudinaryImage(display.image, display.angle)"
+          place-holder="predominant-color"
+          class="photo"
+        />
+        <!-- Review -->
+        <div class="absolute bottom-10 z-10 self-end flex w-full justify-center">
+          <div
+            v-for="opt in reviewDisplayOptions"
+            :key="opt.value"
+            class="btn-review"
+            :class="{ 'btn-selected': reviewResult(i) === opt.value }"
+          >
+            <font-awesome-icon
+              v-model="photo.review_results"
+              :icon="`fa-solid fa-${opt.icon}`"
+              @click="reviewPhoto(i, opt.value)"
+            />
           </div>
-          <!-- Review -->
-          <div class="absolute bottom-10 z-10 row-start-3 self-end flex w-full justify-center">
-            <div
-              v-for="opt in reviewDisplayOptions"
-              :key="opt.value"
-              class="btn-review"
-              :class="{ 'btn-selected': reviewResult(i) === opt.value }"
-            >
-              <font-awesome-icon
-                v-model="photo.review_results"
-                :icon="`fa-solid fa-${opt.icon}`"
-                @click="reviewPhoto(i, opt.value)"
-              />
-            </div>
-          </div>
-          <AdvancedImage
-            v-if="display"
-            :cld-img="getCloudinaryImage(display.image, display.angle)"
-            place-holder="predominant-color"
-            class="object-contain w-full h-full"
-          />
         </div>
       </div>
+    </div>
 
-      <!-- Buttons -->
-      <div class="container-layer w-full h-full grid grid-rows-3">
-        <div class="row-start-1 flex justify-between">
-          <!-- Back to Album -->
-          <div class="ml-5 btn-small" @click="backToAlbum">
-            <font-awesome-icon icon="fa-solid fa-arrow-left" class="btn-small-icon" />
-          </div>
-          <!-- Vertical side-by-side -->
-          <div class="mr-5 btn-small" @click="splitScreen(1)">
-            <font-awesome-icon icon="fa-solid fa-table-columns" class="btn-small-icon" />
-          </div>
-        </div>
-
-        <!-- Navigate -->
-        <div class="row-start-2 self-center w-full flex justify-between">
-          <font-awesome-icon
-            icon="fa-solid fa-caret-left"
-            class="btn-navigate-photo ml-6"
-            :class="[canNavigate(-1) ? 'cursor-pointer' : 'opacity-0']"
-            @click="navigatePhoto(-1)"
-          />
-          <font-awesome-icon
-            icon="fa-solid fa-caret-right"
-            class="btn-navigate-photo mr-6"
-            :class="[canNavigate(1) ? 'cursor-pointer' : 'opacity-0']"
-            @click="navigatePhoto(1)"
-          />
-        </div>
+    <!-- Thumbnails -->
+    <div class="thumbnails">
+      <div
+        v-for="(pho, i) in photos"
+        :key="pho.id"
+        class="container-thumbnail"
+        :class="[currentIndex === i ? 'current-photo' : '']"
+        @click="navigatePhoto(i - currentIndex)"
+      >
+        <AdvancedImage
+          :cld-img="getCloudinaryImage(pho.image, pho.angle)"
+          place-holder="predominant-color"
+          class="thumbnail"
+        />
       </div>
     </div>
   </div>
@@ -322,17 +330,67 @@ const reviewDisplayOptions = [
 }
 
 /* Container */
-.container-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
+.container-photo-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
 
-.container-full-flex {
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  height: 4rem;
+}
+
+.container-photos {
+  position: relative;
+  flex-grow: 1;
   display: flex;
   justify-content: center;
-  gap: 1px;
-  width: 100%;
-  height: 100%;
+  overflow: hidden;
+}
+
+.container-photo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: auto;
+
+  .photo {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+}
+
+.btn-rotate {
+  position: absolute;
+  top: 0;
+  z-index: auto;
+}
+
+.thumbnails {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  height: 8rem;
+
+  .container-thumbnail {
+    width: 3rem;
+    height: 3rem;
+    cursor: pointer;
+    flex-shrink: 0;
+
+    .thumbnail {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .current-photo {
+    border: 4px solid var(--color-menu);
+  }
 }
 </style>
