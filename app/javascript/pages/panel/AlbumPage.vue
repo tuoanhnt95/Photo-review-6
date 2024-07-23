@@ -359,8 +359,8 @@
     <Photo
       v-if="isShowingPhoto && photoShowing"
       :photo="photoShowing"
-      :photos="photos"
-      class="absolute top-0 left-0 w-full z-50"
+      :photos="filteredPhotos"
+      class="overlay dark active z-10"
       @reviewed-photo="(photo: Photo) => updatePhoto(photo)"
       @navigate-photo="(photoId: Number) => showPhoto(photoId)"
       @close-review-photo="closeReviewPhoto"
