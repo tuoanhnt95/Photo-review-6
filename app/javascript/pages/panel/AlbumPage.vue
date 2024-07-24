@@ -853,7 +853,7 @@ function goBackToAlbums() {
 
 .container-filter {
   height: 2rem;
-  margin: 0.75rem 0.75rem 0.25rem 0.75rem;
+  margin: 0.75rem 0 0.25rem 0.75rem;
 }
 
 .container-buttons-filter {
@@ -867,7 +867,7 @@ function goBackToAlbums() {
     justify-content: center;
     align-items: center;
     gap: 4px;
-    padding: 0.125rem 2.5rem;
+    padding: 0 1.75rem;
     width: 3.25rem;
     border-radius: 0;
     border-right: 1px solid var(--black-raven);
@@ -1035,6 +1035,14 @@ tbody tr:nth-child(odd) {
   table {
     width: 60vw;
     /* max-width: 60rem; */
+  }
+
+  .container-filter {
+    margin-right: 0.75rem;
+    .container-buttons-filter button {
+      padding: 0.125rem 2.5rem;
+      width: 3.25rem;
+    }
   }
 }
 

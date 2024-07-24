@@ -140,6 +140,7 @@ interface Album {
   invitees: string[];
   cover: string;
   angle: number;
+  created_at: Date;
 }
 
 const currentUser = JSON.parse(localStorage.user).data.attributes;
@@ -172,7 +173,9 @@ const albums = computed(() => {
     case 4:
       return albumsDataCopy.sort((a, b) => b.name.localeCompare(a.name));
     default:
-      return albumsData.value;
+      return albumsDataCopy.sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      );
   }
 });
 
@@ -196,7 +199,7 @@ const sortMethods = [
   { value: 3, name: 'Album name: A to Z' },
   { value: 4, name: 'Album name: Z to A' },
 ];
-const sortMethod = ref(0);
+const sortMethod = ref(1);
 const isShowingSort = ref(false);
 const selectedSort = computed(() => {
   const selected = sortMethods.find((x) => x.value === sortMethod.value);
