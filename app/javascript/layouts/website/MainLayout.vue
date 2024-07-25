@@ -5,7 +5,7 @@
         <MainMenu />
       </div>
 
-      <div class="container mt-15">
+      <div>
         <router-view />
       </div>
     </div>
