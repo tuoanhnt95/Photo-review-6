@@ -1,34 +1,16 @@
-<!-- <template>
-  <nav class="navbar">
-    <h2 class="navbar-logo">Shoot Select</h2>
-    <ul class="navbar-nav">
-      <li v-for="item in menuItems" :key="item.routeName" class="nav-item">
-        <router-link
-          :to="{
-            name: item.routeName,
-          }"
-        >
-          {{ item.title }}
-        </router-link>
-      </li>
-      <li class="nav-item">
-        <a href="/panel/"></a>
-      </li>
-    </ul>
-  </nav>
-</template> -->
-
 <template>
   <nav class="fixed w-full bg-menu color-menu">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
         <div class="flex items-center">
           <div class="flex-shrink-0">
-            <img class="h-8 w-auto" src="/path-to-your-logo.svg" alt="Shoot Select" />
+            <!-- <img class="h-8 w-auto" src="/path-to-your-logo.svg" alt="Shoot Select" /> -->
           </div>
-          <div class="ml-4 text-xl font-semibold">Shoot Select</div>
+          <router-link :to="{ name: 'index' }" class="ml-4 text-xl font-semibold cursor-pointer">
+            ShootSelect
+          </router-link>
         </div>
-        <ul class="flex items-center">
+        <ul class="flex items-center gap-4">
           <li v-for="item in menuItems" :key="item.routeName">
             <router-link
               :to="{ name: item.routeName }"
