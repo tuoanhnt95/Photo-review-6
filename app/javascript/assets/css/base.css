@@ -48,7 +48,7 @@
 /* semantic color variables for this project */
 :root {
   /* --color-background: #0a0a0a; */
-  --color-fill: #000;
+  --color-fill: var(--black-raven);
   --color-fill-tertiary: var(--black-apple);
   --color-background-soft: var(--vt-c-white-soft);
   --color-background-mute: var(--vt-c-white-mute);
