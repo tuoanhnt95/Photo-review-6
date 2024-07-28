@@ -36,7 +36,7 @@
             type="button"
             class="btn-select btn-menu"
             :class="{ unselectable: selectedPhotoIds.length === 0 }"
-            @click.prevent="rotatePhotos"
+            @click.stop.prevent="rotatePhotos"
           >
             <font-awesome-icon icon="fa-solid fa-rotate-left" />
           </button>
@@ -92,7 +92,7 @@
     <div
       v-if="selectedAlbumViewIndex !== 1"
       class="container-photos-icon"
-      @click.stop="handleContainerClick()"
+      @click.stop="handleContainerClick"
     >
       <div class="photo-container upload" @click.stop.prevent="isUploadingPhoto = true">
         <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600" />
@@ -100,9 +100,8 @@
       <div
         v-for="(photo, i) in photos"
         :key="i"
-        class="relative"
+        class="relative h-fit"
         @click.stop="handlePhotoClick(photo.id)"
-        @dblclick.prevent="showPhoto(photo.id)"
       >
         <div
           class="photo-container flex justify-center"
@@ -117,28 +116,30 @@
         <div v-if="selectedPhotoIds.includes(photo.id)" class="container-icon-circle">
           <font-awesome-icon icon="fa-solid fa-circle-check" class="icon-circle-check" />
         </div>
-        <div v-if="isShowingResult" class="icon-result-overall">
-          <font-awesome-icon :icon="`fa-solid fa-${getOverallIcon(photo.id)}`" />
-        </div>
-        <div v-if="isShowingResult" class="container-photo-reviews-all">
-          <div v-for="review in filterReview.slice(0, 3)" :key="review.icon">
-            <div class="container-photo-review">
-              <font-awesome-icon
-                :icon="`fa-solid fa-${review.icon}`"
-                :class="{
-                  'opacity-0': numberOfReviewsWithResult(photo.id, review.value) === 0,
-                }"
-              />
-              <div
-                :class="{
-                  'opacity-0': numberOfReviewsWithResult(photo.id, review.value) === 0,
-                }"
-              >
-                {{ numberOfReviewsWithResult(photo.id, review.value) }}
+        <slot v-if="isShowingResult">
+          <div class="icon-result-overall">
+            <font-awesome-icon :icon="`fa-solid fa-${getOverallIcon(photo.id)}`" />
+          </div>
+          <div class="container-photo-reviews-all">
+            <div v-for="review in filterReview.slice(0, 3)" :key="review.icon">
+              <div class="container-photo-review">
+                <font-awesome-icon
+                  :icon="`fa-solid fa-${review.icon}`"
+                  :class="{
+                    'opacity-0': numberOfReviewsWithResult(photo.id, review.value) === 0,
+                  }"
+                />
+                <div
+                  :class="{
+                    'opacity-0': numberOfReviewsWithResult(photo.id, review.value) === 0,
+                  }"
+                >
+                  {{ numberOfReviewsWithResult(photo.id, review.value) }}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </slot>
       </div>
     </div>
     <!-- Photos list view -->
@@ -172,7 +173,7 @@
           <tr v-for="(photo, i) in photos" :key="i" class="w-full h-11 pt-3">
             <td
               class="w-11 h-full align-middle cursor-pointer"
-              @click.stop.prevent="clickPhoto(photo.id)"
+              @click.stop.prevent="handlePhotoClick(photo.id)"
             >
               <div class="flex justify-center w-full h-full">
                 <font-awesome-icon
@@ -541,36 +542,36 @@ const isShiftKeyPressed = ref(false);
 const lastSelectedPhoto = ref(0);
 
 const handlePhotoClick = (photoId: number) => {
-  isSelecting.value = true;
-
-  if (isShiftKeyPressed.value && lastSelectedPhoto.value > 0) {
-    const start = photosData.value.findIndex((item) => item.id === lastSelectedPhoto.value);
-    const end = photosData.value.findIndex((item) => item.id === photoId);
-    const range = photosData.value
-      .slice(Math.min(start, end), Math.max(start, end) + 1)
-      .map((item) => item.id);
-
-    if (isCommandKeyPressed.value) {
-      // Add range to existing selection
-      selectedPhotoIds.value = [...new Set([...selectedPhotoIds.value, ...range])];
+  if (isSelecting.value) {
+    if (!isLargeScreen.value) {
+      toggleSelectPhoto(photoId);
     } else {
-      // Replace selection with range
-      selectedPhotoIds.value = range;
-    }
-  } else if (isCommandKeyPressed.value) {
-    // Toggle selection when Command/Control is pressed
-    const index = selectedPhotoIds.value.indexOf(photoId);
-    if (index === -1) {
-      selectedPhotoIds.value.push(photoId);
-    } else {
-      selectedPhotoIds.value.splice(index, 1);
+      if (isShiftKeyPressed.value && lastSelectedPhoto.value > 0) {
+        const start = photosData.value.findIndex((item) => item.id === lastSelectedPhoto.value);
+        const end = photosData.value.findIndex((item) => item.id === photoId);
+        const range = photosData.value
+          .slice(Math.min(start, end), Math.max(start, end) + 1)
+          .map((item) => item.id);
+
+        if (isCommandKeyPressed.value) {
+          // Add range to existing selection
+          selectedPhotoIds.value = [...new Set([...selectedPhotoIds.value, ...range])];
+        } else {
+          // Replace selection with range
+          selectedPhotoIds.value = range;
+        }
+      } else if (isCommandKeyPressed.value) {
+        toggleSelectPhoto(photoId);
+      } else {
+        // Select only the clicked item when Command/Control is not pressed
+        selectedPhotoIds.value = [photoId];
+      }
+
+      lastSelectedPhoto.value = photoId;
     }
   } else {
-    // Select only the clicked item when Command/Control is not pressed
-    selectedPhotoIds.value = [photoId];
+    showPhoto(photoId);
   }
-
-  lastSelectedPhoto.value = photoId;
 };
 
 const handleKeyDown = (event: KeyboardEvent) => {
@@ -630,6 +631,7 @@ function toggleSelectPhoto(photoId: number) {
 
 function cancelSelectPhotos() {
   isSelecting.value = false;
+  // TODO: save the results or rotation, and review results
   selectedPhotoIds.value = [];
 }
 
@@ -799,18 +801,6 @@ const filteredPhotos = computed(() => {
 // photo review
 const isShowingPhoto = ref(false);
 const photoShowing = ref<Photo>();
-
-function clickPhoto(photoId: number) {
-  if (!isLargeScreen) {
-    if (isSelecting.value) {
-      toggleSelectPhoto(photoId);
-    } else {
-      showPhoto(photoId);
-    }
-  } else {
-    // TODO: activate rotate button
-  }
-}
 
 function showPhoto(photoId: Number) {
   photoShowing.value = photosData.value.find((x) => x.id === photoId);
