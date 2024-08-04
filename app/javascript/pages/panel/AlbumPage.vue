@@ -1,70 +1,82 @@
 <template>
   <div class="container-album-page" @click="handleContainerClick">
-    <div class="header-album">
-      <slot v-if="!isSelecting">
-        <a class="container-back" @click.stop="goBackToAlbums">
-          <font-awesome-icon icon="fa-solid fa-chevron-left" />
-          <p style="margin-top: -4px">Albums</p>
-        </a>
+    <div class="bg-menu-dark container-top-fixed">
+      <div class="header-album">
+        <slot v-if="!isSelecting">
+          <a class="container-back" @click.stop="goBackToAlbums">
+            <font-awesome-icon icon="fa-solid fa-chevron-left" />
+            <p style="margin-top: -4px">Albums</p>
+          </a>
 
-        <!-- empty placeholder to keep grid layout -->
-        <p v-if="isLargeScreen"></p>
+          <!-- empty placeholder to keep grid layout -->
+          <p v-if="isLargeScreen"></p>
 
-        <div class="container-select-toggle-menu w-24">
-          <button type="button" class="btn-select btn-menu" @click.stop="toggleSelecting">
-            Select
-          </button>
-          <ButtonMenu @toggle-menu="toggleContextMenu" />
-        </div>
-      </slot>
-      <slot v-else>
-        <div class="w-24">
-          <button type="button" class="btn-select btn-menu" @click.prevent="toggleSelectAllPhotos">
-            {{ selectedPhotoIds.length > 0 ? 'Deselect All' : 'Select All' }}
-          </button>
-        </div>
-        <div v-if="isLargeScreen" class="flex-center-center">
-          <p class="w-8 font-bold">
-            {{ selectedPhotoIds.length }}
-          </p>
-          of {{ filteredPhotos.length }} photos selected
-        </div>
-        <div class="container-select-toggle-menu w-36">
-          <!-- TODO: send photo to someone by notification or email, with a message -->
-          <button
-            v-if="isLargeScreen"
-            type="button"
-            class="btn-select btn-menu"
-            :class="{ unselectable: selectedPhotoIds.length === 0 }"
-            @click.stop.prevent="rotatePhotos"
-          >
-            <font-awesome-icon icon="fa-solid fa-rotate-left" />
-          </button>
-          <button
-            v-if="isLargeScreen"
-            type="button"
-            class="btn-select btn-menu"
-            :class="{ unselectable: !isAlbumOwner || selectedPhotoIds.length === 0 }"
-            @click.prevent="deletePhotos"
-          >
-            <font-awesome-icon icon="fa-solid fa-trash-can" />
-          </button>
-          <button type="button" class="btn-select btn-menu" @click.prevent="cancelSelectPhotos">
-            Cancel
-          </button>
-        </div>
-      </slot>
-    </div>
-
-    <div class="flex justify-between mx-8">
-      <div class="label-text md">
-        {{ album.name }}
+          <div class="container-select-toggle-menu w-24">
+            <button type="button" class="btn-select btn-menu" @click.stop="toggleSelecting">
+              Select
+            </button>
+            <ButtonMenu @toggle-menu="toggleContextMenu" />
+          </div>
+        </slot>
+        <slot v-else>
+          <div class="w-24">
+            <button
+              type="button"
+              class="btn-select btn-menu"
+              @click.prevent="toggleSelectAllPhotos"
+            >
+              {{ selectedPhotoIds.length > 0 ? 'Deselect All' : 'Select All' }}
+            </button>
+          </div>
+          <div v-if="isLargeScreen" class="flex-center-center">
+            <p class="w-8 font-bold">
+              {{ selectedPhotoIds.length }}
+            </p>
+            of {{ filteredPhotos.length }} photos selected
+          </div>
+          <div class="container-select-toggle-menu w-36">
+            <!-- TODO: send photo to someone by notification or email, with a message -->
+            <slot v-if="isLargeScreen">
+              <button
+                type="button"
+                class="btn-select btn-menu"
+                :class="{ unselectable: selectedPhotoIds.length === 0 }"
+                @click.stop.prevent="rotatePhotos"
+              >
+                <font-awesome-icon icon="fa-solid fa-rotate-left" />
+              </button>
+              <button
+                type="button"
+                class="btn-select btn-menu"
+                :class="{ unselectable: !isAlbumOwner || selectedPhotoIds.length === 0 }"
+                @click.prevent="deletePhotos"
+              >
+                <font-awesome-icon icon="fa-solid fa-trash-can" />
+              </button>
+            </slot>
+            <button
+              type="button"
+              class="btn-select btn-menu"
+              :class="{ unselectable: selectedPhotoIds.length === 0 }"
+              @click.prevent="saveChangePhotos"
+            >
+              Save
+            </button>
+            <button type="button" class="btn-select btn-menu" @click.prevent="cancelSelectPhotos">
+              Cancel
+            </button>
+          </div>
+        </slot>
       </div>
-    </div>
-    <!-- Filter -->
-    <div class="container-filter">
-      <div class="flex justify-between items-center h-full">
-        <div class="flex gap-1 items-center text-xs text-slate-400">
+
+      <div class="container-album-name">
+        <div class="label-text md">
+          {{ album.name }}
+        </div>
+      </div>
+      <!-- Filter -->
+      <div class="container-filter">
+        <div class="container-date">
           <font-awesome-icon icon="fa-solid fa-calendar-days" />
           <slot v-if="isLargeScreen">
             <strong>{{ `Due: ${formatDate(album.expiry_date)} ` }}</strong>
@@ -77,147 +89,174 @@
           <strong v-else>{{ formatDate(album.expiry_date) }}</strong>
         </div>
         <div class="container-buttons-filter">
-          <div v-for="opt in filterReview" :key="opt.icon">
-            <button :class="{ selected: opt.selected }" @click="opt.selected = !opt.selected">
+          <slot v-if="!isSelecting">
+            <button
+              v-for="opt in filterReview"
+              :key="opt.icon"
+              :class="{ selected: opt.selected }"
+              @click.stop.prevent="opt.selected = !opt.selected"
+            >
               <font-awesome-icon :icon="`fa-solid fa-${opt.icon}`" />
               <div style="font-size: 11pt">({{ numberOfPhotosWithReview(opt.value) }})</div>
             </button>
-          </div>
+          </slot>
+          <slot v-else>
+            <button
+              v-for="opt in filterReview.slice(0, 3)"
+              :key="opt.icon"
+              :class="{
+                selected: ratedReview === opt.value,
+                unselectable: selectedPhotoIds.length === 0,
+              }"
+              style="height: 22px"
+              @click.stop.prevent="reviewPhotos(opt.value)"
+            >
+              <font-awesome-icon :icon="`fa-solid fa-${opt.icon}`" />
+            </button>
+          </slot>
         </div>
       </div>
+
+      <div
+        class="overlay"
+        :class="{ active: contextMenuIsOpen }"
+        @click.stop="toggleContextMenu"
+      ></div>
     </div>
 
     <!-- Photos -->
-    <!-- Icon view -->
-    <div
-      v-if="selectedAlbumViewIndex !== 1"
-      class="container-photos-icon"
-      @click.stop="handleContainerClick"
-    >
-      <div class="photo-container upload" @click.stop.prevent="isUploadingPhoto = true">
-        <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600" />
-      </div>
+    <div class="mt-36">
+      <!-- Icon view -->
       <div
-        v-for="(photo, i) in photos"
-        :key="i"
-        class="relative h-fit"
-        @click.stop="handlePhotoClick(photo.id)"
+        v-if="selectedAlbumViewIndex !== 1"
+        class="container-photos-icon"
+        @click.stop="handleContainerClick"
       >
+        <div class="photo-container upload" @click.stop.prevent="isUploadingPhoto = true">
+          <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600" />
+        </div>
         <div
-          class="photo-container flex justify-center"
-          :class="{ 'cursor-pointer': filteredPhotos.map((x) => x.id).includes(photo.id) }"
+          v-for="(photo, i) in photos"
+          :key="i"
+          class="relative h-fit"
+          @click.stop="handlePhotoClick(photo.id)"
         >
-          <AdvancedImage
-            :id="photo.image"
-            :cldImg="getCloudinaryImage(photo.image, photo.angle)"
-            :class="getPhotoClass(photo)"
-          />
-        </div>
-        <div v-if="selectedPhotoIds.includes(photo.id)" class="container-icon-circle">
-          <font-awesome-icon icon="fa-solid fa-circle-check" class="icon-circle-check" />
-        </div>
-        <slot v-if="isShowingResult">
-          <div class="icon-result-overall">
-            <font-awesome-icon :icon="`fa-solid fa-${getOverallIcon(photo.id)}`" />
+          <div
+            class="photo-container flex justify-center"
+            :class="{ 'cursor-pointer': filteredPhotos.map((x) => x.id).includes(photo.id) }"
+          >
+            <AdvancedImage
+              :id="photo.image"
+              :cldImg="getCloudinaryImage(photo.image, photo.angle)"
+              :class="getPhotoClass(photo)"
+            />
           </div>
-          <div class="container-photo-reviews-all">
-            <div v-for="review in filterReview.slice(0, 3)" :key="review.icon">
-              <div class="container-photo-review">
-                <font-awesome-icon
-                  :icon="`fa-solid fa-${review.icon}`"
-                  :class="{
-                    'opacity-0': numberOfReviewsWithResult(photo.id, review.value) === 0,
-                  }"
-                />
-                <div
-                  :class="{
-                    'opacity-0': numberOfReviewsWithResult(photo.id, review.value) === 0,
-                  }"
-                >
-                  {{ numberOfReviewsWithResult(photo.id, review.value) }}
+          <div v-if="selectedPhotoIds.includes(photo.id)" class="container-icon-circle">
+            <font-awesome-icon icon="fa-solid fa-circle-check" class="icon-circle-check" />
+          </div>
+          <slot v-if="isShowingResult">
+            <div class="icon-result-overall">
+              <font-awesome-icon :icon="`fa-solid fa-${getOverallIcon(photo.id)}`" />
+            </div>
+            <div class="container-photo-reviews-all">
+              <div v-for="review in filterReview.slice(0, 3)" :key="review.icon">
+                <div class="container-photo-review">
+                  <font-awesome-icon
+                    :icon="`fa-solid fa-${review.icon}`"
+                    :class="{
+                      'opacity-0': numberOfReviewsWithResult(photo.id, review.value) === 0,
+                    }"
+                  />
+                  <div
+                    :class="{
+                      'opacity-0': numberOfReviewsWithResult(photo.id, review.value) === 0,
+                    }"
+                  >
+                    {{ numberOfReviewsWithResult(photo.id, review.value) }}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </slot>
+          </slot>
+        </div>
       </div>
-    </div>
-    <!-- Photos list view -->
-    <div v-else class="flex justify-center">
-      <table class="bg-menu">
-        <thead>
-          <tr>
-            <th></th>
-            <th></th>
-            <th class="text-left">Name</th>
-            <th>
-              <div class="flex gap-2 w-32 justify-start">
-                Average result
-                <div class="flex items-center">
+      <!-- Photos list view -->
+      <div v-else class="flex justify-center">
+        <table class="bg-menu">
+          <thead>
+            <tr>
+              <th></th>
+              <th></th>
+              <th class="text-left">Name</th>
+              <th>
+                <div class="flex gap-2 w-32 justify-start">
+                  Average result
+                  <div class="flex items-center">
+                    <font-awesome-icon
+                      :icon="`fa-solid fa-eye${isShowingResult ? '' : '-slash'}`"
+                      class="cursor-pointer"
+                      @click.stop="isShowingResult = !isShowingResult"
+                    />
+                  </div>
+                </div>
+              </th>
+              <slot v-for="review in filterReview.slice(0, 3)" :key="review.icon">
+                <th>
+                  <font-awesome-icon :icon="`fa-solid fa-${review.icon}`" class="self-center" />
+                </th>
+              </slot>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(photo, i) in photos" :key="i" class="w-full h-11 pt-3">
+              <td
+                class="w-11 h-full align-middle cursor-pointer"
+                @click.stop.prevent="handlePhotoClick(photo.id)"
+              >
+                <div class="flex justify-center w-full h-full">
                   <font-awesome-icon
-                    :icon="`fa-solid fa-eye${isShowingResult ? '' : '-slash'}`"
-                    class="cursor-pointer"
-                    @click.stop="isShowingResult = !isShowingResult"
+                    v-if="selectedPhotoIds.includes(photo.id)"
+                    icon="fa-solid fa-circle-check"
+                    class="self-center icon-circle-check"
                   />
                 </div>
-              </div>
-            </th>
-            <slot v-for="review in filterReview.slice(0, 3)" :key="review.icon">
-              <th>
-                <font-awesome-icon :icon="`fa-solid fa-${review.icon}`" class="self-center" />
-              </th>
-            </slot>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(photo, i) in photos" :key="i" class="w-full h-11 pt-3">
-            <td
-              class="w-11 h-full align-middle cursor-pointer"
-              @click.stop.prevent="handlePhotoClick(photo.id)"
-            >
-              <div class="flex justify-center w-full h-full">
-                <font-awesome-icon
-                  v-if="selectedPhotoIds.includes(photo.id)"
-                  icon="fa-solid fa-circle-check"
-                  class="self-center icon-circle-check"
+              </td>
+              <td class="w-11 h-11 cursor-pointer" @click.stop.prevent="showPhoto(photo.id)">
+                <AdvancedImage
+                  :id="photo.image"
+                  :cldImg="getCloudinaryImage(photo.image, photo.angle)"
+                  class="w-11 h-11"
+                  :class="getPhotoClass(photo)"
                 />
-              </div>
-            </td>
-            <td class="w-11 h-11 cursor-pointer" @click.stop.prevent="showPhoto(photo.id)">
-              <AdvancedImage
-                :id="photo.image"
-                :cldImg="getCloudinaryImage(photo.image, photo.angle)"
-                class="w-11 h-11"
-                :class="getPhotoClass(photo)"
-              />
-            </td>
-            <td
-              class="w-56 h-full align-middle text-wrap cursor-pointer"
-              @click.stop.prevent="showPhoto(photo.id)"
-            >
-              <div class="ml-3 h-full">{{ photo.name }}</div>
-            </td>
-            <td class="w-8 h-full align-middle pr-6">
-              <div
-                v-show="isShowingResult"
-                class="flex justify-center gap-2 w-full h-full text-xl font-bold"
+              </td>
+              <td
+                class="w-56 h-full align-middle text-wrap cursor-pointer"
+                @click.stop.prevent="showPhoto(photo.id)"
               >
-                <font-awesome-icon
-                  :icon="`fa-solid fa-${getOverallIcon(photo.id)}`"
-                  class="self-center"
-                />
-              </div>
-            </td>
-            <slot v-for="review in filterReview.slice(0, 3)" :key="review.icon">
-              <td class="td-reviews">
-                <div v-show="isShowingResult" class="td-review">
-                  {{ numberOfReviewsWithResult(photo.id, review.value) }}
+                <div class="ml-3 h-full">{{ photo.name }}</div>
+              </td>
+              <td class="w-8 h-full align-middle pr-6">
+                <div
+                  v-show="isShowingResult"
+                  class="flex justify-center gap-2 w-full h-full text-xl font-bold"
+                >
+                  <font-awesome-icon
+                    :icon="`fa-solid fa-${getOverallIcon(photo.id)}`"
+                    class="self-center"
+                  />
                 </div>
               </td>
-            </slot>
-          </tr>
-        </tbody>
-      </table>
+              <slot v-for="review in filterReview.slice(0, 3)" :key="review.icon">
+                <td class="td-reviews">
+                  <div v-show="isShowingResult" class="td-review">
+                    {{ numberOfReviewsWithResult(photo.id, review.value) }}
+                  </div>
+                </td>
+              </slot>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Bottom bar if small screen -->
@@ -391,6 +430,7 @@ import {
   getPhotosApi,
   deletePhotosApi,
   getReviewsApi,
+  updatePhotosApi,
 } from '@/apis/panel.api';
 
 // components
@@ -418,7 +458,7 @@ interface Photo {
   image: string;
   angle: number;
   album_id: number;
-  review_results: number | null;
+  review_id: number | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -465,7 +505,6 @@ const albumId = computed(() => {
 
 const isUploadingPhoto = ref(false);
 function closeUploadPhoto() {
-  console.log('closeUploadPhoto');
   isUploadingPhoto.value = false;
 }
 
@@ -616,7 +655,6 @@ function toggleSelectAllPhotos() {
     selectedPhotoIds.value = [];
   } else {
     // select all the photos that are shown in the filtered list
-    console.log('filteredPhotos.value', filteredPhotos.value);
     selectedPhotoIds.value = filteredPhotos.value.map((photo) => photo.id);
   }
 }
@@ -624,15 +662,56 @@ function toggleSelectPhoto(photoId: number) {
   if (selectedPhotoIds.value.includes(photoId)) {
     const index = selectedPhotoIds.value.findIndex((x) => x === photoId);
     selectedPhotoIds.value.splice(index, 1);
+    if (selectedPhotoIds.value.length === 0) {
+      ratedReview.value = null;
+    }
   } else if (filteredPhotos.value.map((x) => x.id).includes(photoId)) {
     selectedPhotoIds.value.push(photoId);
   }
 }
 
+function saveChangePhotos() {
+  if (selectedPhotoIds.value.length > 0) {
+    const photosToBeUpdated: Photo[] = [];
+    selectedPhotoIds.value.forEach((photoId) => {
+      const photo = photosData.value.find((x) => x.id === photoId);
+      const photoOriginal = photosOriginal.find((x) => x.id === photoId);
+      if (
+        photoOriginal &&
+        photo &&
+        (photo.angle !== photoOriginal.angle || ratedReview.value !== photoOriginal.review_id)
+      ) {
+        photo.review_id = ratedReview.value;
+        photosToBeUpdated.push(photo);
+      }
+    });
+    saveReview(photosToBeUpdated);
+    selectedPhotoIds.value = [];
+  }
+}
+
 function cancelSelectPhotos() {
   isSelecting.value = false;
-  // TODO: save the results or rotation, and review results
   selectedPhotoIds.value = [];
+  ratedReview.value = null;
+}
+
+function saveReview(photos: Photo[]) {
+  updatePhotosApi(
+    album.value.id,
+    photos.map((photo) => ({
+      id: photo.id,
+      angle: photo.angle,
+      review_id: photo.review_id,
+    })),
+  )
+    .then(() => {
+      loadPhotos();
+      loadReviews();
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 }
 
 async function deletePhotos() {
@@ -683,15 +762,20 @@ const photos = computed(() => {
 });
 
 const photosData = ref([<Photo>{}]);
-onBeforeMount(async () => {
+onBeforeMount(() => {
+  loadPhotos();
+});
+
+async function loadPhotos() {
   getPhotosApi(albumId.value)
     .then((response: AxiosResponse) => {
       photosData.value = response.data;
+      photosOriginal = JSON.parse(JSON.stringify(photosData.value));
     })
     .catch((error) => {
       console.log(error);
     });
-});
+}
 
 // filter
 const filterMode = ref(1); // 1: blur, 2: hide
@@ -701,7 +785,7 @@ const filterModes = [
 ];
 
 const isShowingResult = ref(false);
-
+const ratedReview = ref<number | null>(null);
 const filterReview = ref([
   { selected: true, value: 3, icon: 'check' },
   { selected: true, value: 2, icon: 'question' },
@@ -711,6 +795,18 @@ const filterReview = ref([
 const selectedFilterIds = computed(() => {
   return filterReview.value.filter((x) => x.selected).map((x) => x.value);
 });
+function reviewPhotos(reviewId: number | null) {
+  if (selectedPhotoIds.value.length === 0) {
+    return;
+  }
+
+  if (ratedReview.value === reviewId) {
+    ratedReview.value = null;
+    return;
+  }
+  ratedReview.value = reviewId;
+  saveReview(photosData.value);
+}
 
 const photosReviewsData = ref([<PhotoUserReview>{}]);
 onBeforeMount(loadReviews);
@@ -733,21 +829,21 @@ function numberOfPhotosWithReview(val: number | null) {
   // get all reviews for this album's photos with their average results and who reviews what
   interface ReviewResult {
     photo_id: number;
-    review_result: number | null;
+    review_id: number | null;
   }
   const photoIds = photosData.value.map((photo) => photo.id);
   var results: ReviewResult[] = [];
   photoIds.forEach((photoId) => {
     const photoReviews = getPhotoReviews(photoId);
     if (photoReviews.length === 0) {
-      results.push({ photo_id: photoId, review_result: null });
+      results.push({ photo_id: photoId, review_id: null });
     } else {
       const review_result = getOverallReview(photoId);
-      results.push({ photo_id: photoId, review_result: review_result });
+      results.push({ photo_id: photoId, review_id: review_result });
     }
   });
 
-  return results.filter((x) => x.review_result === val).length;
+  return results.filter((x) => x.review_id === val).length;
 }
 
 function numberOfReviewsWithResult(photoId: number, val: number | null) {
@@ -817,15 +913,14 @@ function closeReviewPhoto() {
 }
 
 // Rotate photos
-const photosOriginal = ref<Photo[]>([]);
+var photosOriginal: Photo[] = [];
+
 function rotatePhotos() {
   if (selectedPhotoIds.value.length === 0) {
     return;
   }
   selectedPhotoIds.value.forEach((photoId) => {
     const index = photosData.value.findIndex((x) => x.id === photoId);
-    const photo = photosData.value[index];
-    photosOriginal.value.push(photo);
     if (photosData.value[index].angle % 360 === 0) {
       photosData.value[index].angle = 90;
     } else {
@@ -867,7 +962,6 @@ function goBackToAlbums() {
   border: 0.5px solid var(--color-text-light-1);
   border-radius: 1rem;
   font-size: 0.75rem; /* 12px */
-  line-height: 1rem; /* 16px */
   color: white;
 }
 .container-icon-circle {
@@ -920,13 +1014,24 @@ function goBackToAlbums() {
   height: 100vh;
 }
 
+.container-top-fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: 100%;
+}
+
 .header-album {
   display: flex;
   justify-content: space-between;
-  margin-left: 1rem; /* mx-4 */
-  margin-right: 1rem;
-  padding-top: 2.5rem; /* pt-4 */
-  padding-bottom: 0.5rem;
+  padding: 2.5rem 1rem 0.5rem 1rem; /* pt-4 pb-2 px-4 */
+  width: 100%;
+}
+
+.container-album-name {
+  display: flex;
+  padding: 0 1rem;
 }
 
 .container-back {
@@ -950,12 +1055,25 @@ function goBackToAlbums() {
 }
 
 .container-filter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 0 0.25rem 0.75rem;
   height: 2rem;
-  margin: 0.75rem 0 0.25rem 0.75rem;
+}
+
+.container-date {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  margin-top: 0.75rem;
+  font-size: 0.75rem; /* text-xs */
+  color: var(--color-text-light-1);
 }
 
 .container-buttons-filter {
   display: flex;
+  margin-top: 0.5rem;
   background: var(--color-menu);
   color: var(--color-text-light-1);
   border-radius: 0.25rem;
@@ -969,22 +1087,22 @@ function goBackToAlbums() {
     width: 3.25rem;
     border-radius: 0;
     border-right: 1px solid var(--black-raven);
+
+    &.selected {
+      background-color: var(--color-primary);
+      color: white;
+    }
   }
 
-  div:first-child button {
+  button:first-child {
     border-top-left-radius: 0.25rem;
     border-bottom-left-radius: 0.25rem;
   }
 
-  div:last-child button {
+  button:last-child {
     border-top-right-radius: 0.25rem;
     border-bottom-right-radius: 0.25rem;
     border-right: none;
-  }
-
-  button.selected {
-    background-color: var(--color-primary);
-    color: white;
   }
 }
 
@@ -1033,7 +1151,6 @@ function goBackToAlbums() {
   grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
   gap: 0.125rem; /* gap-0.5 */
   width: 100%;
-  flex-grow: 1;
   padding-bottom: 3.5rem;
   color: lighten(var(--color-primary), 50%);
 }
@@ -1087,7 +1204,7 @@ tbody tr:nth-child(odd) {
 
 /* Context menu */
 #context-menu {
-  position: absolute;
+  position: fixed;
   top: 4.5rem;
   right: 0;
   z-index: 10;

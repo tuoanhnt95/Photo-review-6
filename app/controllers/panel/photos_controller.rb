@@ -19,7 +19,7 @@ module Panel
       result = []
       @photos.each do |photo|
         photo_object = {}.merge(photo.attributes)
-        photo_object[:review_results] = get_review_result(photo)
+        photo_object[:review_id] = get_review_result(photo)
         result.push(photo_object)
       end
       result.sort_by! { |photo| photo['id'] }.reverse!
@@ -70,6 +70,24 @@ module Panel
         render json: @photo
       else
         render json: @photo.errors, status: :unprocessable_entity
+      end
+    end
+
+    def update_multiple
+      photo_params[:photos].each do |photo|
+        photo_original = Photo.find(photo[:id])
+
+        next unless photo_original
+
+        photo_original.update(angle: photo[:angle]) if photo[:angle] != photo_original.angle
+
+        review = get_review_result(photo_original)
+        if review.nil?
+          PhotoUserReview.create(photo_id: photo[:id], user_id: current_user.id,
+                                 review_id: photo[:review_id])
+        elsif photo[:review_id] != review.review_id
+          review.update(review_id: photo[:review_id])
+        end
       end
     end
 
@@ -141,7 +159,8 @@ module Panel
 
     # Only allow a list of trusted parameters through.
     def photo_params
-      params.permit(:image, :angle, :album_id, :upload_option, :file, photo_ids: [])
+      params.permit(:image, :angle, :album_id, :upload_option, :file, photo_ids: [],
+                                                                      photos: %i[id angle review_id])
     end
   end
 end

@@ -29,6 +29,7 @@
   --black-piano: rgba(28, 30, 28, 0.9);
   /* --black-piano: rgba(28, 30, 28, 0.5); */
   --black-raven: #151417;
+  --black-raven-soft: rgba(21, 20, 23, 0.8);
   --gray-raven: rgba(50, 50, 50, 0.9);
   --slate-200: rgb(235 238 242);
   --slate-300: rgb(209 213 219);
@@ -49,6 +50,7 @@
 :root {
   /* --color-background: #0a0a0a; */
   --color-fill: var(--black-raven);
+  --color-fill-opaque: var(--black-raven-soft);
   --color-fill-tertiary: var(--black-apple);
   --color-background-soft: var(--vt-c-white-soft);
   --color-background-mute: var(--vt-c-white-mute);
@@ -167,6 +169,12 @@ body {
 .bg-menu {
   z-index: 9;
   background: var(--color-menu);
+  backdrop-filter: blur(12px);
+}
+
+.bg-menu-dark {
+  z-index: 9;
+  background: var(--color-fill-opaque);
   backdrop-filter: blur(12px);
 }
 

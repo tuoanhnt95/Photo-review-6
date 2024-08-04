@@ -50,7 +50,7 @@
             :class="{ 'btn-selected': reviewResult(i) === opt.value }"
           >
             <font-awesome-icon
-              v-model="photo.review_results"
+              v-model="photo.review_id"
               :icon="`fa-solid fa-${opt.icon}`"
               @click="reviewPhoto(i, opt.value)"
             />
@@ -92,7 +92,7 @@ interface Photo {
   image: string;
   angle: number;
   album_id: number;
-  review_results: number | null;
+  review_id: number | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -141,14 +141,14 @@ const photos = ref(props.photos);
 // Review
 function reviewResult(index: number) {
   const reviewedPhoto = displayPhotos.value?.[index];
-  return reviewedPhoto ? reviewedPhoto.review_results : null;
+  return reviewedPhoto ? reviewedPhoto.review_id : null;
 }
 
 function reviewPhoto(index: number, value: number) {
   if (value) {
     const reviewedPhoto = displayPhotos.value?.[index];
     if (reviewedPhoto) {
-      reviewedPhoto.review_results = value;
+      reviewedPhoto.review_id = value;
     }
     if (splitScreenOption.value === 0) {
       navigatePhoto(1);
@@ -165,12 +165,11 @@ function saveReview(index = 0) {
 
   if (!displayedPhoto) return;
 
-  if (displayedPhoto?.review_results || photoOriginal.angle !== displayedPhoto.angle) {
-    console.log('save review');
+  if (displayedPhoto?.review_id || photoOriginal.angle !== displayedPhoto.angle) {
     updateReviewApi(
       displayedPhoto.album_id,
       displayedPhoto.id,
-      displayedPhoto.review_results,
+      displayedPhoto.review_id,
       displayedPhoto.angle,
     )
       .then(() => {
