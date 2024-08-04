@@ -110,3 +110,14 @@ export const updateReviewApi = (
     action: 'update',
   });
 };
+
+export const updatePhotosApi = (
+  album_id: number,
+  photos: { id: number; review_id: number | null; angle: number }[],
+): Promise<AxiosResponse> => {
+  return http.put(`/panel/albums/${album_id}/update_photos`, {
+    photos,
+    controller: 'photos',
+    action: 'update_photos',
+  });
+};
