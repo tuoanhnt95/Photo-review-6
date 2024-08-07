@@ -1,23 +1,11 @@
 @import './css_reset';
-@import './variables';
+// @import './variables';
 @import './general';
 @import './main_menu.scss';
 @import './form.scss';
 @import './tailwind_general.scss';
+@import '../../../javascript/assets/css/base.css';
 
 body {
-  font-size: 16px;
-  line-height: 1.8;
-  font-weight: normal;
-  background: $--color-app-background;
-  color: $--color-text-primary;
-}
-.container {
-  width: 100%;
-  margin-right: auto;
-  margin-left: auto;
-}
-
-.text-center {
-  text-align: center;
+  background: #080604;
 }

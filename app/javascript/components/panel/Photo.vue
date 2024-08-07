@@ -370,10 +370,10 @@ const reviewDisplayOptions = [
 
 .thumbnails {
   display: flex;
-  justify-content: center;
   align-items: center;
   gap: 0.5rem;
   height: 8rem;
+  overflow-x: scroll;
 
   .container-thumbnail {
     width: 3rem;
