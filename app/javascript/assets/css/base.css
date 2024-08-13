@@ -240,3 +240,12 @@ body {
     transform: scale(1.1);
   }
 }
+
+.btn-website {
+  padding: 0.5rem 0.75rem; /* py-2 and px-3 */
+  border-radius: 0.375rem; /* rounded-md */
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500; /* font-medium */
+  color: #ffffff; /* Assuming white text, default for buttons */
+  transition: background-color 150ms ease-in-out;
+}

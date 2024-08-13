@@ -1,26 +1,22 @@
 <template>
   <nav class="header-menu max-w-7xl px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between w-full h-16">
-      <div class="flex items-center">
-        <div class="flex-shrink-0">
-          <!-- <img class="h-8 w-auto" src="/path-to-your-logo.svg" alt="Shoot Select" /> -->
-        </div>
-        <router-link :to="{ name: 'index' }" class="text-xl font-semibold cursor-pointer">
-          ShootSelect
+    <router-link
+      :to="{ name: 'index' }"
+      class="absolute top-6 left-8 text-xl font-semibold cursor-pointer"
+    >
+      ShootSelect
+    </router-link>
+    <ul class="flex items-center gap-4 absolute top-8 right-8">
+      <li v-for="item in menuItems" :key="item.routeName">
+        <router-link
+          :to="{ name: item.routeName }"
+          class="btn-website"
+          :class="{ 'bg-violet-500 hover:bg-violet-600': item.routeName === 'signup' }"
+        >
+          {{ item.title }}
         </router-link>
-      </div>
-      <ul class="flex items-center gap-4">
-        <li v-for="item in menuItems" :key="item.routeName">
-          <router-link
-            :to="{ name: item.routeName }"
-            class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition duration-150 ease-in-out"
-            :class="{ 'bg-violet-500 hover:bg-violet-600': item.routeName === 'signup' }"
-          >
-            {{ item.title }}
-          </router-link>
-        </li>
-      </ul>
-    </div>
+      </li>
+    </ul>
   </nav>
 </template>
 
