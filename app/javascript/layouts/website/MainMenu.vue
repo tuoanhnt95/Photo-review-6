@@ -2,7 +2,7 @@
   <nav class="header-menu max-w-7xl px-4 sm:px-6 lg:px-8">
     <router-link
       :to="{ name: 'index' }"
-      class="absolute top-6 left-8 text-xl font-semibold cursor-pointer"
+      class="absolute top-8 left-8 text-xl font-semibold cursor-pointer"
     >
       ShootSelect
     </router-link>

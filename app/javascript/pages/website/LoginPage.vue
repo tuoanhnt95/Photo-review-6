@@ -53,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, onMounted, computed } from 'vue';
+import { reactive, onMounted, computed } from 'vue';
 import { useAuthStore } from '@/stores/auth.store';
 import { IUserLogin } from '@/types/general';
 import { showToast } from '@/utils/showToast';
