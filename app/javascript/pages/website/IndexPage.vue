@@ -4,17 +4,23 @@
       <div class="container-image">
         <img src="/portrait.jpg" alt="portrait" />
         <div class="shadow-image">
-          <div class="flex flex-col items-center">
-            <p class="ml-2 mb-2 sm:text-lg">Collaborative Photo-culling App</p>
-            <p class="sm:ml-3 text-3xl sm:text-4xl md:text-5xl">
-              Select the best shots, <strong>together</strong>
-            </p>
+          <div class="flex justify-center">
+            <div>
+              <p class="mb-2 sm:text-lg text-violet-500">Collaborative Photo-culling App</p>
+              <p class="text-3xl sm:text-4xl md:text-5xl">
+                Select the best, <strong>together</strong>
+              </p>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div id="pain-point" class="container-cols-2">
+    <div
+      ref="painPoint"
+      class="pain-point invisible-unscroll-Y container-cols-2"
+      :class="{ 'visible-Y': isVisiblePainPoint }"
+    >
       <div class="img-left">
         <img src="/teamwork.webp" alt="headshot" class="w-full h-fit" />
       </div>
@@ -39,19 +45,28 @@
         </ul>
       </div>
     </div>
-    <div class="flex justify-center py-24 text-5xl">
+    <div
+      ref="thisForYou"
+      class="this-for-you invisible-unscroll-X"
+      :class="{ 'visible-X': isVisibleThisForYou }"
+    >
       <div>
         <div class="text-xl">then</div>
         <span class="text-violet-500">This</span> is For You.
       </div>
     </div>
     <div class="container-cols-2">
-      <div class="flex justify-center">
+      <div
+        ref="cullingLeft"
+        class="invisible-X-left flex justify-center"
+        :class="{ 'visible-X': isVisibleCullingLeft }"
+      >
         <img src="/appUI.jpg" alt="portrait" />
       </div>
-      <!-- <div class="flex justify-content items-center bg-white text-black py-16 pl-16"> -->
       <div
-        class="flex justify-center items-center lg:text-black py-36 md:py-0 md:block md:pt-36 md:pl-20 lg:pt-40 lg:pl-28 bg-white text-black"
+        ref="cullingRight"
+        class="invisible-X-right flex justify-center items-center lg:text-black py-36 md:py-0 md:block md:pt-36 md:pl-20 lg:pt-40 lg:pl-28 bg-white text-black"
+        :class="{ 'visible-X': isVisibleCullingRight }"
       >
         <div>
           <p class="text-4xl md:text-2xl lg:text-3xl xl:text-4xl">
@@ -78,7 +93,11 @@
     </div>
 
     <div id="container-collabs" class="container-cols-2 my-12">
-      <div class="img-left md:pr-0">
+      <div
+        ref="collabLeft"
+        class="invisible-X-left flex justify-center img-left md:pr-0"
+        :class="{ 'visible-X': isVisibleCollabLeft }"
+      >
         <div v-for="(collab, i) in collabs" :key="i" class="container-collab">
           <img :src="collab.src" :alt="collab.alt" />
           <div class="container-icon" :class="i % 2 === 0 ? 'flex justify-end' : ''">
@@ -88,7 +107,11 @@
           </div>
         </div>
       </div>
-      <div class="content-right flex justify-center items-center border border-solid">
+      <div
+        ref="collabRight"
+        class="invisible-X-right content-right flex justify-center items-center border border-solid"
+        :class="{ 'visible-X': isVisibleCollabRight }"
+      >
         <div>
           <div class="w-full flex justify-center pt-8 pb-2 text-3xl">
             Any<strong class="tracking-wider">one</strong>. Any<strong class="tracking-wider"
@@ -102,25 +125,31 @@
       </div>
     </div>
 
-    <div class="w-full flex flex-col items-center py-12 bg-violet-700 text-3xl">
-      <p><strong>Free 1000 </strong>photos every <strong>30 days</strong>.</p>
-      <p><strong>Unlimited</strong> albums.</p>
-      <p><strong>Unlimited</strong> collaborators.</p>
-    </div>
-    <div class="w-full flex justify-center px-12 py-4 text-white text-xl">
-      <p class="text-center">
-        <strong>ShootSelect</strong> is free for everyone's basic use. Any
-        <a
-          href="https://jp.linkedin.com/in/oanhnguyenthitu"
-          target="_blank"
-          class="underline underline-offset-2"
-          >support</a
-        >
-        is welcome!
-      </p>
+    <div ref="pricing" class="invisible-unscroll-Y" :class="{ 'visible-Y': isVisiblePricing }">
+      <div class="w-full flex flex-col items-center py-12 bg-violet-700 text-3xl">
+        <p><strong>Free 1000 </strong>photos every <strong>30 days</strong>.</p>
+        <p><strong>Unlimited</strong> albums.</p>
+        <p><strong>Unlimited</strong> collaborators.</p>
+      </div>
+      <div class="w-full flex justify-center px-12 py-4 text-white text-xl">
+        <p class="text-center">
+          <strong>ShootSelect</strong> is free for basic use. Any
+          <a
+            href="https://jp.linkedin.com/in/oanhnguyenthitu"
+            target="_blank"
+            class="underline underline-offset-2"
+            >support</a
+          >
+          is welcome!
+        </p>
+      </div>
     </div>
 
-    <div class="w-full flex justify-center my-12">
+    <div
+      ref="ready"
+      class="invisible-unscroll-Y w-full flex justify-center my-12"
+      :class="{ 'visible-Y': isVisibleReady }"
+    >
       <div class="w-1/2 py-12">
         <div class="text-5xl text-center">
           <p class="mb-4">Ready to</p>
@@ -172,6 +201,8 @@
 </template>
 
 <script setup lang="ts">
+import { onUnmounted, onMounted, ref, Ref, nextTick } from 'vue';
+
 const pains = [
   ['Select from', 'hundreds of photos', ''],
   [
@@ -182,6 +213,86 @@ const pains = [
   ['Chain yourself to an', 'overkill workstation', 'all day'],
   ['', 'Pay', 'for collaborative review tools'],
 ];
+
+// Define refs for each element and their visibility states
+const painPoint = ref<HTMLElement | null>(null);
+const isVisiblePainPoint = ref(false);
+const thisForYou = ref<HTMLElement | null>(null);
+const isVisibleThisForYou = ref(false);
+const cullingLeft = ref<HTMLElement | null>(null);
+const isVisibleCullingLeft = ref(false);
+const cullingRight = ref<HTMLElement | null>(null);
+const isVisibleCullingRight = ref(false);
+const collabLeft = ref<HTMLElement | null>(null);
+const isVisibleCollabLeft = ref(false);
+const collabRight = ref<HTMLElement | null>(null);
+const isVisibleCollabRight = ref(false);
+const pricing = ref<HTMLElement | null>(null);
+const isVisiblePricing = ref(false);
+const ready = ref<HTMLElement | null>(null);
+const isVisibleReady = ref(false);
+
+// Create a map to store element-to-visibility state associations
+const elementVisibilityMap = new Map<HTMLElement, Ref<boolean>>();
+
+let observer: IntersectionObserver | null = null;
+
+onMounted(async () => {
+  // Wait for the DOM to update and refs to be set
+  await nextTick();
+
+  // Populate the map with elements and their corresponding visibility states
+  if (painPoint.value) {
+    elementVisibilityMap.set(painPoint.value, isVisiblePainPoint);
+  }
+  if (thisForYou.value) {
+    elementVisibilityMap.set(thisForYou.value, isVisibleThisForYou);
+  }
+  if (cullingLeft.value) {
+    elementVisibilityMap.set(cullingLeft.value, isVisibleCullingLeft);
+  }
+  if (cullingRight.value) {
+    elementVisibilityMap.set(cullingRight.value, isVisibleCullingRight);
+  }
+  if (collabLeft.value) {
+    elementVisibilityMap.set(collabLeft.value, isVisibleCollabLeft);
+  }
+  if (collabRight.value) {
+    elementVisibilityMap.set(collabRight.value, isVisibleCollabRight);
+  }
+  if (pricing.value) {
+    elementVisibilityMap.set(pricing.value, isVisiblePricing);
+  }
+  if (ready.value) {
+    elementVisibilityMap.set(ready.value, isVisibleReady);
+  }
+
+  observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        const element = entry.target as HTMLElement;
+        const visibilityRef = elementVisibilityMap.get(element);
+        if (visibilityRef) {
+          visibilityRef.value = entry.isIntersecting;
+        }
+      });
+    },
+    { threshold: 0.3 },
+  );
+
+  // Start observing each target element
+  elementVisibilityMap.forEach((_, element) => {
+    if (element instanceof HTMLElement && observer) {
+      observer.observe(element);
+    }
+  });
+});
+
+onUnmounted(() => {
+  if (observer) {
+    observer.disconnect();
+  }
+});
 
 const reviewDisplayOptions = [
   { value: 'Yes', icon: 'check' },
@@ -239,7 +350,7 @@ const collabs = [
   }
 }
 
-#pain-point {
+.pain-point {
   padding: 9rem 6rem 0 6rem;
 
   .img-left {
@@ -251,6 +362,49 @@ const collabs = [
     justify-content: center;
     align-items: center;
   }
+}
+
+.this-for-you {
+  display: flex;
+  justify-content: center;
+  padding: 6rem 0;
+  font-size: 3rem;
+}
+
+.invisible-unscroll-Y {
+  opacity: 0;
+  transform: translateY(2rem);
+}
+
+.invisible-unscroll-X {
+  opacity: 0;
+  transform: translateX(-8rem);
+}
+
+.invisible-X-left {
+  opacity: 0;
+  transform: translateX(-8rem);
+}
+
+.invisible-X-right {
+  opacity: 0;
+  transform: translateX(8rem);
+}
+
+.visible-Y {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 1s,
+    transform 0.5s;
+}
+
+.visible-X {
+  opacity: 1;
+  transform: translateX(0);
+  transition:
+    opacity 1s,
+    transform 0.5s;
 }
 
 #container-collabs {
@@ -307,13 +461,13 @@ const collabs = [
 }
 
 @media screen and (max-width: 1023px) {
-  #pain-point {
+  .pain-point {
     padding: 6rem 3rem 0 3rem;
   }
 }
 
 @media screen and (max-width: 839px) {
-  #pain-point {
+  .pain-point {
     .content-right {
       padding-top: 2rem;
       padding-bottom: 2rem;
