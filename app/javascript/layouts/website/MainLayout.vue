@@ -1,14 +1,7 @@
 <template>
   <BaseLayout>
-    <div>
-      <div class="header-bar">
-        <MainMenu />
-      </div>
-
-      <div>
-        <router-view />
-      </div>
-    </div>
+    <MainMenu />
+    <router-view />
   </BaseLayout>
 </template>
 
@@ -16,3 +9,7 @@
 import BaseLayout from '../BaseLayout.vue';
 import MainMenu from './MainMenu.vue';
 </script>
+
+<style scoped>
+@import '../../../javascript/assets/css/base.css';
+</style>

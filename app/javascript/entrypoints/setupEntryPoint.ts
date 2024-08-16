@@ -5,6 +5,8 @@ import { VueQueryPlugin } from 'vue-query';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 /* import the fontawesome core */
 import { library } from '@fortawesome/fontawesome-svg-core'
+//  import fontawesome brands
+import { faLinkedinIn } from '@fortawesome/free-brands-svg-icons';
 /* import specific icons */
 import {
   faPlus,
@@ -47,7 +49,7 @@ import {
   faUpRightAndDownLeftFromCenter,
   faDownLeftAndUpRightToCenter,
 } from '@fortawesome/free-solid-svg-icons';
-import { faSquareMinus, faImages } from '@fortawesome/free-regular-svg-icons'
+import { faSquareMinus, faImages, faEnvelope } from '@fortawesome/free-regular-svg-icons';
 
 import { globalProperties } from './globalProperties';
 import { pinia } from '@/stores';
@@ -96,7 +98,8 @@ library.add(
   faUpRightAndDownLeftFromCenter,
   faDownLeftAndUpRightToCenter,
 );
-library.add(faSquareMinus, faImages);
+library.add(faSquareMinus, faImages, faEnvelope);
+library.add(faLinkedinIn);
 const token = AuthService.getToken();
 
 if (token) {

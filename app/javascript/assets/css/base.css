@@ -30,6 +30,7 @@
   /* --black-piano: rgba(28, 30, 28, 0.5); */
   --black-raven: #151417;
   --black-raven-soft: rgba(21, 20, 23, 0.8);
+  --black-photobg: #080604;
   --gray-raven: rgba(50, 50, 50, 0.9);
   --slate-200: rgb(235 238 242);
   --slate-300: rgb(209 213 219);
@@ -95,14 +96,6 @@
     --color-text: white;
   }
 } */
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  font-weight: normal;
-}
 
 body {
   width: 100vw;
@@ -246,4 +239,13 @@ body {
   &:hover {
     transform: scale(1.1);
   }
+}
+
+.btn-website {
+  padding: 0.5rem 0.75rem; /* py-2 and px-3 */
+  border-radius: 0.375rem; /* rounded-md */
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500; /* font-medium */
+  color: #ffffff; /* Assuming white text, default for buttons */
+  transition: background-color 150ms ease-in-out;
 }
