@@ -2,11 +2,14 @@ import { Component, createApp } from 'vue';
 import { Router } from 'vue-router';
 import { VueQueryPlugin } from 'vue-query';
 /* import font awesome icon component */
-import { FontAwesomeIcon } from '../../../../node_modules/@fortawesome/vue-fontawesome';
+// import { FontAwesomeIcon } from '../../../../node_modules/@fortawesome/vue-fontawesome';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 /* import the fontawesome core */
-import { library } from '../../../../node_modules/@fortawesome/fontawesome-svg-core';
+// import { library } from '../../../../node_modules/@fortawesome/fontawesome-svg-core';
+import { library } from '@fortawesome/fontawesome-svg-core';
 //  import fontawesome brands
-import { faLinkedinIn } from '../../../../node_modules/@fortawesome/free-brands-svg-icons';
+// import { faLinkedinIn } from '../../../../node_modules/@fortawesome/free-brands-svg-icons';
+import { faLinkedinIn } from '@fortawesome/free-brands-svg-icons';
 /* import specific icons */
 import {
   faPlus,
@@ -48,8 +51,10 @@ import {
   faChevronLeft,
   faUpRightAndDownLeftFromCenter,
   faDownLeftAndUpRightToCenter,
-} from '../../../../node_modules/@fortawesome/free-solid-svg-icons';
-import { faSquareMinus, faImages, faEnvelope } from '../../../../node_modules/@fortawesome/free-regular-svg-icons';
+// } from '../../../../node_modules/@fortawesome/free-solid-svg-icons';
+} from '@fortawesome/free-solid-svg-icons';
+// import { faSquareMinus, faImages, faEnvelope } from '../../../../node_modules/@fortawesome/free-regular-svg-icons';
+import { faSquareMinus, faImages, faEnvelope } from '@fortawesome/free-regular-svg-icons';
 
 import { globalProperties } from './globalProperties';
 import { pinia } from '@/stores';
