@@ -8,6 +8,7 @@ require 'sidekiq/web'
 Bundler.require(*Rails.groups)
 
 module PhotoReview6
+  VERSION = '0.1.0'.freeze
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.0
@@ -39,16 +40,17 @@ module PhotoReview6
     config.action_cable.url = ENV.fetch('ACTION_CABLE_FRONTEND_URL') { 'ws://localhost:28080' }
 
     # Only allow connections to Action Cable from these domains.
-    origins = ENV.fetch('ACTION_CABLE_ALLOWED_REQUEST_ORIGINS') { "http:\/\/localhost*" }.split(',')
+    origins = ENV.fetch('ACTION_CABLE_ALLOWED_REQUEST_ORIGINS') { 'http://localhost*' }.split(',')
     origins.map! { |url| /#{url}/ }
     config.action_cable.allowed_request_origins = origins
 
     # Protect sidekiq-web
     Sidekiq::Web.use(Rack::Auth::Basic) do |username, password|
-      ActiveSupport::SecurityUtils.secure_compare(username, ENV.fetch('SIDEKIQ_WEB_USERNAME', 'sidekiq-web-dashboard')) &&
+      ActiveSupport::SecurityUtils.secure_compare(username,
+                                                  ENV.fetch('SIDEKIQ_WEB_USERNAME', 'sidekiq-web-dashboard')) &&
         ActiveSupport::SecurityUtils.secure_compare(password, ENV.fetch('SIDEKIQ_WEB_PASSWORD', 'sidekiq-web-123'))
     end
 
-    config.action_mailer.default_url_options = { host: ENV['DEFAULT_HOST'] }
+    config.action_mailer.default_url_options = { host: ENV.fetch('DEFAULT_HOST', nil) }
   end
 end
