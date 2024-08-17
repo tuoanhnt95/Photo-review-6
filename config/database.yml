@@ -1,8 +1,8 @@
 default: &default
   adapter: "postgresql"
   encoding: "unicode"
-  database: <%= ENV.fetch("POSTGRES_DB") { "baseapp" } %>
-  # username: <%= ENV.fetch("POSTGRES_USER") { "baseapp" } %>
+  database: <%= ENV.fetch("POSTGRES_DB") { "photo-review-6" } %>
+  # username: <%= ENV.fetch("POSTGRES_USER") { "photo-review-6" } %>
   # password: <%= ENV.fetch("POSTGRES_PASSWORD") { "password" } %>
   # host: <%= ENV.fetch("POSTGRES_HOST") { "postgres" } %>
   port: <%= ENV.fetch("POSTGRES_PORT") { 5432 } %>
@@ -11,12 +11,12 @@ default: &default
 
 development:
   <<: *default
-  database: <%= ENV.fetch("POSTGRES_DB") { "baseapp" } %>_development
+  database: <%= ENV.fetch("POSTGRES_DB") { "photo-review-6" } %>_development
 
 test:
   <<: *default
-  database: <%= ENV.fetch("POSTGRES_DB") { "baseapp" } %>_test
+  database: <%= ENV.fetch("POSTGRES_DB") { "photo-review-6" } %>_test
 
 production:
   <<: *default
-  database: <%= ENV.fetch("POSTGRES_DB") { "baseapp" } %>_production
+  database: <%= ENV.fetch("POSTGRES_DB") { "photo-review-6" } %>_production
