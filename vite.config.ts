@@ -1,14 +1,21 @@
 import { defineConfig } from 'vite';
 import RubyPlugin from 'vite-plugin-ruby';
 import vue from '@vitejs/plugin-vue';
-import path from 'path';
 
 export default defineConfig({
   resolve: {
     extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue'],
-    // alias: { '~@fortawesome': path.resolve(__dirname, '/node_modules/@fortawesome') },
   },
-  plugins: [vue(), RubyPlugin()],
+  plugins: [
+    vue({
+      template: {
+        transformAssetUrls: {
+          includeAbsolute: false,
+        },
+      },
+    })
+    , RubyPlugin()
+  ],
   css: {
     preprocessorOptions: {
       scss: {
