@@ -28,7 +28,7 @@ module Panel
       return redirect_to panel_path if @album.nil?
 
       respond_to do |format|
-        format.html { render template: 'layouts/panel'}
+        format.html { render template: 'layouts/panel' }
         format.json { render json: @album.attach_cover }
       end
     end

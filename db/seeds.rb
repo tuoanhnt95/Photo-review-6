@@ -58,6 +58,26 @@ Album.create([
              ])
 Rails.logger.debug { "#{Album.count} albums created." }
 
+AlbumUser.create([
+                    {
+                      album_id: Album.first.id,
+                      user_id: User.first.id
+                    },
+                    {
+                      album_id: Album.first.id,
+                      user_id: User.all[1].id
+                    },
+                    {
+                      album_id: Album.all[1].id,
+                      user_id: User.first.id
+                    },
+                    {
+                      album_id: Album.all[2].id,
+                      user_id: User.first.id
+                    }
+                  ])
+Rails.logger.debug { "#{AlbumUser.count} album users created." }
+
 Rails.logger.debug 'Creating photo data...'
 Photo.create([
                {
