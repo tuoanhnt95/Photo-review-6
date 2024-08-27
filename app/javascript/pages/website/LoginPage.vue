@@ -87,4 +87,6 @@ const submit = () => {
       showToast(error, 'error');
     });
 };
+
+console.log('Login Page', import.meta.env);
 </script>
