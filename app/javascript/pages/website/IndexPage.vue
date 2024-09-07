@@ -1,8 +1,8 @@
 <template>
-  <div>
+  <div class="overflow-x-hidden">
     <div class="container-features mt-24">
       <div class="container-image">
-        <img src="/portraitEdited.jpg" alt="portrait" />
+        <img src="/imageedit_19_5457184833.png" alt="portrait" />
         <div class="shadow-image">
           <div class="flex justify-center">
             <div>
@@ -26,10 +26,7 @@
       </div>
       <div class="content-right bg-violet-700">
         <ul class="w-5/6 md:w-3/4">
-          <li class="text-base md:text-lg xl:text-xl 2xl:text-2xl">
-            <div>After a shoot, do you <strong>dread photo culling</strong>?</div>
-            In other words, do you have to:
-          </li>
+          <li class="text-base md:text-lg xl:text-xl 2xl:text-2xl">Do you dread having to:</li>
           <li
             v-for="(pain, i) in pains"
             :key="i"
@@ -58,18 +55,18 @@
     <div class="container-cols-2">
       <div
         ref="cullingLeft"
-        class="invisible-X-left flex justify-center"
+        class="invisible-X-left flex justify-center px-8 pb-8 xs:px-0 xs:pb-0"
         :class="{ 'visible-X': isVisibleCullingLeft }"
       >
         <img src="/appUI.jpg" alt="portrait" />
       </div>
       <div
         ref="cullingRight"
-        class="invisible-X-right flex justify-center items-center lg:text-black py-36 md:py-0 md:block md:pt-36 md:pl-20 lg:pt-40 lg:pl-28 bg-white text-black"
+        class="invisible-X-right flex justify-center items-center py-36 md:py-0 md:block md:pt-36 md:pl-20 lg:pt-40 lg:pl-28 bg-white text-black"
         :class="{ 'visible-X': isVisibleCullingRight }"
       >
         <div>
-          <p class="text-4xl md:text-2xl lg:text-3xl xl:text-4xl">
+          <p class="text-3xl md:text-2xl lg:text-3xl xl:text-4xl">
             Photo culling is <strong class="text-violet-700">simple</strong>.
           </p>
           <p class="text-2xl mb-2">All you have to do is select</p>
@@ -113,13 +110,13 @@
         :class="{ 'visible-X': isVisibleCollabRight }"
       >
         <div>
-          <div class="w-full flex justify-center pt-8 pb-2 text-3xl">
+          <div class="w-full flex justify-center pt-8 pb-2 text-2xl md:text-3xl">
             Any<strong class="tracking-wider">one</strong>. Any<strong class="tracking-wider"
               >time</strong
             >. Any<strong class="tracking-wider">where</strong>.
           </div>
-          <div class="w-full flex justify-center pb-8 text-xl">
-            <strong class="mx-2">Collaborate</strong> to review more quickly and accurately.
+          <div class="w-full flex justify-center pb-8 text-md xs:text-xl">
+            <strong class="mr-1">Collaborate</strong> to review more quickly and accurately.
           </div>
         </div>
       </div>
@@ -127,7 +124,9 @@
 
     <div ref="pricing" class="invisible-unscroll-Y" :class="{ 'visible-Y': isVisiblePricing }">
       <div class="w-full flex flex-col items-center py-12 bg-violet-700 text-3xl">
-        <p><strong>Free 1000 </strong>photos every <strong>30 days</strong>.</p>
+        <p class="text-xl xs:text-3xl">
+          <strong>Free 1000 </strong>photos every <strong>30 days</strong>.
+        </p>
         <p><strong>Unlimited</strong> albums.</p>
         <p><strong>Unlimited</strong> collaborators.</p>
       </div>
@@ -150,10 +149,9 @@
       class="invisible-unscroll-Y w-full flex justify-center my-12"
       :class="{ 'visible-Y': isVisibleReady }"
     >
-      <div class="w-1/2 py-12">
+      <div class="py-12">
         <div class="text-5xl text-center">
-          <p class="mb-4">Ready to</p>
-          <p class="text-violet-500">ShootSelect?</p>
+          Ready to <span class="text-violet-500">ShootSelect?</span>
         </div>
         <div class="flex justify-center">
           <router-link
@@ -190,10 +188,7 @@
           <p class="mb-1">Oanh Nguyen is a story teller and software developer who enjoys:</p>
           <li class="mb-1">photography</li>
           <li class="mb-1">collaborations</li>
-          <li class="mb-1">
-            creating tools to help <span class="line-through">herself</span>
-            <span class="line-through">others</span>.
-          </li>
+          <li class="mb-1">creating tools</li>
         </div>
       </div>
     </div>
@@ -205,13 +200,9 @@ import { onUnmounted, onMounted, ref, Ref, nextTick } from 'vue';
 
 const pains = [
   ['Select from', 'hundreds of photos', ''],
-  [
-    'Communicate',
-    'back and forth',
-    'with clients, editors, creative director, art directors, designer, etc.',
-  ],
-  ['Chain yourself to an', 'overkill workstation', 'all day'],
-  ['', 'Pay', 'for collaborative review tools'],
+  ['', 'Back and forth', 'with clients, editors, art directors, etc.'],
+  ['Bound to a', 'desk computer', 'all day'],
+  ['', 'Pay', 'for a simple collaborative tool'],
 ];
 
 // Define refs for each element and their visibility states
@@ -351,7 +342,7 @@ const collabs = [
 }
 
 .pain-point {
-  padding: 9rem 6rem 0 6rem;
+  padding: 2rem 3rem 0 3rem;
 
   .img-left {
     border: 1px solid var(--violet-500);
@@ -460,10 +451,7 @@ const collabs = [
   }
 }
 
-@media screen and (max-width: 1023px) {
-  .pain-point {
-    padding: 6rem 3rem 0 3rem;
-  }
+@media screen and (min-width: 1023px) {
 }
 
 @media screen and (max-width: 839px) {
@@ -478,6 +466,9 @@ const collabs = [
   #container-cols-2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
+  }
+  .pain-point {
+    padding: 6rem 3rem 0 3rem;
   }
 }
 </style>
