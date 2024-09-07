@@ -2,7 +2,7 @@
   <div>
     <div class="container-features mt-24">
       <div class="container-image">
-        <img src="/portrait.jpg" alt="portrait" />
+        <img src="/portraitEdited.jpg" alt="portrait" />
         <div class="shadow-image">
           <div class="flex justify-center">
             <div>

@@ -5,7 +5,6 @@
   >
     <div class="max-w-md w-full bg-gray-800 rounded-lg shadow-lg p-8">
       <div class="text-center mb-8">
-        <!-- <img src="path/to/apple-logo.svg" alt="Shoot Select Logo" class="h-8 mx-auto mb-4 invert" /> -->
         <h2 class="text-2xl font-semibold text-white">Log in</h2>
       </div>
 
